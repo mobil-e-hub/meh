@@ -1,0 +1,159 @@
+<template>
+    <div id="app">
+        <b-navbar fixed="top" variant="light">
+            <b-navbar-brand>
+                mobil-e-Hub
+            </b-navbar-brand>
+            <b-navbar-nav>
+                <b-nav-text>
+                    Visualization Dashboard
+                </b-nav-text>
+            </b-navbar-nav>
+
+            <b-navbar-nav class="ml-auto">
+                <b-nav-form>
+                    <b-button-toolbar>
+                            <b-button class="mx-1" variant="link" :title="running ? 'Pause simulation' : 'Start simulation'" @click="clickSimulationButton">
+                                <b-icon :icon="running ? 'pause-fill' : 'play-fill'" aria-hidden="true"></b-icon>
+                            </b-button>
+                            <b-button class="ml-1" variant="link" title="Stop simulation" @click="clickSimulationStopButton">
+                                <b-icon icon="stop-fill" aria-hidden="true"></b-icon>
+                            </b-button>
+                    </b-button-toolbar>
+                </b-nav-form>
+            </b-navbar-nav>
+        </b-navbar>
+
+        <b-container fluid class="my-5">
+            <b-row class="pt-4">
+                <b-col cols="12">
+                    <b-card no-body>
+                        <b-tabs card>
+                            <b-tab title="Simulation" active>
+                                <svg ref="svg" style="width: 100%; height: 400px">
+                                    <circle v-for="drone in displayedDrones" :key="drone.id" r="5" :cx="drone.x" :cy="drone.y" fill="red"></circle>
+                                    <circle v-for="vehicle in displayedVehicles" :key="vehicle.id" r="10" :cx="vehicle.x" :cy="vehicle.y" fill="blue"></circle>
+                                    <circle v-for="parcel in displayedParcels" :key="parcel.id" r="3" :cx="parcel.x" :cy="parcel.y" fill="green"></circle>
+                                </svg>
+                            </b-tab>
+
+                            <b-tab title="Messages">
+                                <pre style="max-height: 400px; overflow: scroll">{{ receivedMessages.slice(0, 100).join('\n\n') }}</pre>
+                            </b-tab>
+
+                            <b-tab title="Entities">
+                                <b-container fluid>
+                                    <b-row>
+                                        <b-col cols="4">
+                                            <h4>Drones</h4>
+                                            <b-list-group>
+                                                <b-list-group-item v-for="(drone, id) in entities.drones" :key="id">{{ drone }}</b-list-group-item>
+                                            </b-list-group>
+                                        </b-col>
+                                        <b-col cols="4">
+                                            <h4>Vehicles</h4>
+                                            <b-list-group>
+                                                <b-list-group-item v-for="(vehicle, id) in entities.vehicles" :key="id">{{ id }}</b-list-group-item>
+                                            </b-list-group>
+                                        </b-col>
+                                        <b-col cols="4">
+                                            <h4>Parcels</h4>
+                                            <b-list-group>
+                                                <b-list-group-item v-for="(parcel, id) in entities.parcels" :key="id">{{ id }}</b-list-group-item>
+                                            </b-list-group>
+                                        </b-col>
+                                    </b-row>
+                                </b-container>
+                            </b-tab>
+
+                            <b-tab title="Raw values">
+                                <pre style="max-height: 400px; overflow: scroll">{{ displayedDrones }}</pre>
+                            </b-tab>
+                        </b-tabs>
+                        <b-card-footer>
+                            Currently active entities:
+                            <span v-b-popover.hover.top="displayedDrones.map(drone => drone.id).join('\n')" title="Drones">{{`${Object.keys(entities.drones).length} drones`}}</span>,
+                            <span v-b-popover.hover.top="displayedVehicles.map(vehicle => vehicle.id).join('\n')" title="Vehicles">{{`${Object.keys(entities.vehicles).length} vehicles`}}</span>,
+                            <span v-b-popover.hover.top="displayedParcels.map(parcel => parcel.id).join('\n')" title="Parcels">{{`${Object.keys(entities.parcels).length} parcels`}}</span>
+                        </b-card-footer>
+                    </b-card>
+                </b-col>
+            </b-row>
+        </b-container>
+    </div>
+</template>
+
+<script>
+    let mqtt = require('mqtt');
+
+    export default {
+        data: function () {
+            return {
+                running: false,
+                receivedMessages: [],
+                mqtt: {
+                    client: null,
+                    id: 'qdslgkjhqlsk34li3ug3',
+                    root: 'mobil-e-hub/v1'
+                },
+                entities: {
+                    drones: { },
+                    vehicles: { },
+                    parcels: { },
+                    hubs: { }
+                }
+            }
+        },
+        mounted: function() {
+            try {
+                this.mqtt.client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt');
+                console.log(this.mqtt);
+                this.mqtt.client.on('connect', () => {
+                    this.mqtt.client.subscribe(this.mqtt.root + '/#');
+                    this.publish('connected');
+                    this.receivedMessages.unshift('Connected!');
+                });
+                this.mqtt.client.on('message', (topic, message) => {
+                    message = JSON.parse(message.toString());
+                    this.receivedMessages.unshift(topic + ': ' + JSON.stringify(message));
+
+                    topic = topic.split('/');
+                    if (topic[2] === 'from' && topic[3] === 'drone' && topic[5] === 'state') {
+                        this.$set(this.entities.drones, [topic[4]], message);
+                    }
+                    else if (topic[2] === 'from' && topic[3] === 'vehicle' && topic[5] === 'state') {
+                        this.$set(this.entities.vehicles, [topic[4]], message);
+                    }
+                });
+            }
+            catch (err) {
+                this.receivedMessages.unshift(err.toString());
+            }
+        },
+        methods: {
+            clickSimulationButton: function() {
+                this.publish(this.running ? 'pause' : 'start');
+                this.running = !this.running;
+            },
+            clickSimulationStopButton: function() {
+                this.publish('stop');
+                this.running = false;
+            },
+            publish(topic, message = '') {
+                this.mqtt.client.publish(`${this.mqtt.root}/from/visualization/${this.mqtt.id}/${topic}`, JSON.stringify(message));
+                // console.log(`< [VehicleSimulator] from/visualization/${this.mqtt.id}/${topic}: ${JSON.stringify(message)}`);
+            }
+        },
+        computed: {
+            displayedDrones: function() {
+                return Object.entries(this.entities.drones).map(([id, drone]) => ({ id: id, x: this.$refs.svg.clientWidth / 2 + 10 * drone.position.x, y: this.$refs.svg.clientHeight / 2 + 10 * drone.position.y }));
+            },
+            displayedVehicles: function() {
+                return Object.entries(this.entities.vehicles).map(([id, vehicle]) => ({ id: id, x: this.$refs.svg.clientWidth / 2 + 10 * vehicle.x, y: this.$refs.svg.clientHeight / 2 + 10 * vehicle.y }));
+            },
+            displayedParcels: function() {
+                return Object.entries(this.entities.parcels).map(([id, parcel]) => ({ id: id, x: this.$refs.svg.clientWidth / 2 + 10 * parcel.x, y: this.$refs.svg.clientHeight / 2 + 10 * parcel.y }));
+            }
+        }
+    }
+</script>
