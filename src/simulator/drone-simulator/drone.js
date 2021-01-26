@@ -1,5 +1,6 @@
 module.exports = class Drone {
-    constructor() {
+    constructor(id) {
+        this.id = id;
         this.position = { x: 0, y: 0, z: 0 };
 
         this.target = {
@@ -8,7 +9,7 @@ module.exports = class Drone {
             z: (Math.random() - 0.5) * 20
         };
 
-        this.speed = 0.5;
+        this.speed = 1;
     }
 
     move(interval) {
@@ -17,7 +18,7 @@ module.exports = class Drone {
             y: this.target.y - this.position.y,
             z: this.target.z - this.position.z,
         };
-        let length = Math.sqrt(direction.x ^ 2 + direction.y ^ 2 + direction.z ^ 2);
+        let length = Math.sqrt(direction.x ** 2 + direction.y ** 2 + direction.z ** 2);
         if (length > this.speed * interval) {
             direction = {
                 x: direction.x / length * this.speed * interval,

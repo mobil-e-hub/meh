@@ -2,7 +2,7 @@ module.exports = class Vehicle {
     constructor() {
         this.x = 0;
         this.y = 0;
-        this.speed = 3;
+        this.speed = 5;
     }
 
     move(interval) {

@@ -3,21 +3,21 @@ const { v4: uuid } = require('uuid');
 const MQTT = require('mqtt');
 
 // Internal modules
-const Vehicle = require('./vehicle');
+const Drone = require('./drone');
 
-module.exports = class VehicleSimulator {
-    constructor(numberOfVehicles) {
-        this.vehicles = Object.assign({}, ...Array.from({ length: numberOfVehicles }).map(() => ({ [uuid()]: new Vehicle() })));
+module.exports = class DroneSimulator {
+    constructor(numberOfDrones) {
+        this.numberOfDrones = numberOfDrones;
+        this.drones = { };
+
         this.mqtt = {
             client: MQTT.connect('ws://broker.hivemq.com:8000/mqtt'),
             root: 'mobil-e-hub/v1',
             id: uuid()
         };
-        this.timer = null;
-        this.interval = null;
 
         this.mqtt.client.on('connect', () => {
-            this.mqtt.client.subscribe(`${this.mqtt.root}/to/vehicle/#`);
+            this.mqtt.client.subscribe(`${this.mqtt.root}/to/drone/#`);
             this.mqtt.client.subscribe(`${this.mqtt.root}/from/visualization/#`);
 
             this.publish('connected');
@@ -26,14 +26,20 @@ module.exports = class VehicleSimulator {
         this.mqtt.client.on('message', (topic, message) => {
             this.receive(topic.split('/'), JSON.parse(message.toString()));
         });
+
+        this.timer = null;
+        this.interval = null;
     }
 
     start(interval) {
         if (this.timer) {
             clearInterval(this.timer);
         }
+
+        this.init();
+
         this.interval = interval;
-        this.timer = setInterval(this.moveVehicles, interval);
+        this.timer = setInterval(this.moveDrones, interval);
     }
 
     pause() {
@@ -45,7 +51,7 @@ module.exports = class VehicleSimulator {
 
     resume() {
         if (!this.timer) {
-            this.timer = setInterval(this.moveVehicles, this.interval);
+            this.timer = setInterval(this.moveDrones, this.interval);
         }
     }
 
@@ -54,41 +60,47 @@ module.exports = class VehicleSimulator {
             clearInterval(this.timer);
             this.timer = null;
         }
-        for (const [id, vehicle] of Object.entries(this.vehicles)) {
-            vehicle.reset();
-        }
+
+        this.drones = { };
+    }
+
+    init() {
+        this.drones = Object.assign({}, ...Array.from({ length: this.numberOfDrones }).map(() => {
+            let id = uuid();
+            return { [id]: new Drone(id) };
+        }));
     }
 
     publishState() {
-        for (const [id, vehicle] of Object.entries(this.vehicles)) {
-            this.publishFrom(`vehicle/${id}`, 'state', vehicle);
+        for (const [id, drone] of Object.entries(this.drones)) {
+            this.publishFrom(`drone/${id}`, 'state', drone);
         }
     }
 
-    moveVehicles = () => {
-        for (const [id, vehicle] of Object.entries(this.vehicles)) {
-            vehicle.move(this.interval / 1000);
-            this.publishFrom(`vehicle/${id}`, 'state', vehicle);
+    moveDrones = () => {
+        for (const [id, drone] of Object.entries(this.drones)) {
+            drone.move(this.interval / 1000);
+            this.publishFrom(`drone/${id}`, 'state', drone);
         }
     };
 
     publishFrom(sender, topic, message = '') {
         this.mqtt.client.publish(`${this.mqtt.root}/from/${sender}/${topic}`, JSON.stringify(message));
-        console.log(`< [VehicleSimulator] from/${sender}/${topic}: ${JSON.stringify(message)}`);
+        console.log(`< [DroneSimulator] from/${sender}/${topic}: ${JSON.stringify(message)}`);
     }
 
     publish(topic, message = '') {
-        this.mqtt.client.publish(`${this.mqtt.root}/from/vehicle-simulator/${this.mqtt.id}/${topic}`, JSON.stringify(message));
-        console.log(`< [VehicleSimulator] from/vehicle-simulator/${this.mqtt.id}/${topic}: ${JSON.stringify(message)}`);
+        this.mqtt.client.publish(`${this.mqtt.root}/from/drone-simulator/${this.mqtt.id}/${topic}`, JSON.stringify(message));
+        console.log(`< [DroneSimulator] from/drone-simulator/${this.mqtt.id}/${topic}: ${JSON.stringify(message)}`);
     }
 
     publishTo(receiver, topic, message = '') {
         this.mqtt.client.publish(`${this.mqtt.root}/to/${receiver}/${topic}`, JSON.stringify(message));
-        console.log(`< [VehicleSimulator] to/${receiver}/${topic}: ${JSON.stringify(message)}`);
+        console.log(`< [DroneSimulator] to/${receiver}/${topic}: ${JSON.stringify(message)}`);
     }
 
     receive(topic, message) {
-        console.log(`> [VehicleSimulator] ${topic.join('/')}: ${JSON.stringify(message)}`);
+        console.log(`> [DroneSimulator] ${topic.join('/')}: ${JSON.stringify(message)}`);
 
         if (topic[2] === 'from' && topic[3] === 'visualization' && topic[5] === 'start') {
             this.start(100);
@@ -101,6 +113,9 @@ module.exports = class VehicleSimulator {
         }
         else if (topic[2] === 'from' && topic[3] === 'visualization' && topic[5] === 'stop') {
             this.stop();
+        }
+        else if (topic[2] === 'to' && topic[3] === 'drone' && topic[5] === 'target') {
+            this.drones[topic[4]].target = { x: message.x, y: message.y, z: 0 };
         }
     }
 };

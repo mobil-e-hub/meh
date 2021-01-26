@@ -5,8 +5,12 @@ const cors = require('cors');
 const MQTT = require('mqtt');
 
 // Internal modules
-const DroneSimulator = require('./simulation/drone-simulator');
-const VehicleSimulator = require('./simulation/vehicle-simulator');
+const DroneSimulator = require('./drone-simulator/simulator');
+const VehicleSimulator = require('./vehicle-simulator/simulator');
+const HubSimulator = require('./hub-simulator/simulator');
+const OrderSimulator = require('./order-simulator/simulator');
+
+const ControlSystem = require('./control-system/control-system');
 
 // Server
 const app = express();
@@ -14,13 +18,13 @@ const port = 3000;
 app.use(express.static('src/www'));
 app.use(cors());
 
-app.get('/', (req, res) => {
-    return res.send('Hello World!')
-});
-
-app.get('/drones', (req, res) => {
-    return res.json(droneSimulator.drones)
-});
+// app.get('/', (req, res) => {
+//     return res.send('Hello World!')
+// });
+//
+// app.get('/drones', (req, res) => {
+//     return res.json(droneSimulator.drones)
+// });
 
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`)
@@ -55,3 +59,7 @@ function receive(topic, message) {
 // Simulators
 const droneSimulator = new DroneSimulator(5);
 const vehicleSimulator = new VehicleSimulator(3);
+const hubSimulator = new HubSimulator(2);
+const orderSimulator = new OrderSimulator(hubSimulator);
+
+const controlSystem = new ControlSystem(droneSimulator, vehicleSimulator, hubSimulator, orderSimulator);
