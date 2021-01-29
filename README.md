@@ -4,7 +4,7 @@ Author: Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
 ## Purpose of this project
 This project allows for the simulation and visualization of a Drone Logistics Network (DLN). It consists of two components:
 - Visualization: This components shows the current status of the DLN.
-- Simulation: This component simulates drones, vehicles, parcels, hubs and orders.
+- Simulator: This component simulates drones, vehicles, parcels, hubs and orders.
 
 The Control System is built as a [Python-based component](https://www.github.com/michaelpernpeintner/meh-python) and not part of this project.
 
@@ -12,7 +12,7 @@ The Control System is built as a [Python-based component](https://www.github.com
 ```
 $ cd meh-node
 $ npm install
-$ npm run all
+$ npm run all // the commands 'npm run visualization' and 'npm run simulator' also work individually
 ```
 
 ## Overall network architecture
@@ -37,7 +37,10 @@ All entities communicate via MQTT. This allows for a very flexible addition of n
 
 ## Project Structure
 ### Simulation
-Node.js server with modules `DroneSimulator`, `VehicleSimulator` and `OrderSimulator`.
+Node.js server with modules `HubSimulator` `DroneSimulator`, `VehicleSimulator` and `ParcelSimulator`.
+
+### HubSimulator
+...
 
 #### DroneSimulator
 ...
@@ -56,13 +59,14 @@ Vue.js client for the visualization of a running DLN.
 ## Entity models
 ### Drone
 ```
+id: UUID,
 position: {
     x: float,
     y: float,
     z: float
 },
-speed: float
-...
+speed: float,
+tasks: [Task]
 ```
 ...
 
