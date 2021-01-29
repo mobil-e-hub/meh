@@ -1,10 +1,7 @@
 module.exports = class Hub {
-    constructor(id) {
+    constructor(id, position) {
         this.id = id;
-
-        this.x = (Math.random() - 0.5) * 40;
-        this.y = (Math.random() - 0.5) * 40;
-
+        this.position = position;
         this.parcels = {};
     }
 

@@ -1,4 +1,5 @@
 const random = require('random');
+const { v4: uuid } = require('uuid');
 
 module.exports = {
     random: {
@@ -44,6 +45,16 @@ module.exports = {
             else {
                 return array[random.int(0, array.length - 1)];
             }
+        },
+        position: (range = 10) => {
+            return {
+                x: random.float(-range, range),
+                y: random.float(-range, range),
+                z: random.float(0, range),
+            }
         }
+    },
+    uuid: () => {
+        return uuid().substr(0, 8);
     }
 };

@@ -1,9 +1,9 @@
 // External modules
-const { v4: uuid } = require('uuid');
 const MQTT = require('mqtt');
-const random = require('../helpers').random;
+const _ = require('lodash');
 
 // Internal modules
+const { random, uuid } = require('../helpers');
 
 module.exports = class ControlSystem {
     constructor(droneSimulator, vehicleSimulator, hubSimulator, parcelSimulator) {
@@ -20,13 +20,18 @@ module.exports = class ControlSystem {
         });
 
         this.mqtt.client.on('message', (topic, message) => {
-            this.receive(topic.split('/'), JSON.parse(message.toString()));
+            let [project, version, direction, entity, id, ...rest] = topic.split('/');
+            this.receive({ version, direction, entity, id, rest }, JSON.parse(message.toString()));
         });
 
         this.droneSimulator = droneSimulator;
         this.vehicleSimulator = vehicleSimulator;
         this.hubSimulator = hubSimulator;
         this.parcelSimulator = parcelSimulator;
+    }
+
+    destructor() {
+        this.mqtt.client.end();
     }
 
     publishFrom(sender, topic, message = '') {
@@ -45,12 +50,42 @@ module.exports = class ControlSystem {
     }
 
     receive(topic, message) {
-        console.log(`> [ControlSystem] ${topic.join('/')}: ${JSON.stringify(message)}`);
+        console.log(`> [ControlSystem] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
 
-        if (topic[2] === 'from' && topic[3] === 'parcel' && topic[5] === 'state') {
-            let hub = this.hubSimulator.hubs[message.position];
-            let drone = random.value(this.droneSimulator.drones);
-            this.publishTo(`drone/${drone.id}`, 'target', { x: hub.x, y: hub.y });
+        if (topic.direction === 'from' && topic.entity === 'parcel' && topic.rest[0] === 'placed') {
+            // New parcel detected
+            this.assignParcelToDrone(message);
         }
+    }
+
+    assignParcelToDrone(parcel) {
+        let sourceHub = this.hubSimulator.hubs[parcel.carrier.id];
+        let destinationHub = this.hubSimulator.hubs[parcel.destination.id];
+        let drone = random.value(this.droneSimulator.drones);
+        let tasks = [
+            {
+                type: 'fly',
+                target: _.clone(sourceHub.position),
+                minimumDuration: 10
+            },
+            {
+                type: 'pickup',
+                parcelId: parcel.id,
+                fromCarrier: { type: 'hub', id: sourceHub.id },
+                minimumDuration: 5
+            },
+            {
+                type: 'fly',
+                target: _.clone(destinationHub.position),
+                minimumDuration: 10
+            },
+            {
+                type: 'dropoff',
+                parcelId: parcel.id,
+                toCarrier: { type: 'hub', id: destinationHub.id },
+                minimumDuration: 5
+            }
+        ];
+        this.publishTo(`drone/${drone.id}`, 'tasks', tasks);
     }
 };
