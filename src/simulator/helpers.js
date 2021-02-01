@@ -52,7 +52,8 @@ module.exports = {
                 y: random.float(-range, range),
                 z: random.float(0, range),
             }
-        }
+        },
+        rand: random
     },
     uuid: () => {
         return uuid().substr(0, 8);

@@ -37,7 +37,7 @@ All entities communicate via MQTT. This allows for a very flexible addition of n
 
 ## Project Structure
 ### Simulation
-Node.js server with modules `HubSimulator` `DroneSimulator`, `VehicleSimulator` and `ParcelSimulator`.
+Node.js server with simulator modules `HubSimulator` `DroneSimulator`, `VehicleSimulator` and `ParcelSimulator`.
 
 ### HubSimulator
 ...
@@ -66,7 +66,12 @@ position: {
     z: float
 },
 speed: float,
-tasks: [Task]
+mission: {
+    id: UUID,
+    type: ['fly'|'drive'|'pickup'|'dropoff'],
+    [transaction: { id: UUID, from: { type: EntityType, id: UUID }, to: { type: EntityType, id: 'd01' }, parcel: Parcel } | destination: Point],
+    minimumDuration: float
+}
 ```
 ...
 
@@ -75,3 +80,18 @@ Communication between entities exclusively uses the public MQTT broker `broker.h
 
 All topics start with `mobil-e-hub/v1/[from|to]/[entity]/[id]/`, and all messages are string representations of JSON objects.
 Each entity publishes `{ topic: mobil-e-hub/v1/from/[entity]/[id]/connected, message: ''}` upon connection.
+
+### Missions
+Drones and Vehicles can be assigned a _mission_ by the Control System which consists of a list of tasks.
+
+### Tasks
+A task can either be going from one node of an edge to the other node, or picking up / dropping off a parcel.
+
+### Transactions
+A _transaction_ describes the passing of a parcel from one entity to another. The process of a transaction is as follows:
+1. The receiver sends a `transaction/[id]/ready` message to the giver
+2. The giver sends a `transaction/[id]/execute` message to the giver and sends a a `transfer` message to the parcel
+3. The the receiver sends a a `transaction/[id]/complete` message to the giver and marks the transaction as complete
+4. The giver marks the transaction as complete
+
+Hubs can handle multiple transactions in parallel, while drones and vehicles process them one by one as tasks of their current mission.

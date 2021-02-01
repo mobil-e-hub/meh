@@ -1,5 +1,6 @@
 // External modules
 const MQTT = require('mqtt');
+const mqttMatch = require('mqtt-match');
 
 // Internal modules
 const { random, uuid } = require('./helpers');
@@ -22,7 +23,7 @@ module.exports = class MQTTClient {
 
         this.mqtt.client.on('message', (topic, message) => {
             let [project, version, direction, entity, id, ...args] = topic.split('/');
-            this.receive({version, direction, entity, id, args, rest: args.join('/')}, JSON.parse(message.toString()));
+            this.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
         });
     }
 
@@ -46,5 +47,17 @@ module.exports = class MQTTClient {
 
     receive(topic, message) {
         console.log(`> [${this.type}] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
+    }
+
+    subscribe(topics) {
+        this.mqtt.client.subscribe(topics.map(topic => `${this.mqtt.root}/${topic}`));
+    }
+
+    unsubscribe(topics) {
+        this.mqtt.client.unsubscribe(topics.map(topic => `${this.mqtt.root}/${topic}`));
+    }
+
+    matchTopic(topic, pattern) {
+        return mqttMatch(pattern, topic.string.short);
     }
 };

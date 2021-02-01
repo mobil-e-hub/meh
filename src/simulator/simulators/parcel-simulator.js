@@ -1,4 +1,5 @@
 // External modules
+const _ = require('lodash');
 
 // Internal modules
 const MQTTClient = require('../mqtt-client');
@@ -11,6 +12,12 @@ module.exports = class ParcelSimulator extends MQTTClient {
 
         this.parcels = {};
         this.hubSimulator = hubSimulator;
+    }
+
+    resume() {
+        for (const [id, parcel] of Object.entries(this.parcels)) {
+            this.publishFrom(`parcel/${id}`, 'state', parcel);
+        }
     }
 
     stop() {
@@ -50,6 +57,15 @@ module.exports = class ParcelSimulator extends MQTTClient {
                     parcel.carrier = message;
                     this.publishFrom(`parcel/${parcel.id}`, 'state', parcel);
                 }
+            }
+        }
+        if (this.matchTopic(topic, 'to/parcel/+/transfer')) {
+            let parcel = this.parcels[topic.id];
+            parcel.carrier = message;
+
+            this.publishFrom(`parcel/${parcel.id}`, 'state', parcel);
+            if (_.isEqual(parcel.carrier, parcel.destination)) {
+                this.publishFrom(`parcel/${parcel.id}`, 'delivered', parcel);
             }
         }
     }

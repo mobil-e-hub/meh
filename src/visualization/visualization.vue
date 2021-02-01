@@ -21,7 +21,7 @@
                             <b-icon icon="stop-fill" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-button variant="link" title="Place order" @click="clickPlaceOrderButton">
+                        <b-button variant="link" title="Place order" @click="clickPlaceOrderButton" :disabled="state === 'stopped'">
                             <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>
                         </b-button>
 
@@ -29,10 +29,14 @@
                             <b-icon icon="zoom-in" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-nav-text>{{ Math.round(map.zoom * 100) }}%</b-nav-text>
+                        <b-nav-text style="min-width: 50px; text-align: center">{{ Math.round(map.zoom * 100) }}%</b-nav-text>
 
                         <b-button variant="link" title="Zoom out" @click="clickZoomOutButton">
                             <b-icon icon="zoom-out" aria-hidden="true"></b-icon>
+                        </b-button>
+
+                        <b-button variant="link" title="Run test function" @click="clickTestButton">
+                            <b-icon icon="braces" aria-hidden="true"></b-icon>
                         </b-button>
                     </b-button-toolbar>
                 </b-nav-form>
@@ -45,20 +49,35 @@
                     <div v-if="view === 'simulation'">
                         <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
                             <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
+                                <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" />
+                                <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
+
                                 <template v-if="state !== 'stopped'">
-                                    <line :x1="-10 / map.zoom" y1="0" :x2="10 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
-                                    <line x1="0" :y1="-10 / map.zoom" x2="0" :y2="10 / map.zoom" stroke="gray" :stroke-width="1 / map.zoom" />
-                                    <circle v-for="(hub, id) in entities.hubs" :key="id" :r="entitySize.hub" :cx="hub.position.x" :cy="hub.position.y" fill="gray"></circle>
-                                    <circle v-for="(vehicle, id) in entities.vehicles" :key="id" :r="entitySize.vehicle" :cx="vehicle.position.x" :cy="vehicle.position.y" fill="blue"></circle>
-                                    <circle v-for="(drone, id) in entities.drones" :key="id" :r="entitySize.drone" :cx="drone.position.x" :cy="drone.position.y" fill="red"></circle>
-                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="entities[`${parcel.carrier.type}s`][parcel.carrier.id].position.x" :cy="entities[`${parcel.carrier.type}s`][parcel.carrier.id].position.y" fill="green"></circle>
+                                    <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
+                                    <line x1="0" :y1="-30 / map.zoom" x2="0" :y2="30 / map.zoom" stroke="gray" :stroke-width="1 / map.zoom" />
+
+                                    <circle v-for="(hub, id) in entities.hubs" :key="id" :r="entitySize.hub" :cx="getX(hub.position)" :cy="getY(hub.position)" fill="gray">
+                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>
+                                    </circle>
+
+                                    <circle v-for="(car, id) in entities.cars" :key="id" :r="entitySize.car" :cx="car.position.x" :cy="car.position.y" fill="blue">
+                                        <title>Car {{ car.id }} ({{ car.state }})</title>
+                                    </circle>
+
+                                    <circle v-for="(drone, id) in entities.drones" :key="id" :r="entitySize.drone" :cx="drone.position.x" :cy="drone.position.y" fill="red">
+                                        <title>Drone {{ drone.id }} ({{ drone.state }})</title>
+                                    </circle>
+
+                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">
+                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>
+                                    </circle>
                                 </template>
                             </g>
                         </svg>
                     </div>
                     <div v-else-if="view === 'messages'">
                         <h4 class="mb-5">Messages</h4>
-                        <pre style="max-height: 70vh; overflow: scroll">{{ receivedMessages.slice(0, 100).join('\n\n') }}</pre>
+                        <pre style="max-height: 70vh; overflow-y: scroll; white-space: pre-wrap; word-break: keep-all;">{{ receivedMessages.slice(0, 100).join('\n\n') }}</pre>
                     </div>
                     <div v-else-if="view === 'entities'">
                         <h4 class="mb-5">Entities</h4>
@@ -77,9 +96,9 @@
                                     </b-list-group>
                                 </b-col>
                                 <b-col>
-                                    <h4>Vehicles</h4>
+                                    <h4>Cars</h4>
                                     <b-list-group>
-                                        <b-list-group-item v-for="(vehicle, id) in entities.vehicles" :key="id">{{ id }}</b-list-group-item>
+                                        <b-list-group-item v-for="(car, id) in entities.cars" :key="id">{{ id }}</b-list-group-item>
                                     </b-list-group>
                                 </b-col>
                                 <b-col>
@@ -106,8 +125,8 @@
                         <font-awesome-icon icon="plane" style="color: red" />: {{Object.keys(entities.drones).length }}
                     </b-nav-text>
 
-                    <b-nav-text class="mx-3" title="Number of vehicles">
-                        <font-awesome-icon icon="car" style="color: blue" />: {{Object.keys(entities.vehicles).length }}
+                    <b-nav-text class="mx-3" title="Number of cars">
+                        <font-awesome-icon icon="car" style="color: blue" />: {{Object.keys(entities.cars).length }}
                     </b-nav-text>
 
                     <b-nav-text class="mx-3" title="Number of parcels">
@@ -137,6 +156,9 @@
 <script>
     const mqtt = require('mqtt');
     const uuid = require('../simulator/helpers').uuid;
+    const mqttMatch = require('mqtt-match');
+
+    const topology = require('../topology');
 
     export default {
         data: function () {
@@ -151,25 +173,26 @@
                 },
                 entities: {
                     drones: { },
-                    vehicles: { },
+                    cars: { },
                     parcels: { },
                     hubs: { }
                 },
                 map: {
                     origin: { x: 500, y: 400 },
                     offset: { x: 0, y: 0 },
-                    zoom: 1,
+                    zoom: 4,
                     drag: {
                         isDragging: false,
                         x: 0,
                         y: 0
-                    }
+                    },
+                    topology: topology
                 },
                 display: {
                     sizes: {
                         hub: 8,
                         drone: 4,
-                        vehicle: 6,
+                        car: 6,
                         parcel: 2
                     },
                     zoomEntities: false
@@ -187,7 +210,7 @@
                 });
                 this.mqtt.client.on('message', (topic, message) => {
                     let [project, version, direction, entity, id, ...args] = topic.split('/');
-                    this.receive({ version, direction, entity, id, args, rest: args.join('/') }, JSON.parse(message.toString()));
+                    this.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
                     this.receivedMessages.unshift(`${topic}: ${message.toString()}`);
                 });
             }
@@ -219,7 +242,7 @@
                 this.publish('stop');
                 this.state = 'stopped';
                 this.$set(this.entities, 'drones', { });
-                this.$set(this.entities, 'vehicles', { });
+                this.$set(this.entities, 'cars', { });
                 this.$set(this.entities, 'hubs', { });
                 this.$set(this.entities, 'parcels', { });
             },
@@ -263,19 +286,47 @@
             },
             receive: function(topic, message) {
                 if (['running', 'paused'].includes(this.state)) {
-                    if (topic.direction === 'from' && topic.rest === 'state') {
+                    if (this.matchTopic(topic, 'from/+/+/state')) {
                         this.$set(this.entities[`${topic.entity}s`], [topic.id], message);
                     }
                 }
-                if (topic.direction === 'to' && topic.entity === 'drone' && topic.rest === 'tasks') {
-                    this.showToast('Task assigned', `Drone ${topic.id} has been assigned a new task.`)
+                if (this.matchTopic(topic, 'to/drone/+/tasks')) {
+                    this.showToast('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
                 }
-                else if (topic.direction === 'from' && topic.entity === 'parcel' && topic.rest === 'placed') {
-                    this.showToast('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`)
+                else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
+                    this.showToast('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`);
+                }
+                else if (this.matchTopic(topic, 'from/control-system/+/route-update')) {
+                    this.showToast('Route update', `Control System ${topic.id} has updated the routes.`);
+                }
+                else if (this.matchTopic(topic, 'from/car/+/arrived')) {
+                    this.showToast('Car arrived', `Car ${topic.id} has arrived at node ${message}.`);
+                }
+                else if (this.matchTopic(topic, 'from/+/+/mission/+/complete')) {
+                    this.showToast('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`);
+                }
+                else if (this.matchTopic(topic, 'from/+/+/transaction/+/complete')) {
+                    this.showToast('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`);
+                }
+                else if (this.matchTopic(topic, 'from/parcel/+/delivered')) {
+                    this.showToast('Parcel delivered', `Parcel ${topic.id} has reached its destination (${message.destination.type} ${message.destination.id}).`);
                 }
             },
             showToast: function(title, message) {
-                this.$bvToast.toast(message, { title: title, autoHideDelay: 5000, toaster: 'b-toaster-bottom-left' });
+                this.$bvToast.toast(message, { title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left' });
+            },
+            matchTopic: function(topic, pattern) {
+                return mqttMatch(pattern, topic.string.short);
+            },
+            getX: function(node) {
+                return this.map.topology.nodes[node].position.x;
+            },
+            getY: function(node) {
+                return this.map.topology.nodes[node].position.y;
+            },
+            clickTestButton: function() {
+                this.publish('test');
+                this.state = 'running';
             }
         },
         computed: {
@@ -283,9 +334,12 @@
                 return {
                     hub: this.display.sizes.hub / (this.zoomEntities ? 1 : this.map.zoom),
                     drone: this.display.sizes.drone / (this.zoomEntities ? 1 : this.map.zoom),
-                    vehicle: this.display.sizes.vehicle / (this.zoomEntities ? 1 : this.map.zoom),
+                    car: this.display.sizes.car / (this.zoomEntities ? 1 : this.map.zoom),
                     parcel: this.display.sizes.parcel / (this.zoomEntities ? 1 : this.map.zoom)
                 }
+            },
+            parcelPosition: function() {
+                return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
             }
         }
     }

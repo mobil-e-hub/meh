@@ -4,7 +4,7 @@ const _ = require('lodash');
 // Internal modules
 const random = require('../helpers').random;
 
-const DroneState = {
+const CarState = {
     idle: 0,
     moving: 1,
     waitingForTransaction: 2,
@@ -27,14 +27,14 @@ const TaskState = {
     completed: 4
 };
 
-class Drone {
+class Car {
     constructor(id, position) {
         this.id = id;
         this.position = position;
 
-        this.speed = 10;
+        this.speed = 20;
         this.parcel = null;
-        this.state = DroneState.idle;
+        this.state = CarState.idle;
     }
 
     move(interval, simulator) {
@@ -69,14 +69,14 @@ class Drone {
 
                     return true;
                 case 'pickup':
-                    // this.state === DroneState.waitingForTransaction
+                    // this.state === CarState.waitingForTransaction
                     return false;
                 case 'dropoff':
-                    if (this.state === DroneState.waitingForTransaction) {
+                    if (this.state === CarState.waitingForTransaction) {
                         return false;
                     }
                     else {
-                        // this.state === DroneState.executingTransaction
+                        // this.state === CarState.executingTransaction
                         simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
                         simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
 
@@ -103,7 +103,7 @@ class Drone {
     setMission(mission, simulator) {
         this.mission = mission;
         if (mission === null) {
-            this.state = DroneState.idle;
+            this.state = CarState.idle;
         }
         else {
             this.startTask(simulator);
@@ -115,22 +115,22 @@ class Drone {
         let task = this.mission.tasks[0];
 
         if (task.type === 'move') {
-            this.state = DroneState.moving;
+            this.state = CarState.moving;
             task.state = TaskState.ongoing;
         }
         else if (task.type === 'pickup') {
             let transaction = task.transaction;
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
-            this.state = DroneState.waitingForTransaction;
+            this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
         }
         else if (task.type === 'dropoff') {
             if (task.transaction.ready) {
-                this.state = DroneState.executingTransaction;
+                this.state = CarState.executingTransaction;
                 task.state = TaskState.executingTransaction;
             }
             else {
-                this.state = DroneState.waitingForTransaction;
+                this.state = CarState.waitingForTransaction;
                 task.state = TaskState.waitingForTransaction;
             }
         }
@@ -140,9 +140,9 @@ class Drone {
         this.mission.tasks.splice(0, 1);
 
         if (this.mission.tasks.length === 0) {
-            simulator.publishFrom(`drone/${this.id}`, `mission/${this.mission.id}/complete`);
+            simulator.publishFrom(`car/${this.id}`, `mission/${this.mission.id}/complete`);
             this.mission = null;
-            this.state = DroneState.idle;
+            this.state = CarState.idle;
         }
         else {
             this.startTask(simulator);
@@ -150,4 +150,4 @@ class Drone {
     }
 }
 
-module.exports = { Drone, DroneState, TaskState };
+module.exports = { Car, CarState, TaskState };
