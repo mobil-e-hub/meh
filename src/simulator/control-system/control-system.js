@@ -15,7 +15,7 @@ const topology = require('../../topology');
 
 module.exports = class ControlSystem extends MQTTClient {
     constructor(droneSimulator, carSimulator, hubSimulator, parcelSimulator) {
-        super('control-system', ['to/control-system/#', 'from/parcel/#', 'from/visualization/#']);
+        super('control-system', ['to/control-system/#', 'from/parcel/+/placed', 'from/parcel/+/delivered', 'from/visualization/#']);
 
         this.droneSimulator = droneSimulator;
         this.carSimulator = carSimulator;
@@ -30,8 +30,8 @@ module.exports = class ControlSystem extends MQTTClient {
             this.createDeliveryRoute(message);
         }
         if (this.matchTopic(topic, 'from/visualization/+/test')) {
-            // this.test(message);
-            this.findRoute(new Parcel('p00', 'h00', 'h01'));
+            this.test(message);
+            // this.findRoute(new Parcel('p00', 'h00', 'h01'));
         }
     }
 

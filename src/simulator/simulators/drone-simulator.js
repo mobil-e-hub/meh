@@ -3,22 +3,7 @@
 // Internal modules
 const { random, uuid } = require('../helpers');
 const MQTTClient = require('../mqtt-client');
-const Drone = require('../models/drone');
-
-const DroneState = {
-    idle: 0,
-    flying: 1,
-    waitingForTransaction: 2,
-    charging: 3
-};
-
-const TaskState = {
-    notStarted: 0,
-    ongoing: 1,
-    waitingForTransaction: 2,
-    executingTransaction: 3,
-    completed: 4
-};
+const { Drone, DroneState, TaskState} = require('../models/drone');
 
 // Class
 module.exports = class DroneSimulator extends MQTTClient {

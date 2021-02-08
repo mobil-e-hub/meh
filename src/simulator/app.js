@@ -21,7 +21,7 @@ const server = app.listen(port, () => {
 // Simulators
 const droneSimulator = new DroneSimulator(5);
 const carSimulator = new CarSimulator(0);
-const hubSimulator = new HubSimulator(0);
+const hubSimulator = new HubSimulator(3);
 const parcelSimulator = new ParcelSimulator(hubSimulator);
 const controlSystem = new ControlSystem(droneSimulator, carSimulator, hubSimulator, parcelSimulator);
 

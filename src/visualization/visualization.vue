@@ -52,25 +52,33 @@
                                 <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" />
                                 <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
 
+
                                 <template v-if="state !== 'stopped'">
                                     <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
                                     <line x1="0" :y1="-30 / map.zoom" x2="0" :y2="30 / map.zoom" stroke="gray" :stroke-width="1 / map.zoom" />
 
-                                    <circle v-for="(hub, id) in entities.hubs" :key="id" :r="entitySize.hub" :cx="getX(hub.position)" :cy="getY(hub.position)" fill="gray">
-                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>
-                                    </circle>
+<!--                                    <use v-for="(hub, id) in entities.hubs" :key="id" :x="getX(hub.position) - entitySize.hub" :y="getY(hub.position) - entitySize.hub" :width="2 * entitySize.hub" :height="2 * entitySize.hub" :href="require('../../assets/entities.svg') + '#hub-symbol'" fill="gray">-->
+<!--                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
+<!--                                    </use>-->
 
-                                    <circle v-for="(car, id) in entities.cars" :key="id" :r="entitySize.car" :cx="car.position.x" :cy="car.position.y" fill="blue">
+                                    <use v-for="hub in svgHubs" :key="hub.id" :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill">
+<!--                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
+                                    </use>
+
+                                    <use v-for="(car, id) in entities.cars" :key="id" :x="car.position.x - entitySize.car" :y="car.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#car-symbol'" fill="blue" transform="scale(1, -1)">
                                         <title>Car {{ car.id }} ({{ car.state }})</title>
-                                    </circle>
+                                    </use>
 
-                                    <circle v-for="(drone, id) in entities.drones" :key="id" :r="entitySize.drone" :cx="drone.position.x" :cy="drone.position.y" fill="red">
+                                    <use v-for="(drone, id) in entities.drones" :key="id" :x="drone.position.x - entitySize.drone" :y="drone.position.y - entitySize.drone" :width="2 * entitySize.drone" :height="2 * entitySize.drone" :href="require('../../assets/entities.svg') + '#drone-symbol'" fill="red" transform="scale(1, -1)">
                                         <title>Drone {{ drone.id }} ({{ drone.state }})</title>
-                                    </circle>
+                                    </use>
 
-                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">
+                                    <use v-for="(parcel, id) in entities.parcels" :key="id" :x="parcelPosition(parcel).x - entitySize.parcel" :y="parcelPosition(parcel).y - entitySize.parcel" :width="2 * entitySize.parcel" :height="2 * entitySize.parcel" :href="require('../../assets/entities.svg') + '#parcel-symbol'" fill="green" transform="scale(1, -1)">
                                         <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>
-                                    </circle>
+                                    </use>
+<!--                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">-->
+<!--                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>-->
+<!--                                    </circle>-->
                                 </template>
                             </g>
                         </svg>
@@ -178,7 +186,7 @@
                     hubs: { }
                 },
                 map: {
-                    origin: { x: 500, y: 400 },
+                    origin: { x: 0, y: 0 },
                     offset: { x: 0, y: 0 },
                     zoom: 4,
                     drag: {
@@ -190,12 +198,12 @@
                 },
                 display: {
                     sizes: {
-                        hub: 8,
-                        drone: 4,
-                        car: 6,
-                        parcel: 2
+                        hub: 10,
+                        drone: 8,
+                        car: 10,
+                        parcel: 6
                     },
-                    zoomEntities: false
+                    zoomEntities: true
                 }
             }
         },
@@ -340,6 +348,9 @@
             },
             parcelPosition: function() {
                 return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
+            },
+            svgHubs: function() {
+                return Object.values(this.entities.hubs).map(h => ({ x: this.map.topology.nodes[h.position].position.x, y: this.map.topology.nodes[h.position].position.y, width: 10, height: 10, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray' }));
             }
         }
     }

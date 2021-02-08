@@ -3,6 +3,6 @@ module.exports = class Hub {
         this.id = id;
         this.position = position;
         this.transactions = { };
-        this.parcels = { };
+        this.parcels = {  };
     }
 };
