@@ -1,6 +1,21 @@
 <template>
     <div id="app">
         <b-navbar fixed="top" variant="light">
+
+<!--          Burger Menu to toggle Sidebar Menu-->
+            <template>
+              <div id="burger" :class="{ 'active' : this.display.isSidebarVisible }" @click.prevent="toggleSidebar">
+                <slot>
+                  <button type="button" class="burger-button" title="Menu">
+                    <span class="hidden">Toggle menu</span>
+                    <span class="burger-bar burger-bar--1"></span>
+                    <span class="burger-bar burger-bar--2"></span>
+                    <span class="burger-bar burger-bar--3"></span>
+                  </button>
+                </slot>
+              </div>
+            </template>
+
             <b-navbar-brand>
                 mobil-e-Hub
             </b-navbar-brand>
@@ -47,41 +62,140 @@
             <b-row class="pt-4">
                 <b-col cols="12">
                     <div v-if="view === 'simulation'">
-                        <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
-                            <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
-                                <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" />
-                                <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
+                        <!-- Sidebar Menu-->
+                        <template>
+                          <div class="sidebar">
+                            <div class="sidebar-backdrop" @click="toggleSidebar" v-if="this.display.isSidebarVisible"></div>
+                            <transition name="slide">
+                              <div v-if="this.display.isSidebarVisible" class="sidebar-panel mt-lg-4">
+                                <p>TODOs:</p>
+                                <ul class="sidebar-panel-nav px-3 py-20">
 
+                                   <li> Toasts Settings:
+                                      <ul class="sidebar-panel-nav px-3 py-20">
 
-                                <template v-if="state !== 'stopped'">
-                                    <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
-                                    <line x1="0" :y1="-30 / map.zoom" x2="0" :y2="30 / map.zoom" stroke="gray" :stroke-width="1 / map.zoom" />
+                                        <li> All </li>
+                                        <li> None </li>
+                                        <li> Checkboxes </li>
+                                        <li> States </li>
+                                        <li> Routing </li>
+                                        <li> ... (?) </li>
+                                      </ul>
+                                   </li>
+                                   <li class="mt-md-2"> ShowStatsBtn here? </li>
+                                   <li class="mt-md-2"> En-/Disable Zoom Btn? </li>
+                                </ul>
+                              </div>
+                            </transition>
+                          </div>
+                        </template>
 
-<!--                                    <use v-for="(hub, id) in entities.hubs" :key="id" :x="getX(hub.position) - entitySize.hub" :y="getY(hub.position) - entitySize.hub" :width="2 * entitySize.hub" :height="2 * entitySize.hub" :href="require('../../assets/entities.svg') + '#hub-symbol'" fill="gray">-->
-<!--                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
-<!--                                    </use>-->
+                        <b-container fluid>
+                            <b-row>
+                                <!-- Map-->
+                                <b-col cols="9">
 
-                                    <use v-for="hub in svgHubs" :key="hub.id" :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill">
-<!--                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
-                                    </use>
+                                    <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
+                                      <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
+                                          <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" />
+<!--                                          <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />-->
 
-                                    <use v-for="(car, id) in entities.cars" :key="id" :x="car.position.x - entitySize.car" :y="car.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#car-symbol'" fill="blue" transform="scale(1, -1)">
-                                        <title>Car {{ car.id }} ({{ car.state }})</title>
-                                    </use>
+                                          <line v-for="(edge, id) in edgesRoad" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
+                                          <line v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" stroke-dasharray="1" />
+<!--                                          <path v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)"  stroke-dasharray="10,10" d="M5 40 l215 0" />-->
 
-                                    <use v-for="(drone, id) in entities.drones" :key="id" :x="drone.position.x - entitySize.drone" :y="drone.position.y - entitySize.drone" :width="2 * entitySize.drone" :height="2 * entitySize.drone" :href="require('../../assets/entities.svg') + '#drone-symbol'" fill="red" transform="scale(1, -1)">
-                                        <title>Drone {{ drone.id }} ({{ drone.state }})</title>
-                                    </use>
+                                          <template v-if="state !== 'stopped'">
+                                              <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
+                                              <line x1="0" :y1="-30 / map.zoom" x2="0" :y2="30 / map.zoom" stroke="gray" :stroke-width="1 / map.zoom" />
 
-                                    <use v-for="(parcel, id) in entities.parcels" :key="id" :x="parcelPosition(parcel).x - entitySize.parcel" :y="parcelPosition(parcel).y - entitySize.parcel" :width="2 * entitySize.parcel" :height="2 * entitySize.parcel" :href="require('../../assets/entities.svg') + '#parcel-symbol'" fill="green" transform="scale(1, -1)">
-                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>
-                                    </use>
-<!--                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">-->
-<!--                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>-->
-<!--                                    </circle>-->
-                                </template>
-                            </g>
-                        </svg>
+          <!--                                    <use v-for="(hub, id) in entities.hubs" :key="id" :x="getX(hub.position) - entitySize.hub" :y="getY(hub.position) - entitySize.hub" :width="2 * entitySize.hub" :height="2 * entitySize.hub" :href="require('../../assets/entities.svg') + '#hub-symbol'" fill="gray">-->
+          <!--                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
+          <!--                                    </use>-->
+
+                                              <use v-for="hub in svgHubs" :key="hub.id" :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill">
+<!--&lt;!&ndash;                                              TODO    war auskommentiert - überschreibe ich jetzt was?&ndash;&gt;-->
+<!--                                                 <b-badge variant="danger" class="badge-circle badge-md badge-floating border-white">4</b-badge>-->
+<!--                                                  <b-badge>-->
+<!--                                                       <template v-slot:badge>-->
+<!--                                                          <span> 2 </span>-->
+<!--                                                        </template>-->
+<!--                                                        <div>-->
+<!--                                                          <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
+<!--                                                        </div>-->
+
+<!--                                                  </b-badge>-->
+                                              </use>
+
+                                              <use v-for="(car, id) in entities.cars" :key="id" :x="car.position.x - entitySize.car" :y="car.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#car-symbol'" fill="blue" transform="scale(1, -1)">
+                                                  <title>Car {{ car.id }} ({{ car.state }})</title>
+<!--                                                  <b-badge variant="danger" class="badge-circle badge-md badge-floating border-white">4</b-badge>-->
+                                              </use>
+
+                                              <use v-for="(drone, id) in entities.drones" :key="id" :x="drone.position.x - entitySize.drone" :y="drone.position.y - entitySize.drone" :width="2 * entitySize.drone" :height="2 * entitySize.drone" :href="require('../../assets/entities.svg') + '#drone-symbol'" fill="red" transform="scale(1, -1)">
+                                                  <title>Drone {{ drone.id }} ({{ drone.state }})</title>
+                                              </use>
+
+                                              <use v-for="(parcel, id) in entities.parcels" :key="id" :x="parcelPosition(parcel).x - entitySize.parcel" :y="parcelPosition(parcel).y - entitySize.parcel" :width="2 * entitySize.parcel" :height="2 * entitySize.parcel" :href="require('../../assets/entities.svg') + '#parcel-symbol'" fill="green" transform="scale(1, -1)">
+                                                  <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>
+                                              </use>
+          <!--                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">-->
+          <!--                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>-->
+          <!--                                    </circle>-->
+                                          </template>
+                                      </g>
+                                    </svg>
+                                </b-col>
+
+                                <b-col cols="3">
+
+                                    <template v-if="!display.statsHidden">
+
+                                      <div class="card" style="width: 22rem;">
+                                        <div class="card-header">
+                                          Statistics
+                                        </div>
+                                        <table class="card-table table">
+                                          <thead>
+                                          <tr>
+                                            <th scope="col">Entity</th>
+                                            <th scope="col">Engaged</th>
+                                            <th scope="col">Avg. wait </th>
+                                          </tr>
+                                          </thead>
+                                          <tbody>
+                                          <tr>
+                                            <td>Drones</td>
+                                            <td> _x / {{Object.keys(entities.drones).length }}</td>
+                                            <td>_10 min</td>
+                                          </tr>
+                                          <tr>
+                                            <td>Cars</td>
+                                            <td> _x / {{Object.keys(entities.cars).length }}</td>
+                                            <td>_20 min</td>
+                                          </tr>
+                                          <tr>
+                                            <td>
+                                              Parcel
+                                              <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
+                                            </td>
+                                            <td> {{Object.keys(entities.parcels).length }} </td>
+                                            <td>_42 min</td>
+                                          </tr>
+                                          <tr>
+                                            <td>Parcel
+                                              <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>
+                                            </td>
+                                            <td> {{Object.keys(entities.parcels).length }} </td>
+                                            <td>_2 h</td>
+                                          </tr>
+                                          </tbody>
+                                        </table>
+                                      </div>
+
+                                    </template>
+                                </b-col>
+                            </b-row>
+                          </b-container>
                     </div>
                     <div v-else-if="view === 'messages'">
                         <h4 class="mb-5">Messages</h4>
@@ -125,6 +239,19 @@
         <b-navbar fixed="bottom" variant="light">
             <b-navbar-nav class="mx-auto">
                 <template v-if="state !== 'stopped'">
+
+                    <div>
+                        <b-dropdown id="dropdown-dropup" dropup text="Toasts" variant="primary" class="m-2">
+
+                        <b-dropdown-item href="#">None</b-dropdown-item>
+                          <b-dropdown-divider></b-dropdown-divider>
+                        <b-dropdown-item href="#">All</b-dropdown-item>
+                          <b-dropdown-divider></b-dropdown-divider>
+                        <b-dropdown-item href="#">States</b-dropdown-item>
+                        <b-dropdown-item href="#">Routing</b-dropdown-item>
+                        </b-dropdown>
+                    </div>
+
                     <b-nav-text class="mx-2" title="Number of hubs">
                         <font-awesome-icon icon="warehouse" style="color: gray" />: {{Object.keys(entities.hubs).length }}
                     </b-nav-text>
@@ -140,6 +267,9 @@
                     <b-nav-text class="mx-3" title="Number of parcels">
                         <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
                     </b-nav-text>
+
+                    <b-button size="mx-3" class="nav-btn my-2 my-sm-0" style="width: 125px" type="submit" @click="display.statsHidden = !display.statsHidden">{{display.statsHidden ? 'show stats' : 'hide stats'}}</b-button>
+
                 </template>
                 <template v-else>
                     <b-nav-text class="mx-3">
@@ -177,7 +307,7 @@
                 mqtt: {
                     client: null,
                     id: uuid(),
-                    root: 'mobil-e-hub/v1'
+                    root: 'mobil-e-hub/viz'
                 },
                 entities: {
                     drones: { },
@@ -203,7 +333,15 @@
                         car: 10,
                         parcel: 6
                     },
-                    zoomEntities: true
+                    zoomEntities: true,
+                    isSidebarVisible: false,
+                    showToasts: 'all',
+                    statsHidden: true
+                },
+                stats: {
+                    waitingDrones:0,
+                    avgDroneWaitTime:0,
+                    waitingCars: 0,
                 }
             }
         },
@@ -335,7 +473,11 @@
             clickTestButton: function() {
                 this.publish('test');
                 this.state = 'running';
+            },
+            toggleSidebar: function() {
+              this.display.isSidebarVisible = !this.display.isSidebarVisible
             }
+
         },
         computed: {
             entitySize: function() {
@@ -350,7 +492,13 @@
                 return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
             },
             svgHubs: function() {
-                return Object.values(this.entities.hubs).map(h => ({ x: this.map.topology.nodes[h.position].position.x, y: this.map.topology.nodes[h.position].position.y, width: 10, height: 10, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray' }));
+                return Object.values(this.entities.hubs).map(h => ({ x: this.map.topology.nodes[h.position].position.x-5, y: this.map.topology.nodes[h.position].position.y-5, width: 10, height: 10, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray' }));
+            },
+            edgesRoad: function() {
+                return Object.values(this.map.topology.edges).filter( e => e.type == 'road')
+            },
+            edgesAir: function() {
+                return Object.values(this.map.topology.edges).filter( e => e.type == 'air')
             }
         }
     }
@@ -369,4 +517,120 @@
         perspective: 1px;
         z-index: 10000;
     }
+
+    .card.floating{
+      position: fixed;
+      /*width: 50px;*/
+      /*height: 50px;*/
+      right: 30px;
+      /*text-align: center;*/
+      /*border-radius: 50px;*/
+      /*box-shadow: 2px 2px 3px #999;*/
+      overflow: hidden;
+      perspective: 1px;
+      z-index: 10;
+    }
+
+/*!*    Burger Menu for Sidebar*!*/
+    .hidden {
+      visibility: hidden;
+    }
+    /*button {*/
+    /*  cursor: pointer;*/
+    /*}*/
+    /* remove blue outline */
+    button:focus {
+      outline: 0;
+    }
+    .burger-button {
+      position: relative;
+      height: 30px;
+      width: 32px;
+      display: block;
+      z-index: 999;
+      border: 0;
+      border-radius: 0;
+      background-color: transparent;
+      pointer-events: all;
+      transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .burger-bar {
+      background-color: #130f40;
+      position: absolute;
+      top: 50%;
+      right: 6px;
+      left: 6px;
+      height: 2px;
+      width: auto;
+      margin-top: -1px;
+      transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1),
+        opacity 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+        background-color 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .burger-bar--1 {
+      -webkit-transform: translateY(-6px);
+      transform: translateY(-6px);
+    }
+    .burger-bar--2 {
+      transform-origin: 100% 50%;
+      transform: scaleX(0.8);
+    }
+    .burger-button:hover .burger-bar--2 {
+      transform: scaleX(1);
+    }
+    .no-touchevents .burger-bar--2:hover {
+      transform: scaleX(1);
+    }
+    .burger-bar--3 {
+      transform: translateY(6px);
+    }
+    #burger.active .burger-button {
+      transform: rotate(-180deg);
+    }
+    #burger.active .burger-bar {
+      background-color: #130f40;
+    }
+    #burger.active .burger-bar--1 {
+      transform: rotate(45deg);
+    }
+    #burger.active .burger-bar--2 {
+      opacity: 0;
+    }
+    #burger.active .burger-bar--3 {
+      transform: rotate(-45deg);
+    }
+
+/*    Sidebar_Menu*/
+
+    .slide-enter-active,
+    .slide-leave-active
+    {
+      transition: transform 0.2s ease;
+    }
+    .slide-enter,
+    .slide-leave-to {
+      transform: translateX(-100%);
+      transition: all 150ms ease-in 0s
+    }
+    .sidebar-backdrop {
+      background-color: rgba(19, 15, 64, .4);
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+    }
+    .sidebar-panel {
+      overflow-y: auto;
+      background-color: #f8f9fa;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      z-index: 999;
+      padding: 3rem 20px 2rem 20px;
+      width: 200px;
+    }
+
 </style>

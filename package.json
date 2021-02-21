@@ -34,5 +34,8 @@
       "no-undef": "off",
       "no-unused-vars": "off"
     }
+  },
+  "devDependencies": {
+    "jquery": "^3.5.1"
   }
 }

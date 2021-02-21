@@ -12,7 +12,7 @@ module.exports = class MQTTClient {
 
         this.mqtt = {
             client: MQTT.connect('ws://broker.hivemq.com:8000/mqtt'),
-            root: 'mobil-e-hub/v1',
+            root: 'mobil-e-hub/viz',
             id: uuid()
         };
 
