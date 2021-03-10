@@ -2,18 +2,18 @@
     <div id="app">
         <b-navbar fixed="top" variant="light">
 
-<!--          Burger Menu to toggle Sidebar Menu-->
+            <!--          Burger Menu to toggle Sidebar Menu-->
             <template>
-              <div id="burger" :class="{ 'active' : this.display.isSidebarVisible }" @click.prevent="toggleSidebar">
-                <slot>
-                  <button type="button" class="burger-button" title="Menu">
-                    <span class="hidden">Toggle menu</span>
-                    <span class="burger-bar burger-bar--1"></span>
-                    <span class="burger-bar burger-bar--2"></span>
-                    <span class="burger-bar burger-bar--3"></span>
-                  </button>
-                </slot>
-              </div>
+                <div id="burger" :class="{ 'active' : this.display.isSidebarVisible }" @click.prevent="toggleSidebar">
+                    <slot>
+                        <button type="button" class="burger-button" title="Menu">
+                            <span class="hidden">Toggle menu</span>
+                            <span class="burger-bar burger-bar--1"></span>
+                            <span class="burger-bar burger-bar--2"></span>
+                            <span class="burger-bar burger-bar--3"></span>
+                        </button>
+                    </slot>
+                </div>
             </template>
 
             <b-navbar-brand>
@@ -64,69 +64,81 @@
                     <div v-if="view === 'simulation'">
                         <!-- Sidebar Menu-->
                         <template>
-                          <div class="sidebar">
-                            <div class="sidebar-backdrop" @click="toggleSidebar" v-if="this.display.isSidebarVisible"></div>
-                            <transition name="slide">
-                              <div v-if="this.display.isSidebarVisible" class="sidebar-panel mt-lg-4">
-                                <label class="mt-md-2 mb-auto" > <u> Settings: </u> </label>
-                                <ul>
-                                  <li>
-                                <!-- ToggleButton-->
-                                    <template>
-                                        <label :for="toggle_toast_btn" :class="{'active': this.display.areToastsEnabled}" class="toggle__button">
+                            <div class="sidebar">
+                                <div class="sidebar-backdrop" @click="toggleSidebar" v-if="this.display.isSidebarVisible"></div>
+                                <transition name="slide">
+                                    <div v-if="this.display.isSidebarVisible" class="sidebar-panel mt-lg-4">
+                                        <label class="mt-md-2 mb-auto" > <u> Settings: </u> </label>
+                                        <ul>
+                                            <li>
+                                                <!-- ToggleButton - Stats Table-->
+                                                <template>
+                                                    <label for="toggle_stats_btn" :class="{'active': this.display.statsTableVisible}" class="toggle__button">
 
-                                            <span  class="toggle__label"> Toasts: </span>
-        <!--                                    <span v-if="! showToasts" class="toggle__label">{{ disabledText }}</span>-->
+                                                        <span  class="toggle__label"> Stats:   </span>
 
-                                            <input type="checkbox"  :id="toggle_toast_btn"  v-model="toggleToasts">
-                                            <span class="toggle__switch"></span>
-                                        </label>
-                                    </template>
-                                    <ul>
-                                      <li>
-                                        TODO!
-                                      </li>
-                                      <li>
-                                        <label for="checkbox_status" >Status  </label>
-                                        <input class="float-right" type="checkbox" id="checkbox_status" value="status" v-model="this.display.enabledToastTypes">
-                                      </li>
-                                      <li>
-                                        <label class="float-left" for="checkbox_routing" >Routing</label>
-                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" v-model="this.display.enabledToastTypes">
-                                      </li>
-                                      <li>
-                                        <label for="checkbox_routing" >Missions</label>
-<!--                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" v-model="this.display.enabledToastTypes">-->
-                                      </li>
-                                      <li>
-                                        <label for="checkbox_routing" >Parcels</label>
-                                        <!--                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" v-model="this.display.enabledToastTypes">-->
-                                      </li>
-                                    </ul>
-                                  </li>
-                                </ul>
+                                                        <input type="checkbox"  id="toggle_stats_btn"  v-model="toggleStatsTable">
+                                                        <span class="toggle__switch"></span>
+                                                    </label>
+                                                </template>
+                                            </li>
+                                            <li>
+                                                <!-- ToggleButton Toasts-->
+                                                <template>
+                                                    <label for="toggle_toast_btn" :class="{'active': this.display.areToastsEnabled}" class="toggle__button">
+
+                                                        <span  class="toggle__label"> Toasts: </span>
+                                                        <!--                                    <span v-if="! showToasts" class="toggle__label">{{ disabledText }}</span>-->
+
+                                                        <input type="checkbox"  id="toggle_toast_btn"  v-model="toggleToasts">
+                                                        <span class="toggle__switch"></span>
+                                                    </label>
+                                                </template>
+                                                <ul>
+                                                    <li>
+                                                        TODO!
+                                                    </li>
+                                                    <li>
+                                                        <label for="checkbox_status" >Status  </label>
+                                                        <input class="float-right" type="checkbox" id="checkbox_status" value="status" v-model="this.display.enabledToastTypes">
+                                                    </li>
+                                                    <li>
+                                                        <label for="checkbox_routing" >Routing</label>
+                                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" v-model="this.display.enabledToastTypes">
+                                                    </li>
+                                                    <li>
+                                                        <label for="checkbox_mission" >Missions</label>
+                                                        <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" v-model="this.display.enabledToastTypes">
+                                                    </li>
+                                                    <li>
+                                                        <label >Parcels</label>
+                                                        <!--                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" v-model="this.display.enabledToastTypes">-->
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
 
 
-                                <p>TODOs:</p>
-                                <ul v-if="display.areToastsEnabled" class="sidebar-panel-nav px-3 py-20">
+                                        <p>TODOs:</p>
+                                        <ul v-if="display.areToastsEnabled" class="sidebar-panel-nav px-3 py-20">
 
-                                   <li> Toasts Settings:
-                                      <ul class="sidebar-panel-nav px-3 py-20">
+                                            <li> Toasts Settings:
+                                                <ul class="sidebar-panel-nav px-3 py-20">
 
-                                        <li> All </li>
-                                        <li> None </li>
-                                        <li> Checkboxes </li>
-                                        <li> States </li>
-                                        <li> Routing </li>
-                                        <li> ... (?) </li>
-                                      </ul>
-                                   </li>
-                                   <li class="mt-md-2"> ShowStatsBtn here? </li>
-                                   <li class="mt-md-2"> En-/Disable Zoom Btn? </li>
-                                </ul>
-                              </div>
-                            </transition>
-                          </div>
+                                                    <li> All </li>
+                                                    <li> None </li>
+                                                    <li> Checkboxes </li>
+                                                    <li> States </li>
+                                                    <li> Routing </li>
+                                                    <li> ... (?) </li>
+                                                </ul>
+                                            </li>
+                                            <li class="mt-md-2"> ShowStatsBtn here? </li>
+                                            <li class="mt-md-2"> En-/Disable Zoom Btn? </li>
+                                        </ul>
+                                    </div>
+                                </transition>
+                            </div>
                         </template>
 
                         <b-container fluid>
@@ -135,106 +147,104 @@
                                 <b-col cols="9">
 
                                     <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
-                                      <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
-                                          <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" />
-<!--                                          <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />-->
+                                        <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
+                                            <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" />
+                                            <!--                                          <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />-->
 
-                                          <line v-for="(edge, id) in edgesRoad" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
-                                          <line v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" stroke-dasharray="1" />
-<!--                                          <path v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)"  stroke-dasharray="10,10" d="M5 40 l215 0" />-->
+                                            <line v-for="(edge, id) in edgesRoad" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
+                                            <line v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" stroke-dasharray="1" />
+                                            <!--                                          <path v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)"  stroke-dasharray="10,10" d="M5 40 l215 0" />-->
 
-                                          <template v-if="state !== 'stopped'">
-                                              <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
-                                              <line x1="0" :y1="-30 / map.zoom" x2="0" :y2="30 / map.zoom" stroke="gray" :stroke-width="1 / map.zoom" />
+                                            <template v-if="state !== 'stopped'">
+                                                <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
+                                                <line x1="0" :y1="-30 / map.zoom" x2="0" :y2="30 / map.zoom" stroke="gray" :stroke-width="1 / map.zoom" />
 
-          <!--                                    <use v-for="(hub, id) in entities.hubs" :key="id" :x="getX(hub.position) - entitySize.hub" :y="getY(hub.position) - entitySize.hub" :width="2 * entitySize.hub" :height="2 * entitySize.hub" :href="require('../../assets/entities.svg') + '#hub-symbol'" fill="gray">-->
-          <!--                                        <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
-          <!--                                    </use>-->
 
-                                              <use v-for="hub in svgHubs" :key="hub.id" :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill">
-<!--&lt;!&ndash;                                              TODO    war auskommentiert - überschreibe ich jetzt was?&ndash;&gt;-->
-<!--                                                 <b-badge variant="danger" class="badge-circle badge-md badge-floating border-white">4</b-badge>-->
-<!--                                                  <b-badge>-->
-<!--                                                       <template v-slot:badge>-->
-<!--                                                          <span> 2 </span>-->
-<!--                                                        </template>-->
-<!--                                                        <div>-->
-<!--                                                          <title>Hub {{ hub.id }} ({{ hub.parcels.length }} parcels)</title>-->
-<!--                                                        </div>-->
+                                                <g v-for="hub in svgHubs" :key="hub.id">
+                                                    <use :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill"
+                                                         v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details">
+                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>
+                                                    </use>
+                                                    <!-- Badges with Parcel count        -->
+                                                    <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">
+<!--                                                        rotate(-180 ${hub.x} ${hub.y} ` scale(1, -1)`)-->
+                                                        <circle class="SVGBadge-svgBackground" :cx="hub.x" :cy="hub.y - hub.height" r="3"/>
+<!--                                                                TODO text in SVG: flip + translate correctly-->
+                                                        <!--                                                        <text class="SVGBadge-number" :x="hub.x" :y="hub.y - hub.height+1.5" transform="scale(-1,1)" text-anchor="middle" >{{ hub.stored +1}} </text>-->
+                                                    </g>
+                                                </g>
 
-<!--                                                  </b-badge>-->
-                                              </use>
 
-                                              <use v-for="(car, id) in entities.cars" :key="id" :x="car.position.x - entitySize.car" :y="car.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#car-symbol'" fill="blue" transform="scale(1, -1)">
-                                                  <title>Car {{ car.id }} ({{ car.state }})</title>
-<!--                                                  <b-badge variant="danger" class="badge-circle badge-md badge-floating border-white">4</b-badge>-->
-                                              </use>
+                                                <use v-for="(car, id) in entities.cars" :key="id" :x="car.position.x - entitySize.car" :y="car.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#car-symbol'" fill="blue" transform="scale(1, -1)">
+                                                    <title>Car {{ car.id }} ({{ car.state }})</title>
+                                                </use>
 
-                                              <use v-for="(drone, id) in entities.drones" :key="id" :x="drone.position.x - entitySize.drone" :y="drone.position.y - entitySize.drone" :width="2 * entitySize.drone" :height="2 * entitySize.drone" :href="require('../../assets/entities.svg') + '#drone-symbol'" fill="red" transform="scale(1, -1)">
-                                                  <title>Drone {{ drone.id }} ({{ drone.state }})</title>
-                                              </use>
+                                                <use v-for="(drone, id) in entities.drones" :key="id" :x="drone.position.x - entitySize.drone" :y="drone.position.y - entitySize.drone" :width="2 * entitySize.drone" :height="2 * entitySize.drone" :href="require('../../assets/entities.svg') + '#drone-symbol'" fill="red" transform="scale(1, -1)">
+                                                    <title>Drone {{ drone.id }} ({{ drone.state }})</title>
+                                                </use>
 
-                                              <use v-for="(parcel, id) in entities.parcels" :key="id" :x="parcelPosition(parcel).x - entitySize.parcel" :y="parcelPosition(parcel).y - entitySize.parcel" :width="2 * entitySize.parcel" :height="2 * entitySize.parcel" :href="require('../../assets/entities.svg') + '#parcel-symbol'" fill="green" transform="scale(1, -1)">
-                                                  <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>
-                                              </use>
-          <!--                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">-->
-          <!--                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>-->
-          <!--                                    </circle>-->
-                                          </template>
-                                      </g>
+                                                <use v-for="(parcel, id) in entities.parcels" :key="id" :x="parcelPosition(parcel).x - entitySize.parcel" :y="parcelPosition(parcel).y - entitySize.parcel" :width="2 * entitySize.parcel" :height="2 * entitySize.parcel" :href="require('../../assets/entities.svg') + '#parcel-symbol'" fill="green" transform="scale(1, -1)"
+                                                     v-b-popover.hover.right="`Parcel ${parcel.id} (Source: ${parcel.carrier.id}, Destination: ${parcel.destination.id})`" title="Parcel details">
+<!--&lt;!&ndash;                                                    <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>&ndash;&gt; TODO title necessary??-->
+                                                </use>
+                                                <!--                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">-->
+                                                <!--                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>-->
+                                                <!--                                    </circle>-->
+                                            </template>
+                                        </g>
                                     </svg>
                                 </b-col>
 
                                 <b-col cols="3">
 
-                                    <template v-if="!display.statsHidden">
+                                    <template v-if="display.statsTableVisible">
 
-                                      <div class="card" style="width: 22rem;">
-                                        <div class="card-header">
-                                          Statistics
+                                        <div class="card" style="width: 22rem;">
+                                            <div class="card-header">
+                                                <b>Statistics</b>
+                                            </div>
+                                            <table class="card-table table">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Entity</th>
+                                                    <th scope="col">Engaged</th>
+                                                    <th scope="col">Avg. wait </th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <td>Drones</td>
+                                                    <td> _x / {{Object.keys(entities.drones).length }}</td>
+                                                    <td>_10 min</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Cars</td>
+                                                    <td> _x / {{Object.keys(entities.cars).length }}</td>
+                                                    <td>_20 min</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        Parcel
+                                                        <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
+                                                    </td>
+                                                    <td> _{{Object.keys(entities.parcels).length }} </td>
+                                                    <td>_42 min</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Parcel
+                                                        <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>
+                                                    </td>
+                                                    <td> _{{Object.keys(entities.parcels).length }} </td>
+                                                    <td>_2 h</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <table class="card-table table">
-                                          <thead>
-                                          <tr>
-                                            <th scope="col">Entity</th>
-                                            <th scope="col">Engaged</th>
-                                            <th scope="col">Avg. wait </th>
-                                          </tr>
-                                          </thead>
-                                          <tbody>
-                                          <tr>
-                                            <td>Drones</td>
-                                            <td> _x / {{Object.keys(entities.drones).length }}</td>
-                                            <td>_10 min</td>
-                                          </tr>
-                                          <tr>
-                                            <td>Cars</td>
-                                            <td> _x / {{Object.keys(entities.cars).length }}</td>
-                                            <td>_20 min</td>
-                                          </tr>
-                                          <tr>
-                                            <td>
-                                              Parcel
-                                              <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
-                                            </td>
-                                            <td> _{{Object.keys(entities.parcels).length }} </td>
-                                            <td>_42 min</td>
-                                          </tr>
-                                          <tr>
-                                            <td>Parcel
-                                              <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>
-                                            </td>
-                                            <td> _{{Object.keys(entities.parcels).length }} </td>
-                                            <td>_2 h</td>
-                                          </tr>
-                                          </tbody>
-                                        </table>
-                                      </div>
 
                                     </template>
                                 </b-col>
                             </b-row>
-                          </b-container>
+                        </b-container>
                     </div>
                     <div v-else-if="view === 'messages'">
                         <h4 class="mb-5">Messages</h4>
@@ -279,18 +289,6 @@
             <b-navbar-nav class="mx-auto">
                 <template v-if="state !== 'stopped'">
 
-                    <div>
-                        <b-dropdown id="dropdown-dropup" dropup text="Toasts" variant="primary" class="m-2">
-
-                        <b-dropdown-item href="#">None</b-dropdown-item>
-                          <b-dropdown-divider></b-dropdown-divider>
-                        <b-dropdown-item href="#">All</b-dropdown-item>
-                          <b-dropdown-divider></b-dropdown-divider>
-                        <b-dropdown-item href="#">States</b-dropdown-item>
-                        <b-dropdown-item href="#">Routing</b-dropdown-item>
-                        </b-dropdown>
-                    </div>
-
                     <b-nav-text class="mx-2" title="Number of hubs">
                         <font-awesome-icon icon="warehouse" style="color: gray" />: {{Object.keys(entities.hubs).length }}
                     </b-nav-text>
@@ -307,7 +305,8 @@
                         <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
                     </b-nav-text>
 
-                    <b-button size="mx-3" class="nav-btn my-2 my-sm-0 ml-5" style="width: 125px" type="submit" @click="display.statsHidden = !display.statsHidden">{{display.statsHidden ? 'show stats' : 'hide stats'}}</b-button>
+                    <!--                  TODO Button weg-->
+                    <b-button  v-b-popover.hover.top="'TODO remove (debug)'" size="mx-3" class="nav-btn my-2 my-sm-0 ml-5" style="width: 125px" type="submit" @click="display.statsTableVisible = !display.statsTableVisible">{{display.statsTableVisible ? 'show stats' : 'hide stats'}}</b-button>
 
                 </template>
                 <template v-else>
@@ -331,415 +330,465 @@
 </template>
 
 <script>
-    const mqtt = require('mqtt');
-    const uuid = require('../simulator/helpers').uuid;
-    const mqttMatch = require('mqtt-match');
+const mqtt = require('mqtt');
+const uuid = require('../simulator/helpers').uuid;
+const mqttMatch = require('mqtt-match');
 
-    const topology = require('../topology');
+const topology = require('../topology');
 
-    export default {
-        data: function () {
-            return {
-                state: 'stopped',
-                view: 'simulation',
-                receivedMessages: [],
-                mqtt: {
-                    client: null,
-                    id: uuid(),
-                    root: 'mobil-e-hub/viz'
+export default {
+    data: function () {
+        return {
+            state: 'stopped',
+            view: 'simulation',
+            receivedMessages: [],
+            mqtt: {
+                client: null,
+                id: uuid(),
+                root: 'mobil-e-hub/viz'
+            },
+            entities: {
+                drones: { },
+                cars: { },
+                parcels: { },
+                hubs: { }
+            },
+            map: {
+                origin: { x: 0, y: 0 },
+                offset: { x: 0, y: 0 },
+                zoom: 4,
+                drag: {
+                    isDragging: false,
+                    x: 0,
+                    y: 0
                 },
-                entities: {
-                    drones: { },
-                    cars: { },
-                    parcels: { },
-                    hubs: { }
+                topology: topology
+            },
+            display: {
+                sizes: {
+                    hub: 10,
+                    drone: 8,
+                    car: 10,
+                    parcel: 6
                 },
-                map: {
-                    origin: { x: 0, y: 0 },
-                    offset: { x: 0, y: 0 },
-                    zoom: 4,
-                    drag: {
-                        isDragging: false,
-                        x: 0,
-                        y: 0
-                    },
-                    topology: topology
-                },
-                display: {
-                    sizes: {
-                        hub: 10,
-                        drone: 8,
-                        car: 10,
-                        parcel: 6
-                    },
-                    zoomEntities: true,
-                    isSidebarVisible: false,
-                    areToastsEnabled: true,
-                    enabledToastTypes: ['status'],
-                    statsHidden: true
-                },
-                stats: {
-                    waitingDrones:0,
-                    avgDroneWaitTime:0,
-                    waitingCars: 0,
-                }
+                zoomEntities: true,
+                isSidebarVisible: false,
+                areToastsEnabled: true,
+                enabledToastTypes: ['status'],
+                statsTableVisible: true
+            },
+            stats: {
+                waitingDrones:0,
+                avgDroneWaitTime:0,
+                waitingCars: 0,
+            }
+        }
+    },
+    created: function() {
+
+    },
+    mounted: function() {
+        try {
+            this.mqtt.client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt');
+            this.mqtt.client.on('connect', () => {
+                this.mqtt.client.subscribe(this.mqtt.root + '/#');
+            });
+            this.mqtt.client.on('message', (topic, message) => {
+                let [project, version, direction, entity, id, ...args] = topic.split('/');
+                this.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
+                this.receivedMessages.unshift(`${topic}: ${message.toString()}`);
+            });
+        }
+        catch (err) {
+            this.receivedMessages.unshift(err.toString());
+        }
+
+        this.$set(this.map, 'origin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
+    },
+    methods: {
+        clickStartSimulationButton: function() {
+            switch (this.state) {
+                case 'running':
+                    this.publish('pause');
+                    this.state = 'paused';
+                    break;
+                case 'paused':
+                    this.publish('resume');
+                    this.state = 'running';
+                    break;
+                case 'stopped':
+                    this.publish('start');
+                    this.state = 'running';
+                    this.$set(this.map, 'origin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
+                    break;
             }
         },
-        created: function() {
-
+        clickStopSimulationButton: function() {
+            this.publish('stop');
+            this.state = 'stopped';
+            this.$set(this.entities, 'drones', { });
+            this.$set(this.entities, 'cars', { });
+            this.$set(this.entities, 'hubs', { });
+            this.$set(this.entities, 'parcels', { });
         },
-        mounted: function() {
-            try {
-                this.mqtt.client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt');
-                this.mqtt.client.on('connect', () => {
-                    this.mqtt.client.subscribe(this.mqtt.root + '/#');
-                });
-                this.mqtt.client.on('message', (topic, message) => {
-                    let [project, version, direction, entity, id, ...args] = topic.split('/');
-                    this.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
-                    this.receivedMessages.unshift(`${topic}: ${message.toString()}`);
-                });
-            }
-            catch (err) {
-                this.receivedMessages.unshift(err.toString());
-            }
-
-            this.$set(this.map, 'origin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
+        clickPlaceOrderButton: function() {
+            this.publish('place-order');
         },
-        methods: {
-            clickStartSimulationButton: function() {
-                switch (this.state) {
-                    case 'running':
-                        this.publish('pause');
-                        this.state = 'paused';
-                        break;
-                    case 'paused':
-                        this.publish('resume');
-                        this.state = 'running';
-                        break;
-                    case 'stopped':
-                        this.publish('start');
-                        this.state = 'running';
-                        this.$set(this.map, 'origin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
-                        break;
-                }
-            },
-            clickStopSimulationButton: function() {
-                this.publish('stop');
-                this.state = 'stopped';
-                this.$set(this.entities, 'drones', { });
-                this.$set(this.entities, 'cars', { });
-                this.$set(this.entities, 'hubs', { });
-                this.$set(this.entities, 'parcels', { });
-            },
-            clickPlaceOrderButton: function() {
-                this.publish('place-order');
-            },
-            clickZoomInButton: function() {
-                this.map.zoom *= 1.25;
-            },
-            clickZoomOutButton: function() {
-                this.map.zoom *= 0.8;
-            },
-            setView: function(view) {
-                this.view = view;
-            },
-            onMouseWheelMap: function(event) {
-                this.map.zoom *= event.deltaY > 0 ? 1 / 1.05 : 1.05;
-            },
-            onMouseDownMap: function(event) {
-                this.map.drag.x = event.offsetX;
-                this.map.drag.y = event.offsetY;
-                this.map.drag.isDragging = true;
-            },
-            onMouseMoveMap: function(event) {
-                if (this.map.drag.isDragging) {
-                    this.map.origin.x += event.offsetX - this.map.drag.x;
-                    this.map.origin.y += event.offsetY - this.map.drag.y;
-                    this.map.drag.x = event.offsetX;
-                    this.map.drag.y = event.offsetY;
-                }
-            },
-            onMouseUpMap: function(event) {
+        clickZoomInButton: function() {
+            this.map.zoom *= 1.25;
+        },
+        clickZoomOutButton: function() {
+            this.map.zoom *= 0.8;
+        },
+        setView: function(view) {
+            this.view = view;
+        },
+        onMouseWheelMap: function(event) {
+            this.map.zoom *= event.deltaY > 0 ? 1 / 1.05 : 1.05;
+        },
+        onMouseDownMap: function(event) {
+            this.map.drag.x = event.offsetX;
+            this.map.drag.y = event.offsetY;
+            this.map.drag.isDragging = true;
+        },
+        onMouseMoveMap: function(event) {
+            if (this.map.drag.isDragging) {
                 this.map.origin.x += event.offsetX - this.map.drag.x;
                 this.map.origin.y += event.offsetY - this.map.drag.y;
                 this.map.drag.x = event.offsetX;
                 this.map.drag.y = event.offsetY;
-                this.map.drag.isDragging = false;
-            },
-            publish: function(topic, message = '') {
-                this.mqtt.client.publish(`${this.mqtt.root}/from/visualization/${this.mqtt.id}/${topic}`, JSON.stringify(message));
-            },
-            receive: function(topic, message) {
-                if (['running', 'paused'].includes(this.state)) {
-                    if (this.matchTopic(topic, 'from/+/+/state')) {
-                        this.$set(this.entities[`${topic.entity}s`], [topic.id], message);
-                    }
-                }
-                if (this.matchTopic(topic, 'to/drone/+/tasks')) {
-                    this.showToast('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
-                }
-                else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
-                    this.showToast('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`);
-                }
-                else if (this.matchTopic(topic, 'from/control-system/+/route-update')) {
-                    this.showToast('Route update', `Control System ${topic.id} has updated the routes.`);
-                }
-                else if (this.matchTopic(topic, 'from/car/+/arrived')) {
-                    this.showToast('Car arrived', `Car ${topic.id} has arrived at node ${message}.`);
-                }
-                else if (this.matchTopic(topic, 'from/+/+/mission/+/complete')) {
-                    this.showToast('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`);
-                }
-                else if (this.matchTopic(topic, 'from/+/+/transaction/+/complete')) {
-                    this.showToast('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`);
-                }
-                else if (this.matchTopic(topic, 'from/parcel/+/delivered')) {
-                    this.showToast('Parcel delivered', `Parcel ${topic.id} has reached its destination (${message.destination.type} ${message.destination.id}).`);
-                }
-            },
-            showToast: function(title, message) {
-                if (this.display.areToastsEnabled) {
-                    this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});
-                }
-            },
-            matchTopic: function(topic, pattern) {
-                return mqttMatch(pattern, topic.string.short);
-            },
-            getX: function(node) {
-                return this.map.topology.nodes[node].position.x;
-            },
-            getY: function(node) {
-                return this.map.topology.nodes[node].position.y;
-            },
-            clickTestButton: function() {
-                this.publish('test');
-                this.state = 'running';
-            },
-            toggleSidebar: function() {
-              this.display.isSidebarVisible = !this.display.isSidebarVisible
             }
-
         },
-        computed: {
-            entitySize: function() {
-                return {
-                    hub: this.display.sizes.hub / (this.zoomEntities ? 1 : this.map.zoom),
-                    drone: this.display.sizes.drone / (this.zoomEntities ? 1 : this.map.zoom),
-                    car: this.display.sizes.car / (this.zoomEntities ? 1 : this.map.zoom),
-                    parcel: this.display.sizes.parcel / (this.zoomEntities ? 1 : this.map.zoom)
+        onMouseUpMap: function(event) {
+            this.map.origin.x += event.offsetX - this.map.drag.x;
+            this.map.origin.y += event.offsetY - this.map.drag.y;
+            this.map.drag.x = event.offsetX;
+            this.map.drag.y = event.offsetY;
+            this.map.drag.isDragging = false;
+        },
+        publish: function(topic, message = '') {
+            this.mqtt.client.publish(`${this.mqtt.root}/from/visualization/${this.mqtt.id}/${topic}`, JSON.stringify(message));
+        },
+        receive: function(topic, message) {
+            if (['running', 'paused'].includes(this.state)) {
+                if (this.matchTopic(topic, 'from/+/+/state')) {
+                    this.$set(this.entities[`${topic.entity}s`], [topic.id], message);
                 }
+            }
+            if (this.matchTopic(topic, 'to/drone/+/tasks')) {
+                this.showToastStatus('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
+            }
+            else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
+                this.showToast('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`);
+            }
+            else if (this.matchTopic(topic, 'from/control-system/+/route-update')) {
+                this.showToast('Route update', `Control System ${topic.id} has updated the routes.`);
+            }
+            else if (this.matchTopic(topic, 'from/car/+/arrived')) {
+                this.showToast('Car arrived', `Car ${topic.id} has arrived at node ${message}.`);
+            }
+            else if (this.matchTopic(topic, 'from/+/+/mission/+/complete')) {
+                this.showToast('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`);
+            }
+            else if (this.matchTopic(topic, 'from/+/+/transaction/+/complete')) {
+                this.showToast('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`);
+            }
+            else if (this.matchTopic(topic, 'from/parcel/+/delivered')) {
+                this.showToast('Parcel delivered', `Parcel ${topic.id} has reached its destination (${message.destination.type} ${message.destination.id}).`);
+            }
+        },
+        showToastStatus: function(title, message) {
+            if (this.display.enabledToastTypes.has('status')){
+                this.showToast(title, message)
+            }
+        },
+        //TODO add for routing / status
+        showToast: function(title, message) {
+            if (this.display.areToastsEnabled) {
+                this.display.statsTableVisible = !this.display.statsTableVisible
+                this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});
+            }
+        },
+        matchTopic: function(topic, pattern) {
+            return mqttMatch(pattern, topic.string.short);
+        },
+        getX: function(node) {
+            return this.map.topology.nodes[node].position.x;
+        },
+        getY: function(node) {
+            return this.map.topology.nodes[node].position.y;
+        },
+        clickTestButton: function() {
+            this.publish('test');
+            this.state = 'running';
+        },
+        toggleSidebar: function() {
+            this.display.isSidebarVisible = !this.display.isSidebarVisible
+        }
+
+    },
+    computed: {
+        entitySize: function() {
+            return {
+                hub: this.display.sizes.hub / (this.zoomEntities ? 1 : this.map.zoom),
+                drone: this.display.sizes.drone / (this.zoomEntities ? 1 : this.map.zoom),
+                car: this.display.sizes.car / (this.zoomEntities ? 1 : this.map.zoom),
+                parcel: this.display.sizes.parcel / (this.zoomEntities ? 1 : this.map.zoom)
+            }
+        },
+        parcelPosition: function() {
+            return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
+        },
+        svgHubs: function() {
+            return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x-5, y: this.map.topology.nodes[h.position].position.y-5, width: 10, height: 10, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length }));
+        },
+        edgesRoad: function() {
+            return Object.values(this.map.topology.edges).filter( e => e.type == 'road')
+        },
+        edgesAir: function() {
+            return Object.values(this.map.topology.edges).filter( e => e.type == 'air')
+        },
+        toggleStatsTable: {
+            get() {
+                return this.display.statsTableVisible;
             },
-            parcelPosition: function() {
-                return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
+            set(newValue) {
+                this.display.statsTableVisible = newValue;
+                this.$emit('change', newValue);
+            }
+        },
+        toggleToasts: {
+            get() {
+                return this.display.areToastsEnabled;
             },
-            svgHubs: function() {
-                return Object.values(this.entities.hubs).map(h => ({ x: this.map.topology.nodes[h.position].position.x-5, y: this.map.topology.nodes[h.position].position.y-5, width: 10, height: 10, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray' }));
-            },
-            edgesRoad: function() {
-                return Object.values(this.map.topology.edges).filter( e => e.type == 'road')
-            },
-            edgesAir: function() {
-                return Object.values(this.map.topology.edges).filter( e => e.type == 'air')
-            },
-            toggleToasts: {
-                get() {
-                  return this.display.areToastsEnabled;
-                },
-                set(newValue) {
-                  this.display.areToastsEnabled = newValue;
-                  this.$emit('change', newValue);
-                }
+            set(newValue) {
+                this.display.areToastsEnabled = newValue;
+                this.$emit('change', newValue);
             }
         }
     }
+}
 </script>
 
 <style>
-    .btn.floating{
-        position: fixed;
-        width: 50px;
-        height: 50px;
-        right: 30px;
-        text-align: center;
-        border-radius: 50px;
-        box-shadow: 2px 2px 3px #999;
-        overflow: hidden;
-        perspective: 1px;
-        z-index: 10000;
-    }
+.btn.floating{
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    right: 30px;
+    text-align: center;
+    border-radius: 50px;
+    box-shadow: 2px 2px 3px #999;
+    overflow: hidden;
+    perspective: 1px;
+    z-index: 10000;
+}
 
-    .card.floating{
-      position: fixed;
-      /*width: 50px;*/
-      /*height: 50px;*/
-      right: 30px;
-      /*text-align: center;*/
-      /*border-radius: 50px;*/
-      /*box-shadow: 2px 2px 3px #999;*/
-      overflow: hidden;
-      perspective: 1px;
-      z-index: 10;
-    }
+.card.floating{
+    position: fixed;
+    /*width: 50px;*/
+    /*height: 50px;*/
+    right: 30px;
+    /*text-align: center;*/
+    /*border-radius: 50px;*/
+    /*box-shadow: 2px 2px 3px #999;*/
+    overflow: hidden;
+    perspective: 1px;
+    z-index: 10;
+}
 
 /*!*    Burger Menu for Sidebar*!*/
-    .hidden {
-      visibility: hidden;
-    }
-    /*button {*/
-    /*  cursor: pointer;*/
-    /*}*/
-    /* remove blue outline */
-    button:focus {
-      outline: 0;
-    }
-    .burger-button {
-      position: relative;
-      height: 30px;
-      width: 32px;
-      display: block;
-      z-index: 999;
-      border: 0;
-      border-radius: 0;
-      background-color: transparent;
-      pointer-events: all;
-      transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-    .burger-bar {
-      background-color: #130f40;
-      position: absolute;
-      top: 50%;
-      right: 6px;
-      left: 6px;
-      height: 2px;
-      width: auto;
-      margin-top: -1px;
-      transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1),
-        opacity 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
-        background-color 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-    .burger-bar--1 {
-      -webkit-transform: translateY(-6px);
-      transform: translateY(-6px);
-    }
-    .burger-bar--2 {
-      transform-origin: 100% 50%;
-      transform: scaleX(0.8);
-    }
-    .burger-button:hover .burger-bar--2 {
-      transform: scaleX(1);
-    }
-    .no-touchevents .burger-bar--2:hover {
-      transform: scaleX(1);
-    }
-    .burger-bar--3 {
-      transform: translateY(6px);
-    }
-    #burger.active .burger-button {
-      transform: rotate(-180deg);
-    }
-    #burger.active .burger-bar {
-      background-color: #130f40;
-    }
-    #burger.active .burger-bar--1 {
-      transform: rotate(45deg);
-    }
-    #burger.active .burger-bar--2 {
-      opacity: 0;
-    }
-    #burger.active .burger-bar--3 {
-      transform: rotate(-45deg);
-    }
+.hidden {
+    visibility: hidden;
+}
+/*button {*/
+/*  cursor: pointer;*/
+/*}*/
+/* remove blue outline */
+button:focus {
+    outline: 0;
+}
+.burger-button {
+    position: relative;
+    height: 30px;
+    width: 32px;
+    display: block;
+    z-index: 999;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+    pointer-events: all;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.burger-bar {
+    background-color: #130f40;
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    left: 6px;
+    height: 2px;
+    width: auto;
+    margin-top: -1px;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1),
+    opacity 0.3s cubic-bezier(0.165, 0.84, 0.44, 1),
+    background-color 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.burger-bar--1 {
+    -webkit-transform: translateY(-6px);
+    transform: translateY(-6px);
+}
+.burger-bar--2 {
+    transform-origin: 100% 50%;
+    transform: scaleX(0.8);
+}
+.burger-button:hover .burger-bar--2 {
+    transform: scaleX(1);
+}
+.no-touchevents .burger-bar--2:hover {
+    transform: scaleX(1);
+}
+.burger-bar--3 {
+    transform: translateY(6px);
+}
+#burger.active .burger-button {
+    transform: rotate(-180deg);
+}
+#burger.active .burger-bar {
+    background-color: #130f40;
+}
+#burger.active .burger-bar--1 {
+    transform: rotate(45deg);
+}
+#burger.active .burger-bar--2 {
+    opacity: 0;
+}
+#burger.active .burger-bar--3 {
+    transform: rotate(-45deg);
+}
 
 /*    Sidebar_Menu*/
 
-    .slide-enter-active,
-    .slide-leave-active
-    {
-      transition: transform 0.2s ease;
-    }
-    .slide-enter,
-    .slide-leave-to {
-      transform: translateX(-100%);
-      transition: all 150ms ease-in 0s
-    }
-    .sidebar-backdrop {
-      background-color: rgba(19, 15, 64, .4);
-      width: 100vw;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      cursor: pointer;
-    }
-    .sidebar-panel {
-      overflow-y: auto;
-      background-color: #f8f9fa;
-      position: fixed;
-      left: 0;
-      top: 0;
-      height: 100vh;
-      z-index: 999;
-      padding: 3rem 20px 2rem 20px;
-      width: 200px;
-    }
+.slide-enter-active,
+.slide-leave-active
+{
+    transition: transform 0.2s ease;
+}
+.slide-enter,
+.slide-leave-to {
+    transform: translateX(-100%);
+    transition: all 150ms ease-in 0s
+}
+.sidebar-backdrop {
+    background-color: rgba(19, 15, 64, .4);
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+}
+.sidebar-panel {
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 999;
+    padding: 3rem 20px 2rem 20px;
+    width: 200px;
+}
 
 /*    Toggle Button in Sidemenu*/
-    .toggle__button {
-      vertical-align: middle;
-      user-select: none;
-      cursor: pointer;
-    }
-    .toggle__button input[type="checkbox"] {
-      opacity: 0;
-      position: absolute;
-      width: 1px;
-      height: 1px;
-    }
-    .toggle__button .toggle__switch {
-      display:inline-block;
-      height:12px;
-      border-radius:6px;
-      width:40px;
-      background: #BFCBD9;
-      box-shadow: inset 0 0 1px #BFCBD9;
-      position:relative;
-      margin-left: 10px;
-      transition: all .25s;
-    }
-    .toggle__button .toggle__switch::after,
-    .toggle__button .toggle__switch::before {
-      content: "";
-      position: absolute;
-      display: block;
-      height: 18px;
-      width: 18px;
-      border-radius: 50%;
-      left: 0;
-      top: -3px;
-      transform: translateX(0);
-      transition: all .25s cubic-bezier(.5, -.6, .5, 1.6);
-    }
-    .toggle__button .toggle__switch::after {
-      background: #4D4D4D;
-      box-shadow: 0 0 1px #666;
-    }
-    .toggle__button .toggle__switch::before {
-      background: #4D4D4D;
-      box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
-      opacity:0;
-    }
-    .active .toggle__switch {
-      background: #adedcb;
-      box-shadow: inset 0 0 1px #adedcb;
-    }
-    .active .toggle__switch::after,
-    .active .toggle__switch::before{
-      transform:translateX(40px - 18px);
-    }
-    .active .toggle__switch::after {
-      left: 23px;
-      background: #53B883;
-      box-shadow: 0 0 1px #53B883;
-    }
+.toggle__button {
+    vertical-align: middle;
+    user-select: none;
+    cursor: pointer;
+}
+.toggle__button input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+}
+.toggle__button .toggle__switch {
+    display:inline-block;
+    height:12px;
+    border-radius:6px;
+    width:40px;
+    background: #BFCBD9;
+    box-shadow: inset 0 0 1px #BFCBD9;
+    position:relative;
+    margin-left: 10px;
+    transition: all .25s;
+}
+.toggle__button .toggle__switch::after,
+.toggle__button .toggle__switch::before {
+    content: "";
+    position: absolute;
+    display: block;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    left: 0;
+    top: -3px;
+    transform: translateX(0);
+    transition: all .25s cubic-bezier(.5, -.6, .5, 1.6);
+}
+.toggle__button .toggle__switch::after {
+    background: #4D4D4D;
+    box-shadow: 0 0 1px #666;
+}
+.toggle__button .toggle__switch::before {
+    background: #4D4D4D;
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+    opacity:0;
+}
+.active .toggle__switch {
+    background: #adedcb;
+    box-shadow: inset 0 0 1px #adedcb;
+}
+.active .toggle__switch::after,
+.active .toggle__switch::before{
+    transform:translateX(22px);
+}
+.active .toggle__switch::after {
+    left: 23px;
+    background: #53B883;
+    box-shadow: 0 0 1px #53B883;
+}
+
+
+/*.SVGBadge-svg {*/
+/*     font-size: 30px;*/
+/*     position: absolute;*/
+/*     bottom: 100%;*/
+/*     left: 100%;*/
+/*     width: 1em;*/
+/*     height: 1em;*/
+/*     margin-left: -0.6em;*/
+/*     margin-bottom: -0.6em;*/
+/* }*/
+
+.SVGBadge {
+    /*transform-origin: center;*/
+    /*transform-box: fill-box;*/
+}
+
+.SVGBadge-svgBackground {
+    fill: forestgreen;
+    fill-opacity: 0.4;
+    z-index: 5;
+}
+
+.SVGBadge-number {
+    /*transform-origin: center center;*/
+
+    fill: purple;
+    font-family: sans-serif;
+    font-size: 5px;
+    letter-spacing: -1px;
+    z-index: 5;
+}
+
 </style>
