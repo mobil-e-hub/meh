@@ -96,4 +96,8 @@ module.exports = class DroneSimulator extends MQTTClient {
             this.drones[topic.id].completeTask(this);
         }
     }
+
+    getIdleDrones() {
+        return Object.fromEntries(Object.entries(this.drones).filter(d => d['state'] === DroneState.idle))
+    }
 };

@@ -98,7 +98,7 @@ A task can either be going from one node of an edge to the other node, or pickin
 A _transaction_ describes the passing of a parcel from one entity to another. The process of a transaction is as follows:
 1. The receiver sends a `transaction/[id]/ready` message to the giver
 2. The giver sends a `transaction/[id]/execute` message to the giver and sends a a `transfer` message to the parcel
-3. The the receiver sends a a `transaction/[id]/complete` message to the giver and marks the transaction as complete
+3. The receiver sends a `transaction/[id]/complete` message to the giver and marks the transaction as complete
 4. The giver marks the transaction as complete
 
 Hubs can handle multiple transactions in parallel, while drones and vehicles process them one by one as tasks of their current mission.
