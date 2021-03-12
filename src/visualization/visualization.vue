@@ -78,7 +78,7 @@
                                                         <span  class="toggle__label"> Stats:   </span>
 
                                                         <input type="checkbox"  id="toggle_stats_btn"  v-model="toggleStatsTable">
-                                                        <span class="toggle__switch"></span>
+                                                        <span class="mr-auto toggle__switch"></span>
                                                     </label>
                                                 </template>
                                             </li>
@@ -88,54 +88,26 @@
                                                     <label for="toggle_toast_btn" :class="{'active': this.display.areToastsEnabled}" class="toggle__button">
 
                                                         <span  class="toggle__label"> Toasts: </span>
-                                                        <!--                                    <span v-if="! showToasts" class="toggle__label">{{ disabledText }}</span>-->
-
                                                         <input type="checkbox"  id="toggle_toast_btn"  v-model="toggleToasts">
-                                                        <span class="toggle__switch"></span>
+                                                        <span class="ml-auto toggle__switch"></span>
                                                     </label>
                                                 </template>
                                                 <ul>
                                                     <li>
-                                                        TODO!
-                                                    </li>
-                                                    <li>
                                                         <label for="checkbox_status" >Status  </label>
-                                                        <input class="float-right" type="checkbox" id="checkbox_status" value="status" v-model="this.display.enabledToastTypes">
-                                                    </li>
+                                                        <input class="float-right" type="checkbox" id="checkbox_status" value="status" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">                                                    </li>
                                                     <li>
                                                         <label for="checkbox_routing" >Routing</label>
-                                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" v-model="this.display.enabledToastTypes">
+                                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">
                                                     </li>
                                                     <li>
                                                         <label for="checkbox_mission" >Missions</label>
-                                                        <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" v-model="this.display.enabledToastTypes">
-                                                    </li>
-                                                    <li>
-                                                        <label >Parcels</label>
-                                                        <!--                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" v-model="this.display.enabledToastTypes">-->
+                                                        <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">
                                                     </li>
                                                 </ul>
                                             </li>
                                         </ul>
 
-
-                                        <p>TODOs:</p>
-                                        <ul v-if="display.areToastsEnabled" class="sidebar-panel-nav px-3 py-20">
-
-                                            <li> Toasts Settings:
-                                                <ul class="sidebar-panel-nav px-3 py-20">
-
-                                                    <li> All </li>
-                                                    <li> None </li>
-                                                    <li> Checkboxes </li>
-                                                    <li> States </li>
-                                                    <li> Routing </li>
-                                                    <li> ... (?) </li>
-                                                </ul>
-                                            </li>
-                                            <li class="mt-md-2"> ShowStatsBtn here? </li>
-                                            <li class="mt-md-2"> En-/Disable Zoom Btn? </li>
-                                        </ul>
                                     </div>
                                 </transition>
                             </div>
@@ -148,7 +120,9 @@
 
                                     <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
                                         <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
-                                            <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" />
+                                            <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray">
+                                                <title>Node {{ node.id }} ({{ node.type }})</title>
+                                            </circle>
                                             <!--                                          <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />-->
 
                                             <line v-for="(edge, id) in edgesRoad" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
@@ -185,7 +159,6 @@
 
                                                 <use v-for="(parcel, id) in entities.parcels" :key="id" :x="parcelPosition(parcel).x - entitySize.parcel" :y="parcelPosition(parcel).y - entitySize.parcel" :width="2 * entitySize.parcel" :height="2 * entitySize.parcel" :href="require('../../assets/entities.svg') + '#parcel-symbol'" fill="green" transform="scale(1, -1)"
                                                      v-b-popover.hover.right="`Parcel ${parcel.id} (Source: ${parcel.carrier.id}, Destination: ${parcel.destination.id})`" title="Parcel details">
-<!--&lt;!&ndash;                                                    <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>&ndash;&gt; TODO title necessary??-->
                                                 </use>
                                                 <!--                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">-->
                                                 <!--                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>-->
@@ -201,14 +174,14 @@
 
                                         <div class="card" style="width: 22rem;">
                                             <div class="card-header">
-                                                <b>Statistics</b>
+                                                <b>Statistics (Dummy)</b>
                                             </div>
                                             <table class="card-table table">
                                                 <thead>
                                                 <tr>
                                                     <th scope="col">Entity</th>
                                                     <th scope="col">Engaged</th>
-                                                    <th scope="col">Avg. wait </th>
+                                                    <th scope="col">Avg. wait (?)</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
@@ -331,9 +304,6 @@
                     <b-nav-text class="mx-3" title="Number of parcels">
                         <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
                     </b-nav-text>
-
-                    <!--                  TODO Button weg-->
-                    <b-button  v-b-popover.hover.top="'TODO remove (debug)'" size="mx-3" class="nav-btn my-2 my-sm-0 ml-5" style="width: 125px" type="submit" @click="display.statsTableVisible = !display.statsTableVisible">{{display.statsTableVisible ? 'show stats' : 'hide stats'}}</b-button>
 
                 </template>
                 <template v-else>
@@ -507,7 +477,7 @@ export default {
                 }
             }
             if (this.matchTopic(topic, 'to/drone/+/tasks')) {
-                this.showToastStatus('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
+                this.showToast('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
             }
             else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
                 this.showToast('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`);
@@ -533,10 +503,14 @@ export default {
                 this.showToast(title, message)
             }
         },
+        showToastRouting: function(title, message) {
+            if (this.display.enabledToastTypes.has('routing')){
+                this.showToast(title, message)
+            }
+        },
         //TODO add for routing / status
         showToast: function(title, message) {
             if (this.display.areToastsEnabled) {
-                this.display.statsTableVisible = !this.display.statsTableVisible
                 this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});
             }
         },
@@ -710,13 +684,14 @@ button:focus {
     transition: all 150ms ease-in 0s
 }
 .sidebar-backdrop {
-    background-color: rgba(19, 15, 64, .4);
+    background-color: rgba(19, 15, 64, 0.4);
     width: 100vw;
     height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
     cursor: pointer;
+    z-index: 899;
 }
 .sidebar-panel {
     overflow-y: auto;
@@ -784,7 +759,7 @@ button:focus {
     transform:translateX(22px);
 }
 .active .toggle__switch::after {
-    left: 23px;
+    /*left: 23px;*/
     background: #53B883;
     box-shadow: 0 0 1px #53B883;
 }
