@@ -163,9 +163,9 @@
                                                 <g v-for="hub in svgHubs" :key="hub.id">
                                                     <use :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill"
                                                          v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details">
-                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>
+<!--                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>-->
                                                     </use>
-                                                    <!-- Badges with Parcel count        -->
+                                                     Badges with Parcel count
                                                     <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">
 <!--                                                        rotate(-180 ${hub.x} ${hub.y} ` scale(1, -1)`)-->
                                                         <circle class="SVGBadge-svgBackground" :cx="hub.x" :cy="hub.y - hub.height" r="3"/>
@@ -281,6 +281,33 @@
                             </b-row>
                         </b-container>
                     </div>
+                    <div v-else-if="view === 'settings'">
+                        <h4 class="mb-5">Settings</h4>
+                        <b-container fluid>
+                            <b-row class="my-4">
+                                <b-col>
+                                    <h5>Display</h5>
+                                    <b-form-checkbox id="checkbox-zoom" v-model="display.zoomEntities">
+                                        Zoom entity sizes
+                                    </b-form-checkbox>
+                                </b-col>
+                            </b-row>
+
+                            <b-row class="my-4">
+                                <b-col>
+                                    <h5>MQTT Broker</h5>
+                                    <div>
+                                        <b-form-group label="Broker URL:" label-for="input-mqtt-broker">
+                                            <b-form-input id="input-mqtt-broker" v-model="mqtt.url" type="url" placeholder="Enter URL" required></b-form-input>
+                                        </b-form-group>
+                                        <b-form-group label="Message Prefix:" label-for="input-mqtt-prefix">
+                                            <b-form-input id="input-mqtt-prefix" v-model="mqtt.root" placeholder="Enter prefix" required></b-form-input>
+                                        </b-form-group>
+                                    </div>
+                                </b-col>
+                            </b-row>
+                        </b-container>
+                    </div>
                 </b-col>
             </b-row>
         </b-container>
@@ -317,14 +344,17 @@
             </b-navbar-nav>
         </b-navbar>
 
-        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : ''" style="bottom: 160px" @click="setView('simulation')">
+        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : ''" style="bottom: 220px" title="Map View" @click="setView('simulation')">
             <b-icon icon="map" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'messages' ? 'primary' : ''" style="bottom: 100px" @click="setView('messages')">
+        <b-button class="floating" :variant="view === 'messages' ? 'primary' : ''" style="bottom: 160px" title="Messages View" @click="setView('messages')">
             <b-icon icon="chat-left-text" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'entities' ? 'primary' : ''" style="bottom: 40px" @click="setView('entities')">
+        <b-button class="floating" :variant="view === 'entities' ? 'primary' : ''" style="bottom: 100px" title="Entities View" @click="setView('entities')">
             <b-icon icon="clipboard-data" aria-hidden="true"></b-icon>
+        </b-button>
+        <b-button class="floating" :variant="view === 'settings' ? 'primary' : ''" style="bottom: 40px" title="Settings View" @click="setView('settings')">
+            <b-icon icon="gear-fill" aria-hidden="true"></b-icon>
         </b-button>
     </div>
 </template>
@@ -345,7 +375,8 @@ export default {
             mqtt: {
                 client: null,
                 id: uuid(),
-                root: 'mobil-e-hub/viz'
+                root: 'mobil-e-hub/viz',
+                url: 'ws://broker.hivemq.com:8000/mqtt'
             },
             entities: {
                 drones: { },
@@ -389,7 +420,7 @@ export default {
     },
     mounted: function() {
         try {
-            this.mqtt.client = mqtt.connect('ws://broker.hivemq.com:8000/mqtt');
+            this.mqtt.client = mqtt.connect(this.mqtt.url);
             this.mqtt.client.on('connect', () => {
                 this.mqtt.client.subscribe(this.mqtt.root + '/#');
             });
@@ -540,7 +571,7 @@ export default {
             return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
         },
         svgHubs: function() {
-            return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x-5, y: this.map.topology.nodes[h.position].position.y-5, width: 10, height: 10, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length }));
+            return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x-3, y: this.map.topology.nodes[h.position].position.y-3, width: 6, height: 6, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length }));
         },
         edgesRoad: function() {
             return Object.values(this.map.topology.edges).filter( e => e.type == 'road')
