@@ -32,7 +32,7 @@ class Drone {
         this.id = id;
         this.position = position;
 
-        this.speed = 10;
+        this.speed = 2;
         this.parcel = null;
         this.state = DroneState.idle;
     }

@@ -32,7 +32,7 @@ class Car {
         this.id = id;
         this.position = position;
 
-        this.speed = 20;
+        this.speed = 10;
         this.parcel = null;
         this.state = CarState.idle;
     }
