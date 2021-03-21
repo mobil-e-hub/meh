@@ -7,7 +7,7 @@ module.exports = {
         n04: { id: 'n04', position: { x: -50, y: 60, z: 0 }, type: 'air' },
         n05: { id: 'n05', position: { x: -60, y: 60, z: 0 }, type: 'air' },
         n06: { id: 'n06', position: { x: -60, y: 50, z: 0 }, type: 'air' },
-        n07: { id: 'n07', position: { x: -60, y: -60, z: 0 }, type: 'air' },
+        n07: { id: 'n07', position: { x: -60, y: -60, z: 0 }, type: 'air' },  // n07: no outgoing edges
     },
     edges: {
         e00: { id: 'e00', from: 'n00', to: 'n01', type: 'road', distance: 100 },

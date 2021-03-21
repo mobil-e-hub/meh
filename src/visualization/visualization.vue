@@ -105,6 +105,14 @@
                                                         <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">
                                                     </li>
                                                 </ul>
+
+                                                <label>{{ this.display.enabledToastTypes}}"</label>
+                                                <ul id="example-1">
+                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">
+                                                        {{ item }}
+                                                    </li>
+                                                </ul>
+
                                             </li>
                                         </ul>
 
@@ -139,13 +147,13 @@
                                                          v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details">
 <!--                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>-->
                                                     </use>
-                                                     Badges with Parcel count
-                                                    <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">
-<!--                                                        rotate(-180 ${hub.x} ${hub.y} ` scale(1, -1)`)-->
-                                                        <circle class="SVGBadge-svgBackground" :cx="hub.x" :cy="hub.y - hub.height" r="3"/>
-<!--                                                                TODO text in SVG: flip + translate correctly-->
-                                                        <!--                                                        <text class="SVGBadge-number" :x="hub.x" :y="hub.y - hub.height+1.5" transform="scale(-1,1)" text-anchor="middle" >{{ hub.stored +1}} </text>-->
-                                                    </g>
+<!--                                                     Badges with Parcel count-->
+<!--                                                    <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">-->
+<!--&lt;!&ndash;                                                        rotate(-180 ${hub.x} ${hub.y} ` scale(1, -1)`)&ndash;&gt;-->
+<!--                                                        <circle class="SVGBadge-svgBackground" :cx="hub.x" :cy="hub.y - hub.height" r="3"/>-->
+<!--&lt;!&ndash;                                                                TODO text in SVG: flip + translate correctly&ndash;&gt;-->
+<!--                                                        &lt;!&ndash;                                                        <text class="SVGBadge-number" :x="hub.x" :y="hub.y - hub.height+1.5" transform="scale(-1,1)" text-anchor="middle" >{{ hub.stored +1}} </text>&ndash;&gt;-->
+<!--                                                    </g>-->
                                                 </g>
 
 
@@ -370,6 +378,7 @@ export default {
                     hub: 10,
                     drone: 8,
                     car: 10,
+                    //bus: 10,
                     parcel: 6
                 },
                 zoomEntities: true,
@@ -477,38 +486,38 @@ export default {
                 }
             }
             if (this.matchTopic(topic, 'to/drone/+/tasks')) {
-                this.showToast('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
+                this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
             }
             else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
-                this.showToast('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`);
+                this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`);
             }
             else if (this.matchTopic(topic, 'from/control-system/+/route-update')) {
-                this.showToast('Route update', `Control System ${topic.id} has updated the routes.`);
+                this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`);
             }
             else if (this.matchTopic(topic, 'from/car/+/arrived')) {
-                this.showToast('Car arrived', `Car ${topic.id} has arrived at node ${message}.`);
+                this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`);
             }
             else if (this.matchTopic(topic, 'from/+/+/mission/+/complete')) {
-                this.showToast('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`);
+                this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`);
             }
             else if (this.matchTopic(topic, 'from/+/+/transaction/+/complete')) {
-                this.showToast('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`);
+                this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`);
             }
             else if (this.matchTopic(topic, 'from/parcel/+/delivered')) {
-                this.showToast('Parcel delivered', `Parcel ${topic.id} has reached its destination (${message.destination.type} ${message.destination.id}).`);
+                this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination (${message.destination.type} ${message.destination.id}).`);
             }
         },
         showToastStatus: function(title, message) {
-            if (this.display.enabledToastTypes.has('status')){
+            if (this.display.enabledToastTypes.includes('status')){
                 this.showToast(title, message)
             }
         },
         showToastRouting: function(title, message) {
-            if (this.display.enabledToastTypes.has('routing')){
+            if (this.display.enabledToastTypes.includes('routing')){
                 this.showToast(title, message)
             }
         },
-        //TODO add for routing / status
+        // TODO debug showToastType --> freezes (?)
         showToast: function(title, message) {
             if (this.display.areToastsEnabled) {
                 this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});

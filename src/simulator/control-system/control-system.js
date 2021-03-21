@@ -21,6 +21,10 @@ module.exports = class ControlSystem extends MQTTClient {
         this.carSimulator = carSimulator;
         this.hubSimulator = hubSimulator;
         this.parcelSimulator = parcelSimulator;
+
+        this.distances = null;
+        this.countTransaction = 0;
+        this.countMission = 0;
     }
 
     receive(topic, message) {
@@ -54,13 +58,18 @@ module.exports = class ControlSystem extends MQTTClient {
 
         let route = this.findRoute(parcel);
 
-        let drone1 = this.assignDrone(parcel, route.air1);
+        // TODO -  handle case: no car/drone is IDLE...
+        let drone1 = this._assignDrone(parcel, route.air1);
         let car = this.assignCar(parcel, route.road);
-        let drone2 = this.assignDrone(parcel, route.air2)
+        let drone2 = this._assignDrone(parcel, route.air2)
 
         //----------------
 
-        // TODO: create Transactions & Missions
+
+        // TODO create Missions
+        //      -> always follows templates or of arbitrary length??
+        this.createAndStartMission(parcel, drone1, car, drone2, route);
+
 
         // TODO => MQTT: publish to entities
         //     1. M1: source hub: give
@@ -71,37 +80,35 @@ module.exports = class ControlSystem extends MQTTClient {
 
     }
 
+
+
     findRoute(parcel) {
         // Concept:
         // Solve three sub-problems
         // 1) From source hub to the hub's road junction   TODO: always the same junctions? --> corresponding road junction stored somewhere?
-        // 2) Between the two junctions   TODO  --> filter for type: 'parking' (/ road ??)
+        // 2) Between the two junctions
         // 3) From the destination hub's road junction to the hub
         // Each problem can be solved with the Floyd-Warshall algorithm which gives all shortest paths in the respective graphs
         // Then, for every vehicle, compute the sum of shortest paths (weighted with the vehicle's speed) from the current location to the pick-up node and from there to the drop-off node
         // Finally, choose the three vehicles which take the shortest time and assign them their respective mission
 
 
-        //TODO
-        //      - difference between air and road edges??
-        //      -Assumption: Source and destination are always hubs
-
-
         // compute shortest pairs matrix
         let nodes = Object.keys(topology.nodes);
-        let _floydWarshall = this.floyd_warshall(nodes, parcel);   // TODO consider type of edge here?? --> e.g. road could contain air shortcut or do we trust the map?
+        let _floydWarshall = this.floyd_warshall(nodes);   // TODO consider type of edge here?? --> e.g. road could contain air shortcut or do we trust the map?
         let dist = _floydWarshall[0];
         let next = _floydWarshall[1];
+
+        this.distances = dist;
 
         let mapping = _.invert(nodes);
         let s_h = this.hubSimulator.hubs[parcel.carrier.id];  // TODO sometimes undefined --> crash ... Couldn't reproduce...
         let source = mapping[s_h.position];
         let destination = mapping[this.hubSimulator.hubs[parcel.destination.id].position];
 
-        // find closest road junction to source & destination hubs  (air --> parking)
-        // xTODO only type 'parking' ??
+        // find closest road junction to source & destination hubs  (parking: both drones and cars can access)
         // xTODO check if shortest way exists
-        let nodes_road = Object.values(topology.nodes).filter(n => n["type"] == 'parking').map(n => n.id)  //TODO: type 'road' also possible as junction?
+        let nodes_road = Object.values(topology.nodes).filter(n => n["type"] == 'parking').map(n => n.id)
 
         let source_min_dist_junctions = nodes_road.map( h => dist[source][mapping[h]]);
         let junction_source = dist[source].indexOf(Math.min.apply(null, source_min_dist_junctions));
@@ -109,9 +116,9 @@ module.exports = class ControlSystem extends MQTTClient {
         let junction_destination = dist.flatMap( n => n[destination]).indexOf((Math.min.apply(null, dest_min_dist_junctions))); // transposed!:  junction -> destination : min over column dist[i][dest]!
 
         //Backtrack shortest Paths
-        let shortestRoad = {distance: dist[junction_source][junction_destination], path: this.backtrackShortestPath(next, junction_source, junction_destination)};
-        let shortestAir1 = {distance: dist[source][junction_source], path: this.backtrackShortestPath(next, source, junction_source)};
-        let shortestAir2 = {distance: dist[junction_destination][destination], path: this.backtrackShortestPath(next, junction_destination, destination)};
+        let shortestRoad = {distance: dist[junction_source][junction_destination], path: this.backtrackShortestPath(next, junction_source, junction_destination, dist[junction_source][junction_destination])};
+        let shortestAir1 = {distance: dist[source][junction_source], path: this.backtrackShortestPath(next, source, junction_source, dist[source][junction_source])};
+        let shortestAir2 = {distance: dist[junction_destination][destination], path: this.backtrackShortestPath(next, junction_destination, destination, dist[junction_destination][destination])};
 
         let route = {air1: shortestAir1, road: shortestRoad, air2: shortestAir2};
         return route;
@@ -127,7 +134,8 @@ module.exports = class ControlSystem extends MQTTClient {
 
         for (let e of Object.values(topology.edges)) {
             let from = mapping[e.from], to = mapping[e.to];
-            dist[from][to] = e.distance; next[from][to] = parseInt(to);
+            dist[from][to] = e.distance;
+            next[from][to] = parseInt(to);
         }
         for (let n = 0; n < nodes.length; n++) {
             dist[n][n] = 0;
@@ -149,8 +157,10 @@ module.exports = class ControlSystem extends MQTTClient {
         return [dist, next];
     }
 
-    backtrackShortestPath(matrix_next, start, end) {
-        // TODO throw Exception if Infinity: There is no path.
+    backtrackShortestPath(matrix_next, start, end, distance) {
+        if (!isFinite(distance)) {
+            throw new Error(`There is no path between these nodes. start: ${start}, end: ${end}, distance: ${distance}`);
+        }
         let path = [start];
         let n = parseInt(start);
         end = parseInt(end);
@@ -158,50 +168,186 @@ module.exports = class ControlSystem extends MQTTClient {
             n = matrix_next[n][end];
             path.push(n);
         }
-        return path;
+        return path; // TODO type: start start note string, rest int
     }
 
 
-    assignDrone(parcel, route) {
+    _assignDrone(parcel, route) {
         //    TODO which one to pick?? always closest idle one / or also utilization / details like enough battery left for this mission??
         //      --> consider Action space!!!
 
+
         //  TODO  get idle drones
         //      --> optimize: do not consider all?
-        let idle_drones = this.droneSimulator.getIdleDrones();
-        let node = route.shift();
+        let idleDrones = this.droneSimulator.getIdleDrones();
+        let node = route.path.shift();   // retrieve starting node TODO: check --> this removes index 0  -||- needed?
 
-        let optimal_drone;
-        let travelTime = new Array(idle_drones.length);
+        let optimalDrone = null;
+        let optimalDroneIndex = 0;
+        let travelTime = new Array(idleDrones.length);
+
+        let mapping = _.invert(Object.keys(topology.nodes)); // todo refactor mapping to class variable
 
 
         let i = 0;
-        for (let drone in idle_drones) {
+        for (let droneID in idleDrones) {
             // way to route starting point
-            let distance = 0; // TODO  compute euclidean distance /
-                              //      better: look up in dist matrix form FW  (Assumption, drone is at node!)
-                              //            --> map positions of drones to nodes first!!
 
-            travelTime[i] = distance / drone.speed;
+            let drone = idleDrones[droneID];
+            // let distance = 0;
+            let dronePosition = mapping[this.getNodeByPosition(drone.position)];
+            let distance = this.distances[dronePosition][node]
 
-            // actual route
-            travelTime[i] += route.distance / drone.speed;
+            travelTime[i] = (distance + route.distance) / drone.speed;
 
-            // TODO compare for optimal (min) time --> retrieve that drone!!
+            if(optimalDrone == null || travelTime[i] < travelTime[optimalDroneIndex]) {
+                optimalDrone = drone;
+                optimalDroneIndex = i;
+            }
+            i++;
 
             //  TODO get positions of idle drones
-            //                - check sum(distance * speed) over drone -> node -> node
-            //                - if two equally : --> conflict resolution?
+            //                - if two equally : --> conflict resolution? --> pick first available one?
             //                - assign missions --> drone two gets blocked immediately?? (waiting??)
         }
+
+
+
+        return optimalDrone;
     }
 
-    findClosestEntity(node, entities){
-        return 0;
+    //TODO check if no idle drone is at a hub --> throw error
+    getNodeByPosition(position) {
+        return Object.keys(topology.nodes).find(key => topology.nodes[key].position.x === position.x && topology.nodes[key].position.y === position.y) ;
     }
+
+
+    createTransaction(parcel, from, to){
+        //                t02: {
+        //                 id: 't02',
+        //                 from: { type: 'car', id: 'v00' },
+        //                 to: { type: 'drone', id: 'd01' },
+        //                 parcel: 'p00'
+        //             },
+
+        let from_new = { type: from.constructor.name, id: from.id};           //TODO ATTENTION: from.constructor.name unsafe / bad style ?? --> debug carefully
+        let to_new = { type: to.constructor.name, id: to.id};
+
+        this.incrementTransactionID()
+        let newID =`t${this.countTransaction}`        //TODO better generate UUID than use incremented transaction counter??
+        return { id: newID, from: from, to: to, parcel: parcel.id }
+    }
+
+
+    incrementTransactionID() {
+        this.countTransaction +=1;
+        return this.countTransaction;
+    }
+
 
     assignCar(parcel, route) {
+        // TODO car has capacity
+        // TODO model 2 types of cars:
+        //                 - regular(?)/ recurrent -> Bus / Garbage trucks / ... always loop through a fixed scheduled route
+        //                 - singular / independent /
         return 0;
+    }
+
+    createAndStartMission(parcel, drone1, car, drone2, route){      // TODO retrieve the 2 junctions from the route
+
+        // let transactions = {
+        //     t00: {
+        //         id: 't00',
+        //         from: {type: 'hub', id: 'h00'},
+        //         to: {type: 'drone', id: 'd00'},
+        //         parcel: 'p00'
+        //     },
+        //     t01: {
+        //         id: 't01',
+        //         from: {type: 'drone', id: 'd00'},
+        //         to: {type: 'car', id: 'v00'},
+        //         parcel: 'p00'
+        //     },
+        //     t02: {
+        //         id: 't02',
+        //         from: {type: 'car', id: 'v00'},
+        //         to: {type: 'drone', id: 'd01'},
+        //         parcel: 'p00'
+        //     },
+        //     t03: {
+        //         id: 't03',
+        //         from: {type: 'drone', id: 'd01'},
+        //         to: {type: 'hub', id: 'h01'},
+        //         parcel: 'p00'
+        //     }
+        // }
+
+        // TODO create transactions  --> debug: doublecheck..
+        let t00 = this.createTransaction(parcel, parcel.carrier, drone1);
+        let t01 = this.createTransaction(parcel, drone1, car);
+        let t02 = this.createTransaction(parcel, car, drone2);
+        let t03 = this.createTransaction(parcel, drone2, parcel.destination);
+
+        // m00: {
+        //     id: 'm00',
+        //         tasks: [
+        //         { type: 'give', transaction: _.clone(transactions.t00) }
+        //     ]
+        // },
+        // m01: {
+        //     id: 'm01',
+        //         tasks: [
+        //         { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: 60, z: 0}, minimumDuration: 10 },
+        //         { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t00) },
+        //         { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: 50, z: 0}, minimumDuration: 10 },
+        //         { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: 50, z: 0}, minimumDuration: 10 },
+        //         { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t01) },
+        //         { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: 60, z: 0}, minimumDuration: 10 }
+        //     ]
+        // },
+        // m02: {
+        //     id: 'm02',
+        //         tasks: [
+        //         { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
+        //         { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t02) },
+        //         { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: -60, z: 0}, minimumDuration: 10 },
+        //         { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t03) }
+        //     ]
+        // },
+        // m03: {
+        //     id: 'm03',
+        //         tasks: [
+        //         {type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t01)},
+        //         { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: -50, z: 0}, minimumDuration: 10 },
+        //         { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t02) }
+        //     ]
+        // },
+        // m04: {
+        //     id: 'm04',
+        //         tasks: [
+        //         { type: 'take', state: TaskState.notStarted, transaction: _.clone(transactions.t03) }
+        //     ]
+        // }
+
+        // TODO create Missions
+        //          problems: - retrieve location coordinates from nodes
+        //                    - missions always in same order?
+        let m1 = null; //
+
+        // TODO wieder nötig?
+        // this.hubSimulator.resume();
+        // this.droneSimulator.resume();
+        // this.carSimulator.resume();
+        // this.parcelSimulator.resume();
+
+
+        // this.publishTo('hub/h00', 'mission', missions.m00);
+        // this.publishTo('drone/d00', 'mission', missions.m01);
+        // this.publishTo('drone/d01', 'mission', missions.m02);
+        // this.publishTo('car/v00', 'mission', missions.m03);
+        // this.publishTo('hub/h01', 'mission', missions.m04);
+
+        return null;
     }
 
     test(message) {
