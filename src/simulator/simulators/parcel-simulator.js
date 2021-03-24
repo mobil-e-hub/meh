@@ -35,9 +35,9 @@ module.exports = class ParcelSimulator extends MQTTClient {
                 else if (topic.rest === 'place-order') {
                     // let orderId = uuid();
                     let id = uuid();
-                    let [source, destination] = random.keys(this.hubSimulator.hubs, 2);
+                    // let [source, destination] = random.keys(this.hubSimulator.hubs, 2);
                     // this.orders[orderId] = new Order(source, destination);
-                    this.parcels[id] = new Parcel(id, source, destination);
+                    this.parcels[id] = new Parcel(id, message.carrier, message.destination);
 
                     // this.publishFrom(`order/${id}`, 'state', this.orders[id]);
                     this.publishFrom(`parcel/${id}`, 'placed', this.parcels[id]);

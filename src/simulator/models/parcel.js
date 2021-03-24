@@ -1,10 +1,10 @@
 // External modules
 
 module.exports = class Parcel {
-    constructor(id, source, destination) {
+    constructor(id, carrier, destination) {
         this.id = id;
-        this.carrier = { type: 'hub', id: source };
-        this.destination = { type: 'hub', id: destination };
+        this.carrier = carrier;
+        this.destination = destination;
     }
 
     reset() {

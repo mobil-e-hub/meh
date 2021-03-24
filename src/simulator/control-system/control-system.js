@@ -31,7 +31,7 @@ module.exports = class ControlSystem extends MQTTClient {
         super.receive(topic, message);
 
         if (this.matchTopic(topic, 'from/parcel/+/placed')) {
-            this.createDeliveryRoute(message);
+            // this.createDeliveryRoute(message);
         }
         if (this.matchTopic(topic, 'from/visualization/+/test')) {
             this.test(message);
@@ -233,9 +233,9 @@ module.exports = class ControlSystem extends MQTTClient {
         let from_new = { type: from.constructor.name, id: from.id};           //TODO ATTENTION: from.constructor.name unsafe / bad style ?? --> debug carefully
         let to_new = { type: to.constructor.name, id: to.id};
 
-        this.incrementTransactionID()
-        let newID =`t${this.countTransaction}`        //TODO better generate UUID than use incremented transaction counter??
-        return { id: newID, from: from, to: to, parcel: parcel.id }
+        this.incrementTransactionID();
+        let newID =`t${this.countTransaction}`;        //TODO better generate UUID than use incremented transaction counter??
+        return { id: newID, from: from, to: to, parcel: parcel.id };
     }
 
 
@@ -351,10 +351,10 @@ module.exports = class ControlSystem extends MQTTClient {
     }
 
     test(message) {
-        this.hubSimulator.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07') };
-        this.droneSimulator.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }) };
+        this.hubSimulator.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07'), h02: new Hub('h02', 'n10') };
+        this.droneSimulator.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
         this.carSimulator.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
-        this.parcelSimulator.parcels = { p00: new Parcel('p00', 'h00', 'h01') };
+        this.parcelSimulator.parcels = { p00: new Parcel('p00', { type: 'hub', id: 'h00' }, { type: 'hub', id: 'h01' }) };
 
         let transactions = {
             t00: {

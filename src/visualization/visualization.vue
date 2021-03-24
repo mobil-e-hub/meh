@@ -125,7 +125,6 @@
                             <b-row>
                                 <!-- Map-->
                                 <b-col cols="9">
-
                                     <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
                                         <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
                                             <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray">
@@ -177,9 +176,29 @@
                                 </b-col>
 
                                 <b-col cols="3">
+                                    <b-card v-if="state !== 'stopped'" class="my-3" no-body>
+                                        <b-card-header>
+                                            Place Order
+                                        </b-card-header>
+
+                                        <b-card-body>
+                                            <div>
+                                                <b-form-group label="Source Hub" label-for="input-source-hub">
+                                                    <b-form-select id="input-source-hub" v-model="order.source" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>
+                                                </b-form-group>
+
+                                                <b-form-group label="Destination Hub" label-for="input-destination-hub">
+                                                    <b-form-select id="input-destination-hub" v-model="order.destination" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>
+                                                </b-form-group>
+
+                                                <b-button variant="primary" @click="clickPlaceOrderButton">
+                                                    Place Order
+                                                </b-button>
+                                            </div>
+                                        </b-card-body>
+                                    </b-card>
 
                                     <template v-if="display.statsTableVisible">
-
                                         <div class="card" style="width: 22rem;">
                                             <div class="card-header">
                                                 <b>Statistics (Dummy)</b>
@@ -221,7 +240,6 @@
                                                 </tbody>
                                             </table>
                                         </div>
-
                                     </template>
                                 </b-col>
                             </b-row>
@@ -391,6 +409,10 @@ export default {
                 waitingDrones:0,
                 avgDroneWaitTime:0,
                 waitingCars: 0,
+            },
+            order: {
+                source: null,
+                destination: null
             }
         }
     },
@@ -442,7 +464,11 @@ export default {
             this.$set(this.entities, 'parcels', { });
         },
         clickPlaceOrderButton: function() {
-            this.publish('place-order');
+            this.publish('place-order', {
+                id: uuid(),
+                carrier: { type: 'hub', id: this.order.source },
+                destination: { type: 'hub', id: this.order.destination }
+            });
         },
         clickZoomInButton: function() {
             this.map.zoom *= 1.25;
@@ -489,7 +515,7 @@ export default {
                 this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
             }
             else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
-                this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.destination.id}.`);
+                this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`);
             }
             else if (this.matchTopic(topic, 'from/control-system/+/route-update')) {
                 this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`);
@@ -504,7 +530,7 @@ export default {
                 this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`);
             }
             else if (this.matchTopic(topic, 'from/parcel/+/delivered')) {
-                this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination (${message.destination.type} ${message.destination.id}).`);
+                this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`);
             }
         },
         showToastStatus: function(title, message) {
