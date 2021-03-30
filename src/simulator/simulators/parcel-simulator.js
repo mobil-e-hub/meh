@@ -33,6 +33,10 @@ module.exports = class ParcelSimulator extends MQTTClient {
                     this.stop();
                 }
                 else if (topic.rest === 'place-order') {
+                    let id = uuid();
+                    this.publishFrom(`order/${id}`, 'placed');
+                }
+                else if (topic.rest === 'place-parcel') {
                     // let orderId = uuid();
                     let id = uuid();
                     // let [source, destination] = random.keys(this.hubSimulator.hubs, 2);
@@ -68,5 +72,9 @@ module.exports = class ParcelSimulator extends MQTTClient {
                 this.publishFrom(`parcel/${parcel.id}`, 'delivered', parcel);
             }
         }
+    }
+
+    addParcel() {
+
     }
 };

@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 // Internal modules
 const MQTTClient = require('../mqtt-client');
-const { random, uuid } = require('../helpers');
+const { random, uuid, dist2d } = require('../helpers');
 
 const { Drone, DroneState, TaskState } = require('../models/drone');
 const { Car, CarState } = require('../models/car');
@@ -15,7 +15,7 @@ const topology = require('../../topology');
 
 module.exports = class ControlSystem extends MQTTClient {
     constructor(droneSimulator, carSimulator, hubSimulator, parcelSimulator) {
-        super('control-system', ['to/control-system/#', 'from/parcel/+/placed', 'from/parcel/+/delivered', 'from/visualization/#']);
+        super('control-system', ['to/control-system/#', 'from/parcel/+/placed', 'from/parcel/+/delivered', 'from/visualization/#', 'from/order/+/placed']);
 
         this.droneSimulator = droneSimulator;
         this.carSimulator = carSimulator;
@@ -34,6 +34,10 @@ module.exports = class ControlSystem extends MQTTClient {
             // this.createDeliveryRoute(message);
         }
         if (this.matchTopic(topic, 'from/visualization/+/test')) {
+            this.test(message);
+            // this.findRoute(new Parcel('p00', 'h00', 'h01'));
+        }
+        if (this.matchTopic(topic, 'from/order/+/placed')) {
             this.test(message);
             // this.findRoute(new Parcel('p00', 'h00', 'h01'));
         }
@@ -79,8 +83,6 @@ module.exports = class ControlSystem extends MQTTClient {
         //     5. M5: dest-hub  : take
 
     }
-
-
 
     findRoute(parcel) {
         // Concept:
@@ -348,6 +350,10 @@ module.exports = class ControlSystem extends MQTTClient {
         // this.publishTo('hub/h01', 'mission', missions.m04);
 
         return null;
+    }
+
+    getHubs(position, radius) {
+        return Object.values(this.hubSimulator.hubs).filter(h => dist2d(topology.nodes[h.position].position, position) <= radius);
     }
 
     test(message) {

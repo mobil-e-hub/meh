@@ -64,5 +64,12 @@ module.exports = {
     },
     uuid: () => {
         return uuid().substr(0, 8);
+    },
+    dist2d: (a, b) => {
+        console.log(a, b);
+        return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+    },
+    dist3d: (a, b) => {
+        return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2);
     }
 };

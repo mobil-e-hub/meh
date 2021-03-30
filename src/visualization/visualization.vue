@@ -36,9 +36,9 @@
                             <b-icon icon="stop-fill" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-button variant="link" title="Place order" @click="clickPlaceOrderButton" :disabled="state === 'stopped'">
-                            <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>
-                        </b-button>
+<!--                        <b-button variant="link" title="Place order" @click="clickPlaceOrderButton" :disabled="state === 'stopped'">-->
+<!--                            <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>-->
+<!--                        </b-button>-->
 
                         <b-button variant="link" title="Zoom in" @click="clickZoomInButton">
                             <b-icon icon="zoom-in" aria-hidden="true"></b-icon>
@@ -53,6 +53,42 @@
                         <b-button variant="link" title="Run test function" @click="clickTestButton">
                             <b-icon icon="braces" aria-hidden="true"></b-icon>
                         </b-button>
+
+                        <b-button v-b-modal.modal-send-message variant="link" title="Send message">
+                            <b-icon icon="terminal-fill" aria-hidden="true"></b-icon>
+                        </b-button>
+
+                        <b-modal id="modal-send-message" title="Send message" @ok="clickSendButton">
+                            <b-form-group label="Topic" label-for="input-message-topic">
+                                <b-form-input id="input-message-topic" v-model="command.message.topic" placeholder="from/visualization/..." required></b-form-input>
+                            </b-form-group>
+
+                            <b-form-group label="Message" label-for="input-message-message">
+                                <b-form-input id="input-message-message" v-model="command.message.message" placeholder="{ data: 'Hello World' }" required></b-form-input>
+                            </b-form-group>
+                        </b-modal>
+
+                        <b-button v-b-modal.modal-place-order variant="link" title="Place order">
+                            <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>
+                        </b-button>
+
+                        <b-modal id="modal-place-order" title="Place order" @ok="clickPlaceOrderButton">
+                            <b-form-group label="Vendor" label-for="input-order-vendor">
+                                <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>
+                            </b-form-group>
+
+                            <b-form-group label="Customer" label-for="input-order-customer">
+                                <b-form-select id="input-order-customer" v-model="command.order.customer" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>
+                            </b-form-group>
+
+                            <b-form-group label="Pick-up time" label-for="input-order-pickup">
+                                <b-form-select id="input-order-pickup" v-model="command.order.pickup" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>
+                            </b-form-group>
+
+                            <b-form-group label="Drop-off time" label-for="input-order-dropoff">
+                                <b-form-select id="input-order-dropoff" v-model="command.order.dropoff" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>
+                            </b-form-group>
+                        </b-modal>
                     </b-button-toolbar>
                 </b-nav-form>
             </b-navbar-nav>
@@ -106,12 +142,12 @@
                                                     </li>
                                                 </ul>
 
-                                                <label>{{ this.display.enabledToastTypes}}"</label>
-                                                <ul id="example-1">
-                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">
-                                                        {{ item }}
-                                                    </li>
-                                                </ul>
+<!--                                                <label>{{ this.display.enabledToastTypes}}"</label>-->
+<!--                                                <ul id="example-1">-->
+<!--                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">-->
+<!--                                                        {{ item }}-->
+<!--                                                    </li>-->
+<!--                                                </ul>-->
 
                                             </li>
                                         </ul>
@@ -130,11 +166,9 @@
                                             <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray">
                                                 <title>Node {{ node.id }} ({{ node.type }})</title>
                                             </circle>
-                                            <!--                                          <line v-for="(edge, id) in map.topology.edges" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />-->
 
-                                            <line v-for="(edge, id) in edgesRoad" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
-                                            <line v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" stroke-dasharray="1" />
-                                            <!--                                          <path v-for="(edge, id) in edgesAir" :key="id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)"  stroke-dasharray="10,10" d="M5 40 l215 0" />-->
+                                            <line v-for="edge in edgesRoad" :key="edge.id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
+                                            <line v-for="edge in edgesAir" :key="edge.id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" stroke-dasharray="1" />
 
                                             <template v-if="state !== 'stopped'">
                                                 <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
@@ -143,7 +177,7 @@
 
                                                 <g v-for="hub in svgHubs" :key="hub.id">
                                                     <use :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill"
-                                                         v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details">
+                                                         v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details" transform="scale(1, -1)">
 <!--                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>-->
                                                     </use>
 <!--                                                     Badges with Parcel count-->
@@ -155,6 +189,9 @@
 <!--                                                    </g>-->
                                                 </g>
 
+                                                <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.car" :y="-address.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">
+                                                    <title>Address {{ address.id }} ({{ address.name }})</title>
+                                                </use>
 
                                                 <use v-for="(car, id) in entities.cars" :key="id" :x="car.position.x - entitySize.car" :y="-car.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#car-symbol'" fill="blue" transform="scale(1, -1)">
                                                     <title>Car {{ car.id }} ({{ car.state }})</title>
@@ -167,36 +204,33 @@
                                                 <use v-for="(parcel, id) in entities.parcels" :key="id" :x="parcelPosition(parcel).x - entitySize.parcel" :y="-parcelPosition(parcel).y - entitySize.parcel" :width="2 * entitySize.parcel" :height="2 * entitySize.parcel" :href="require('../../assets/entities.svg') + '#parcel-symbol'" fill="green" transform="scale(1, -1)"
                                                      v-b-popover.hover.right="`Parcel ${parcel.id} (Source: ${parcel.carrier.id}, Destination: ${parcel.destination.id})`" title="Parcel details">
                                                 </use>
-                                                <!--                                    <circle v-for="(parcel, id) in entities.parcels" :key="id" :r="entitySize.parcel" :cx="parcelPosition(parcel).x" :cy="parcelPosition(parcel).y" fill="green">-->
-                                                <!--                                        <title>Parcel {{ parcel.id }} ({{ parcel.state }})</title>-->
-                                                <!--                                    </circle>-->
                                             </template>
                                         </g>
                                     </svg>
                                 </b-col>
 
                                 <b-col cols="3">
-                                    <b-card v-if="state !== 'stopped'" class="my-3" no-body>
-                                        <b-card-header>
-                                            Place Order
-                                        </b-card-header>
+<!--                                    <b-card v-if="state !== 'stopped'" class="my-3" no-body>-->
+<!--                                        <b-card-header>-->
+<!--                                            Place Order-->
+<!--                                        </b-card-header>-->
 
-                                        <b-card-body>
-                                            <div>
-                                                <b-form-group label="Source Hub" label-for="input-source-hub">
-                                                    <b-form-select id="input-source-hub" v-model="order.source" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>
-                                                </b-form-group>
+<!--                                        <b-card-body>-->
+<!--                                            <div>-->
+<!--                                                <b-form-group label="Source Hub" label-for="input-source-hub">-->
+<!--                                                    <b-form-select id="input-source-hub" v-model="command.order.source" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>-->
+<!--                                                </b-form-group>-->
 
-                                                <b-form-group label="Destination Hub" label-for="input-destination-hub">
-                                                    <b-form-select id="input-destination-hub" v-model="order.destination" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>
-                                                </b-form-group>
+<!--                                                <b-form-group label="Destination Hub" label-for="input-destination-hub">-->
+<!--                                                    <b-form-select id="input-destination-hub" v-model="command.order.destination" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>-->
+<!--                                                </b-form-group>-->
 
-                                                <b-button variant="primary" @click="clickPlaceOrderButton">
-                                                    Place Order
-                                                </b-button>
-                                            </div>
-                                        </b-card-body>
-                                    </b-card>
+<!--                                                <b-button variant="primary" @click="clickPlaceOrderButton">-->
+<!--                                                    Place Order-->
+<!--                                                </b-button>-->
+<!--                                            </div>-->
+<!--                                        </b-card-body>-->
+<!--                                    </b-card>-->
 
                                     <template v-if="display.statsTableVisible">
                                         <div class="card" style="width: 22rem;">
@@ -403,16 +437,24 @@ export default {
                 isSidebarVisible: false,
                 areToastsEnabled: true,
                 enabledToastTypes: ['status'],
-                statsTableVisible: true
+                statsTableVisible: false
             },
             stats: {
                 waitingDrones:0,
                 avgDroneWaitTime:0,
                 waitingCars: 0,
             },
-            order: {
-                source: null,
-                destination: null
+            command: {
+                message: {
+                    topic: null,
+                    message: null
+                },
+                order: {
+                    vendor: null,
+                    customer: null,
+                    pickup: null,
+                    dropoff: null
+                }
             }
         }
     },
@@ -462,13 +504,6 @@ export default {
             this.$set(this.entities, 'cars', { });
             this.$set(this.entities, 'hubs', { });
             this.$set(this.entities, 'parcels', { });
-        },
-        clickPlaceOrderButton: function() {
-            this.publish('place-order', {
-                id: uuid(),
-                carrier: { type: 'hub', id: this.order.source },
-                destination: { type: 'hub', id: this.order.destination }
-            });
         },
         clickZoomInButton: function() {
             this.map.zoom *= 1.25;
@@ -532,6 +567,9 @@ export default {
             else if (this.matchTopic(topic, 'from/parcel/+/delivered')) {
                 this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`);
             }
+            else if (this.matchTopic(topic, 'to/visualization/#')) {
+                this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`);
+            }
         },
         showToastStatus: function(title, message) {
             if (this.display.enabledToastTypes.includes('status')){
@@ -558,9 +596,21 @@ export default {
         getY: function(node) {
             return this.map.topology.nodes[node].position.y;
         },
+        clickSendButton: function() {
+            this.mqtt.client.publish(`${this.mqtt.root}/${this.command.message.topic}`, JSON.stringify(this.command.message.message));
+        },
         clickTestButton: function() {
             this.publish('test');
             this.state = 'running';
+        },
+        clickPlaceOrderButton: function() {
+            this.publish('place-order', {
+                id: uuid(),
+                vendor: { type: 'customer', id: this.command.order.vendor },
+                customer: { type: 'customer', id: this.command.order.customer },
+                pickup: this.command.order.pickup,
+                dropoff: this.command.order.dropoff
+            });
         },
         toggleSidebar: function() {
             this.display.isSidebarVisible = !this.display.isSidebarVisible
@@ -583,10 +633,10 @@ export default {
             return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x-3, y: this.map.topology.nodes[h.position].position.y-3, width: 6, height: 6, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length }));
         },
         edgesRoad: function() {
-            return Object.values(this.map.topology.edges).filter( e => e.type == 'road')
+            return Object.values(this.map.topology.edges).filter( e => e.type === 'road')
         },
         edgesAir: function() {
-            return Object.values(this.map.topology.edges).filter( e => e.type == 'air')
+            return Object.values(this.map.topology.edges).filter( e => e.type === 'air')
         },
         toggleStatsTable: {
             get() {
