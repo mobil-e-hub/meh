@@ -6,10 +6,11 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCar, faPlane, faWarehouse, faArchive } from '@fortawesome/free-solid-svg-icons';
+import { faCar, faBus, faPlane, faWarehouse, faArchive } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 library.add(faCar);
+library.add(faBus);
 library.add(faPlane);
 library.add(faWarehouse);
 library.add(faArchive);

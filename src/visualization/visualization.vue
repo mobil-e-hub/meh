@@ -163,12 +163,12 @@
                                 <b-col cols="9">
                                     <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
                                         <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom}, -${map.zoom}) translate(${map.offset.x}, ${map.offset.y})`">
-                                            <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray">
+                                            <circle v-for="(node, id) in map.topology.nodes" :key="id" :r="2" :cx="node.position.x" :cy="node.position.y" fill="lightgray" transform="scale(1, -1)">
                                                 <title>Node {{ node.id }} ({{ node.type }})</title>
                                             </circle>
 
-                                            <line v-for="edge in edgesRoad" :key="edge.id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" />
-                                            <line v-for="edge in edgesAir" :key="edge.id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" stroke-dasharray="1" />
+                                            <line v-for="edge in edgesRoad" :key="edge.id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" transform="scale(1, -1)"/>
+                                            <line v-for="edge in edgesAir" :key="edge.id" :x1="getX(edge.from)" :y1="getY(edge.from)" :x2="getX(edge.to)" :y2="getY(edge.to)" stroke="lightgray" :stroke-width="1" stroke-dasharray="1" transform="scale(1, -1)"/>
 
                                             <template v-if="state !== 'stopped'">
                                                 <line :x1="-30 / map.zoom" y1="0" :x2="30 / map.zoom" y2="0" stroke="gray" :stroke-width="1 / map.zoom" />
@@ -176,8 +176,8 @@
 
 
                                                 <g v-for="hub in svgHubs" :key="hub.id">
-                                                    <use :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill"
-                                                         v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details" transform="scale(1, -1)">
+                                                    <use :x="hub.x - entitySize.hub/2" :y="hub.y - entitySize.hub/2" :width="hub.width * entitySize.hub" :height="hub.height * entitySize.hub" :href="hub.href" :fill="hub.fill"
+                                                         v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored}), Node: ${hub.node}`" title="Hub details" transform="scale(1, -1)">
 <!--                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>-->
                                                     </use>
 <!--                                                     Badges with Parcel count-->
@@ -189,12 +189,18 @@
 <!--                                                    </g>-->
                                                 </g>
 
-                                                <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.car" :y="-address.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">
+                                                <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.address" :y="-address.position.y - entitySize.address" :width="2 * entitySize.address" :height="2 * entitySize.address" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">
                                                     <title>Address {{ address.id }} ({{ address.name }})</title>
                                                 </use>
 
                                                 <use v-for="(car, id) in entities.cars" :key="id" :x="car.position.x - entitySize.car" :y="-car.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#car-symbol'" fill="blue" transform="scale(1, -1)">
                                                     <title>Car {{ car.id }} ({{ car.state }})</title>
+                                                </use>
+
+
+                                                <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
+<!--                                                    TODO add loaded parcels / capacity?-->
+                                                    <title>Bus {{ bus.id }} ({{ bus.state }})</title>
                                                 </use>
 
                                                 <use v-for="(drone, id) in entities.drones" :key="id" :x="drone.position.x - entitySize.drone" :y="-drone.position.y - entitySize.drone" :width="2 * entitySize.drone" :height="2 * entitySize.drone" :href="require('../../assets/entities.svg') + '#drone-symbol'" fill="red" transform="scale(1, -1)">
@@ -257,6 +263,11 @@
                                                     <td>_20 min</td>
                                                 </tr>
                                                 <tr>
+                                                    <td>Buses</td>
+                                                    <td> _x / {{ Object.keys(entities.buss).length }}</td>
+                                                    <td>_50 min</td>
+                                                </tr>
+                                                <tr>
                                                     <td>
                                                         Parcel
                                                         <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
@@ -303,6 +314,12 @@
                                     <h4>Cars</h4>
                                     <b-list-group>
                                         <b-list-group-item v-for="(car, id) in entities.cars" :key="id">{{ id }}</b-list-group-item>
+                                    </b-list-group>
+                                </b-col>
+                                <b-col>
+                                    <h4>Buses</h4>
+                                    <b-list-group>
+                                        <b-list-group-item v-for="(bus, id) in entities.buss" :key="id">{{ id }}</b-list-group-item>
                                     </b-list-group>
                                 </b-col>
                                 <b-col>
@@ -361,6 +378,10 @@
                         <font-awesome-icon icon="car" style="color: blue" />: {{Object.keys(entities.cars).length }}
                     </b-nav-text>
 
+                    <b-nav-text class="mx-3" title="Number of busses">
+                        <font-awesome-icon icon="bus" style="color: blue" />: {{ Object.keys(entities.buss).length }}
+                    </b-nav-text>
+
                     <b-nav-text class="mx-3" title="Number of parcels">
                         <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
                     </b-nav-text>
@@ -411,6 +432,7 @@ export default {
             entities: {
                 drones: { },
                 cars: { },
+                buss: {},   //plural busses breaks mqtt topic matching TODO
                 parcels: { },
                 hubs: { }
             },
@@ -427,11 +449,12 @@ export default {
             },
             display: {
                 sizes: {
-                    hub: 10,
-                    drone: 8,
-                    car: 10,
-                    //bus: 10,
-                    parcel: 6
+                    hub: 12,
+                    drone: 2,
+                    car: 3,
+                    bus: 8,
+                    parcel: 1,
+                    address: 4,
                 },
                 zoomEntities: true,
                 isSidebarVisible: false,
@@ -450,7 +473,7 @@ export default {
                     message: null
                 },
                 order: {
-                    vendor: null,
+                    vendor: null,     //
                     customer: null,
                     pickup: null,
                     dropoff: null
@@ -502,6 +525,7 @@ export default {
             this.state = 'stopped';
             this.$set(this.entities, 'drones', { });
             this.$set(this.entities, 'cars', { });
+            this.$set(this.entities, 'buses', { });
             this.$set(this.entities, 'hubs', { });
             this.$set(this.entities, 'parcels', { });
         },
@@ -620,17 +644,19 @@ export default {
     computed: {
         entitySize: function() {
             return {
-                hub: this.display.sizes.hub / (this.zoomEntities ? 1 : this.map.zoom),
-                drone: this.display.sizes.drone / (this.zoomEntities ? 1 : this.map.zoom),
-                car: this.display.sizes.car / (this.zoomEntities ? 1 : this.map.zoom),
-                parcel: this.display.sizes.parcel / (this.zoomEntities ? 1 : this.map.zoom)
+                hub: this.display.sizes.hub / (this.display.zoomEntities ? 1 : this.map.zoom),
+                drone: this.display.sizes.drone / (this.display.zoomEntities ? 1 : this.map.zoom),
+                car: this.display.sizes.car / (this.display.zoomEntities ? 1 : this.map.zoom),
+                bus: this.display.sizes.bus / (this.display.zoomEntities ? 1 : this.map.zoom),
+                parcel: this.display.sizes.parcel / (this.display.zoomEntities ? 1 : this.map.zoom),
+                address: this.display.sizes.address / (this.display.zoomEntities ? 1 : this.map.zoom),
             }
         },
         parcelPosition: function() {
             return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
         },
         svgHubs: function() {
-            return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x-3, y: this.map.topology.nodes[h.position].position.y-3, width: 6, height: 6, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length }));
+            return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x, y: this.map.topology.nodes[h.position].position.y-1, width: 1, height: 1, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length, node: h.position }));
         },
         edgesRoad: function() {
             return Object.values(this.map.topology.edges).filter( e => e.type === 'road')
@@ -883,3 +909,6 @@ button:focus {
 }
 
 </style>
+
+
+<!-- TODO elements ideas: add clock-->

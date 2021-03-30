@@ -29,7 +29,7 @@ const TaskState = {
 };
 
 class Bus {
-    constructor(id, position, route, capacity, stopTime = 5000) {
+    constructor(id, position, route, capacity = 2, stopTime = 5000) {
         this.id = id;
         this.position = position;
 

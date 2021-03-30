@@ -4,7 +4,7 @@ const _ = require('lodash');
 // Internal modules
 const { random, uuid } = require('../helpers');
 const MQTTClient = require('../mqtt-client');
-const Car = require('../models/car');
+const { Car, CarState } = require('../models/car');
 
 const topology = require('../../topology');
 
@@ -57,8 +57,8 @@ module.exports = class CarSimulator extends MQTTClient {
         this.cars = Object.assign({}, ...Array.from({ length: this.numberOfCars }).map(() => {
             let id = uuid();
             let start = random.key(_.pickBy(topology.nodes, n => ['parking', 'road-junction'].includes(n.type)));
-            // let task = this.randomTask(start);
-            return { [id]: new Car(id, topology.nodes[start].position, []) };
+
+            return { [id]: new Car (id, topology.nodes[start].position) };
         }));
         for (const [id, car] of Object.entries(this.cars)) {
             this.publishFrom(`car/${id}`, 'state', car);
@@ -97,5 +97,9 @@ module.exports = class CarSimulator extends MQTTClient {
             // This message is only received if the car is the transaction's "from" instance and has already sent the "execute" message
             this.cars[topic.id].completeTask(this);
         }
+    }
+
+    getIdleCars() {
+        return Object.fromEntries(Object.entries(this.cars).filter(d => d[1]['state'] === 0))
     }
 };
