@@ -252,6 +252,12 @@
                                                     <title>Car {{ id }} ({{ car.state }})</title>
                                                 </use>
 
+
+                                                <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
+<!--                                                    TODO add loaded parcels / capacity?-->
+                                                    <title>Bus {{ bus.id }} ({{ bus.state }})</title>
+                                                </use>
+
                                                 <use v-for="(drone, id) in entities.drones"
                                                      :key="id"
                                                      :x="drone.cx - drone.width / 2"
@@ -330,6 +336,11 @@
                                                     <td>_20 min</td>
                                                 </tr>
                                                 <tr>
+                                                    <td>Buses</td>
+                                                    <td> _x / {{ Object.keys(entities.buss).length }}</td>
+                                                    <td>_50 min</td>
+                                                </tr>
+                                                <tr>
                                                     <td>
                                                         Parcel
                                                         <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
@@ -376,6 +387,12 @@
                                     <h4>Cars</h4>
                                     <b-list-group>
                                         <b-list-group-item v-for="(car, id) in entities.cars" :key="id">{{ id }}</b-list-group-item>
+                                    </b-list-group>
+                                </b-col>
+                                <b-col>
+                                    <h4>Buses</h4>
+                                    <b-list-group>
+                                        <b-list-group-item v-for="(bus, id) in entities.buss" :key="id">{{ id }}</b-list-group-item>
                                     </b-list-group>
                                 </b-col>
                                 <b-col>
@@ -439,6 +456,10 @@
                         <font-awesome-icon icon="car" style="color: blue" />: {{Object.keys(entities.cars).length }}
                     </b-nav-text>
 
+                    <b-nav-text class="mx-3" title="Number of busses">
+                        <font-awesome-icon icon="bus" style="color: blue" />: {{ Object.keys(entities.buss).length }}
+                    </b-nav-text>
+
                     <b-nav-text class="mx-3" title="Number of parcels">
                         <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
                     </b-nav-text>
@@ -497,6 +518,7 @@ export default {
                 },
                 drones: { },
                 cars: { },
+                buss: {},   //plural busses breaks mqtt topic matching TODO
                 parcels: { },
                 hubs: { }
             },
@@ -1048,3 +1070,6 @@ button:focus {
 }
 
 </style>
+
+
+<!-- TODO elements ideas: add clock-->

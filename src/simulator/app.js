@@ -7,6 +7,7 @@ const _ = require('lodash');
 // Internal modules
 const DroneSimulator = require('./simulators/drone-simulator');
 const CarSimulator = require('./simulators/car-simulator');
+const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
 const ParcelSimulator = require('./simulators/parcel-simulator');
 const ControlSystem = require('./control-system/control-system');
@@ -25,11 +26,12 @@ const server = app.listen(port, () => {
 });
 
 // Simulators
-const droneSimulator = new DroneSimulator(5);
-const carSimulator = new CarSimulator(0);
-const hubSimulator = new HubSimulator(3);
+const droneSimulator = new DroneSimulator(2);   // 2
+const carSimulator = new CarSimulator(1);       // 1
+const busSimulator = new BusSimulator(1);
+const hubSimulator = new HubSimulator(3);       // 3
 const parcelSimulator = new ParcelSimulator(hubSimulator);
-const controlSystem = new ControlSystem(droneSimulator, carSimulator, hubSimulator, parcelSimulator);
+const controlSystem = new ControlSystem(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator);
 
 // Graceful shutdown
 process.on('SIGTERM', shutdown);
@@ -39,6 +41,7 @@ function shutdown() {
     server.close(() => {
         droneSimulator.destructor();
         carSimulator.destructor();
+        busSimulator.destructor();
         hubSimulator.destructor();
         parcelSimulator.destructor();
         controlSystem.destructor();
