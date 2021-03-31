@@ -525,7 +525,7 @@ export default {
             this.state = 'stopped';
             this.$set(this.entities, 'drones', { });
             this.$set(this.entities, 'cars', { });
-            this.$set(this.entities, 'buses', { });
+            this.$set(this.entities, 'buss', { });
             this.$set(this.entities, 'hubs', { });
             this.$set(this.entities, 'parcels', { });
         },
