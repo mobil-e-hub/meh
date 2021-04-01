@@ -1,13 +1,6 @@
 <template>
-    <use :x="topology.nodes[hub.position].x"
-         :y="topology.nodes[hub.position].y"
-         :width="10"
-         :height="10"
-         :href="require('../../../assets/entities.svg') + '#hub-symbol'"
-         fill="green"
-         v-b-popover.hover.right="`Hub ${id} (Parcels: ${stored})`"
-         title="Hub details"
-         transform="scale(1, -1)">
+    <use v-if="hub && node" :x="displayPosition.x" :y="displayPosition.y" :width="size" :height="size" :href="require('../../../assets/entities.svg') + '#hub-symbol'" :fill="fill">
+        <title>Hub {{ hub.id }} (Parcels: {{ Object.keys(hub.parcels).length }})</title>
     </use>
 </template>
 
@@ -17,13 +10,34 @@
     export default {
         name: 'Hub',
         props: {
-            hub: Object
+            id: String
         },
         data: function () {
             return {
-                id: 1234,
-                stored: 3,
-                topology: topology
+
+            }
+        },
+        computed: {
+            hub: function() {
+                return this.$store.state.entities.hubs[this.id];
+            },
+            node: function() {
+                return this.$store.state.topology.nodes[this.hub.position];
+            },
+            size: function() {
+                return this.$store.state.settings.map.displaySize.hub * (this.$store.state.settings.map.zoom.entities ? this.$store.state.settings.map.zoom.factor : 1.0);
+            },
+            fill: function() {
+                return 'green';
+            },
+            position: function() {
+                return this.node ? { cx: this.node.position.x, cy: this.node.position.y } : null;
+            },
+            displayPosition: function() {
+                return this.position ? {
+                    x: this.position.cx * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.x - (this.size / 2),
+                    y: this.position.cy * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.y - (this.size / 2)
+                } : null;
             }
         }
     }

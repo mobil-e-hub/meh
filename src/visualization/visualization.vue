@@ -53,7 +53,7 @@
                             <b-icon icon="zoom-in" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-nav-text style="min-width: 50px; text-align: center">{{ Math.round(map.zoom.factor * 100) }}%</b-nav-text>
+                        <b-nav-text style="min-width: 50px; text-align: center">{{ Math.round($store.state.settings.map.zoom.factor * 100) }}%</b-nav-text>
 
                         <b-button variant="link" title="Zoom out" @click="clickZoomOutButton">
                             <b-icon icon="zoom-out" aria-hidden="true"></b-icon>
@@ -82,21 +82,21 @@
                         </b-button>
 
                         <b-modal id="modal-place-order" title="Place order" @ok="clickPlaceOrderButton">
-                            <b-form-group label="Vendor" label-for="input-order-vendor">
-                                <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>
-                            </b-form-group>
+<!--                            <b-form-group label="Vendor" label-for="input-order-vendor">-->
+<!--                                <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>-->
+<!--                            </b-form-group>-->
 
-                            <b-form-group label="Customer" label-for="input-order-customer">
-                                <b-form-select id="input-order-customer" v-model="command.order.customer" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>
-                            </b-form-group>
+<!--                            <b-form-group label="Customer" label-for="input-order-customer">-->
+<!--                                <b-form-select id="input-order-customer" v-model="command.order.customer" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>-->
+<!--                            </b-form-group>-->
 
-                            <b-form-group label="Pick-up time" label-for="input-order-pickup">
-                                <b-form-select id="input-order-pickup" v-model="command.order.pickup" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>
-                            </b-form-group>
+<!--                            <b-form-group label="Pick-up time" label-for="input-order-pickup">-->
+<!--                                <b-form-select id="input-order-pickup" v-model="command.order.pickup" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>-->
+<!--                            </b-form-group>-->
 
-                            <b-form-group label="Drop-off time" label-for="input-order-dropoff">
-                                <b-form-select id="input-order-dropoff" v-model="command.order.dropoff" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>
-                            </b-form-group>
+<!--                            <b-form-group label="Drop-off time" label-for="input-order-dropoff">-->
+<!--                                <b-form-select id="input-order-dropoff" v-model="command.order.dropoff" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>-->
+<!--                            </b-form-group>-->
                         </b-modal>
                     </b-button-toolbar>
                 </b-nav-form>
@@ -171,45 +171,25 @@
                                 <!-- Map-->
                                 <b-col cols="9">
                                     <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
-                                        <g :transform="`translate(${map.origin.x}, ${map.origin.y}) scale(${map.zoom.factor}, -${map.zoom.factor}) translate(${map.offset.x}, ${map.offset.y})`">
-                                            <!--Topology (nodes, edges)-->
-                                            <circle v-for="(node, id) in map.topology.nodes"
-                                                    :key="id"
-                                                    :r="map.displaySize.node / (map.zoom.topology ? 1 : map.zoom.factor)"
-                                                    :cx="node.position.x"
-                                                    :cy="node.position.y"
-                                                    fill="lightgray"
-                                            >
-                                                <title>Node {{ node.id }} ({{ node.type }})</title>
-                                            </circle>
+                                        <!--Topology (nodes, edges)-->
+                                        <node v-for="(node, id) in $store.state.topology.nodes" :key="id" :id="id" />
+                                        <edge v-for="(edge, id) in $store.state.topology.edges" :key="id" :id="id" />
 
-                                            <line v-for="(edge, id) in map.topology.edges"
-                                                  :key="id"
-                                                  :x1="map.topology.nodes[edge.from].position.x"
-                                                  :y1="map.topology.nodes[edge.from].position.y"
-                                                  :x2="map.topology.nodes[edge.to].position.x"
-                                                  :y2="map.topology.nodes[edge.to].position.y"
-                                                  stroke="lightgray"
-                                                  :stroke-width="map.displaySize.edge / (map.zoom.topology ? 1 : map.zoom.factor)"
-                                                  :stroke-dasharray="edge.type === 'air' ? 1 : ''"
-                                            />
-
-
-                                            <!--Content-->
-                                            <template>
-                                                <!--Static content (hubs, addresses)-->
-                                                <g v-for="(hub, id) in entities.hubs" :key="id">
+                                        <!--Content-->
+                                        <!--Static content (hubs, addresses)-->
+                                        <g v-for="(hub, id) in $store.state.entities.hubs" :key="id">
                                                     <!--Hub-->
-                                                    <use :x="hub.cx - hub.width / 2"
-                                                         :y="hub.cy - hub.height / 2"
-                                                         :width="hub.width"
-                                                         :height="hub.height"
-                                                         :href="require('../../assets/entities.svg') + '#hub-symbol'"
-                                                         :fill="hub.fill"
-                                                         v-b-popover.hover.right="`Hub ${id} (Parcels: ${hub.stored})`"
-                                                         title="Hub details"
-                                                         transform="scale(1, -1)">
-                                                    </use>
+                                                    <hub :id="id"></hub>
+<!--                                                    <use :x="hub.cx - hub.width / 2"-->
+<!--                                                         :y="hub.cy - hub.height / 2"-->
+<!--                                                         :width="hub.width"-->
+<!--                                                         :height="hub.height"-->
+<!--                                                         :href="require('../../assets/entities.svg') + '#hub-symbol'"-->
+<!--                                                         :fill="hub.fill"-->
+<!--                                                         v-b-popover.hover.right="`Hub ${id} (Parcels: ${hub.stored})`"-->
+<!--                                                         title="Hub details"-->
+<!--                                                         transform="scale(1, -1)">-->
+<!--                                                    </use>-->
 
                                                     <!--Badge with Parcel count-->
                                                     <!--                                                    <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">-->
@@ -220,11 +200,11 @@
                                                     <!--                                                    </g>-->
                                                 </g>
 
-<!--                                                <g v-for="hub in svgHubs" :key="hub.id">-->
-<!--                                                    <use :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill"-->
-<!--                                                         v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details" transform="scale(1, -1)">-->
+<!--                                        <g v-for="hub in svgHubs" :key="hub.id">-->
+<!--                                            <use :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill"-->
+<!--                                                 v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details" transform="scale(1, -1)">-->
 <!--&lt;!&ndash;                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>&ndash;&gt;-->
-<!--                                                    </use>-->
+<!--                                            </use>-->
 <!--&lt;!&ndash;                                                     Badges with Parcel count&ndash;&gt;-->
 <!--&lt;!&ndash;                                                    <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">&ndash;&gt;-->
 <!--&lt;!&ndash;&lt;!&ndash;                                                        rotate(-180 ${hub.x} ${hub.y} ` scale(1, -1)`)&ndash;&gt;&ndash;&gt;-->
@@ -232,59 +212,59 @@
 <!--&lt;!&ndash;&lt;!&ndash;                                                                TODO text in SVG: flip + translate correctly&ndash;&gt;&ndash;&gt;-->
 <!--&lt;!&ndash;                                                        &lt;!&ndash;                                                        <text class="SVGBadge-number" :x="hub.x" :y="hub.y - hub.height+1.5" transform="scale(-1,1)" text-anchor="middle" >{{ hub.stored +1}} </text>&ndash;&gt;&ndash;&gt;-->
 <!--&lt;!&ndash;                                                    </g>&ndash;&gt;-->
-<!--                                                </g>-->
+<!--                                        </g>-->
 
-<!--                                                <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.car" :y="-address.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">-->
-<!--                                                    <title>Address {{ address.id }} ({{ address.name }})</title>-->
-<!--                                                </use>-->
+<!--                                        <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.car" :y="-address.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">-->
+<!--                                            <title>Address {{ address.id }} ({{ address.name }})</title>-->
+<!--                                        </use>-->
 
-                                                <!--Dynamic content (cars, drones, parcels-->
-                                                <use v-for="(car, id) in entities.cars"
-                                                     :key="id"
-                                                     :x="car.cx - car.width / 2"
-                                                     :y="car.cy - car.height / 2"
-                                                     :width="car.width"
-                                                     :height="car.height"
-                                                     :fill="car.fill"
-                                                     :href="require('../../assets/entities.svg') + '#car-symbol'"
-                                                     transform="scale(1, -1)"
-                                                >
-                                                    <title>Car {{ id }} ({{ car.state }})</title>
-                                                </use>
+                                        <!--Dynamic content (cars, drones, parcels-->
+                                        <use v-for="(car, id) in entities.cars"
+                                             :key="id"
+                                             :x="car.cx - car.width / 2"
+                                             :y="car.cy - car.height / 2"
+                                             :width="car.width"
+                                             :height="car.height"
+                                             :fill="car.fill"
+                                             :href="require('../../assets/entities.svg') + '#car-symbol'"
+                                             transform="scale(1, -1)"
+                                        >
+                                            <title>Car {{ id }} ({{ car.state }})</title>
+                                        </use>
 
 
-                                                <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
+                                        <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
 <!--                                                    TODO add loaded parcels / capacity?-->
-                                                    <title>Bus {{ bus.id }} ({{ bus.state }})</title>
-                                                </use>
+                                            <title>Bus {{ bus.id }} ({{ bus.state }})</title>
+                                        </use>
 
-                                                <use v-for="(drone, id) in entities.drones"
-                                                     :key="id"
-                                                     :x="drone.cx - drone.width / 2"
-                                                     :y="drone.cy - drone.height / 2"
-                                                     :width="drone.width"
-                                                     :height="drone.height"
-                                                     :fill="drone.fill"
-                                                     :href="require('../../assets/entities.svg') + '#drone-symbol'"
-                                                     transform="scale(1, -1)"
-                                                >
-                                                    <title>Drone {{ id }} ({{ drone.state }})</title>
-                                                </use>
+                                        <drone v-for="(drone, id) in $store.state.entities.drones" :key="id" :id="id" />
 
-                                                <use v-for="(parcel, id) in lodash.pickBy(entities.parcels, (p, key) => p.cx !== null)"
-                                                     :key="id"
-                                                     :x="parcel.cx - parcel.width / 2"
-                                                     :y="parcel.cy - parcel.height / 2"
-                                                     :width="parcel.width"
-                                                     :height="parcel.height"
-                                                     :fill="parcel.fill"
-                                                     :href="require('../../assets/entities.svg') + '#parcel-symbol'"
-                                                     transform="scale(1, -1)"
-                                                     v-b-popover.hover.right="`Parcel ${id} (Source: ${parcel.carrier.id}, Destination: ${parcel.destination.id})`"
-                                                     title="Parcel details">
-                                                </use>
-                                            </template>
-                                        </g>
+                                        <use v-for="(drone, id) in entities.drones"
+                                             :key="id"
+                                             :x="drone.cx - drone.width / 2"
+                                             :y="drone.cy - drone.height / 2"
+                                             :width="drone.width"
+                                             :height="drone.height"
+                                             :fill="drone.fill"
+                                             :href="require('../../assets/entities.svg') + '#drone-symbol'"
+                                             transform="scale(1, -1)"
+                                        >
+                                            <title>Drone {{ id }} ({{ drone.state }})</title>
+                                        </use>
+
+                                        <use v-for="(parcel, id) in lodash.pickBy(entities.parcels, (p, key) => p.cx !== null)"
+                                             :key="id"
+                                             :x="parcel.cx - parcel.width / 2"
+                                             :y="parcel.cy - parcel.height / 2"
+                                             :width="parcel.width"
+                                             :height="parcel.height"
+                                             :fill="parcel.fill"
+                                             :href="require('../../assets/entities.svg') + '#parcel-symbol'"
+                                             transform="scale(1, -1)"
+                                             v-b-popover.hover.right="`Parcel ${id} (Source: ${parcel.carrier.id}, Destination: ${parcel.destination.id})`"
+                                             title="Parcel details">
+                                        </use>
                                     </svg>
                                 </b-col>
 
@@ -495,6 +475,10 @@ const mqttMatch = require('mqtt-match');
 const _ = require('lodash');
 
 const topology = require('../topology');
+import Node from './components/Node';
+import Edge from './components/Edge';
+import Hub from './components/Hub';
+import Drone from './components/Drone';
 
 export default {
     data: function () {
@@ -523,28 +507,28 @@ export default {
                 hubs: { }
             },
             map: {
-                origin: { x: 0, y: 0 },
-                offset: { x: 0, y: 0 },
-                zoom: {
-                    factor: 4,
-                    entities: true,
-                    topology: true
-                },
-                displaySize: {
-                    hub: 25,
-                    drone: 15,
-                    car: 20,
-                    //bus: 10,
-                    parcel: 12,
-                    node: 2,
-                    edge: 1
-                },
+                // origin: { x: 0, y: 0 },
+                // offset: { x: 0, y: 0 },
+                // zoom: {
+                //     factor: 4,
+                //     entities: true,
+                //     topology: true
+                // },
+                // displaySize: {
+                //     hub: 25,
+                //     drone: 15,
+                //     car: 20,
+                //     //bus: 10,
+                //     parcel: 12,
+                //     node: 2,
+                //     edge: 1
+                // },
                 drag: {
                     isDragging: false,
                     x: 0,
                     y: 0
                 },
-                topology: topology
+                // topology: topology
             },
             display: {
                 isSidebarVisible: false,
@@ -573,7 +557,10 @@ export default {
         }
     },
     components: {
-
+        Node,
+        Edge,
+        Hub,
+        Drone
     },
     created: function() {
 
@@ -598,7 +585,7 @@ export default {
             this.receivedMessages.unshift({ topic: 'error', message: err.toString(), timestamp: Date.now() });
         }
 
-        this.$set(this.map, 'origin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
+        this.$store.commit('mapSetOrigin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
     },
     methods: {
         clickStartSimulationButton: function() {
@@ -644,7 +631,7 @@ export default {
             this.view = view;
         },
         onMouseWheelMap: function(event) {
-            this.map.zoom.factor *= event.deltaY > 0 ? 1 / 1.05 : 1.05;
+            this.$store.commit('mapZoom', { factor: event.deltaY });
         },
         onMouseDownMap: function(event) {
             this.map.drag.x = event.offsetX;
@@ -653,17 +640,13 @@ export default {
         },
         onMouseMoveMap: function(event) {
             if (this.map.drag.isDragging) {
-                this.map.origin.x += event.offsetX - this.map.drag.x;
-                this.map.origin.y += event.offsetY - this.map.drag.y;
+                this.$store.commit('mapMove', { offsetX: event.offsetX - this.map.drag.x, offsetY: event.offsetY - this.map.drag.y });
                 this.map.drag.x = event.offsetX;
                 this.map.drag.y = event.offsetY;
             }
         },
         onMouseUpMap: function(event) {
-            this.map.origin.x += event.offsetX - this.map.drag.x;
-            this.map.origin.y += event.offsetY - this.map.drag.y;
-            this.map.drag.x = event.offsetX;
-            this.map.drag.y = event.offsetY;
+            this.$store.commit('mapMove', { offsetX: event.offsetX - this.map.drag.x, offsetY: event.offsetY - this.map.drag.y });
             this.map.drag.isDragging = false;
         },
         publish: function(topic, message = '') {
@@ -671,7 +654,7 @@ export default {
         },
         receive: function(topic, message) {
             if (this.matchTopic(topic, 'from/+/+/state')) {
-                this.updateState(topic, message);
+                this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message });
             }
             else if (this.matchTopic(topic, 'to/drone/+/tasks')) {
                 this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
@@ -736,7 +719,6 @@ export default {
         },
         clickTestButton: function() {
             this.publish('test');
-            // this.state = 'running';
         },
         clickPlaceOrderButton: function() {
             this.publish('place-order', {
@@ -750,62 +732,62 @@ export default {
         toggleSidebar: function() {
             this.display.isSidebarVisible = !this.display.isSidebarVisible
         },
-        updateState(topic, message) {
-            if (topic.entity === 'hub') {
-                const hub = message;
-                const size = this.map.displaySize.hub / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-                this.$set(this.entities.hubs, [topic.id], {
-                    id: hub.id,
-                    cx: this.map.topology.nodes[hub.position].position.x,
-                    cy: -this.map.topology.nodes[hub.position].position.y,
-                    width: size,
-                    height: size,
-                    fill: Object.keys(hub.parcels).length > 0 ? 'red' : 'gray',
-                    stored: Object.keys(hub.parcels).length
-                });
-            }
-            else if (topic.entity === 'car') {
-                const car = message;
-                const size = this.map.displaySize.car / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-                this.$set(this.entities.cars, [topic.id], {
-                    id: car.id,
-                    cx: car.position.x,
-                    cy: -car.position.y,
-                    width: size,
-                    height: size,
-                    fill: 'blue',
-                    state: car.state
-                });
-            }
-            else if (topic.entity === 'drone') {
-                const drone = message;
-                const size = this.map.displaySize.drone / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-                this.$set(this.entities.drones, [topic.id], {
-                    id: drone.id,
-                    cx: drone.position.x,
-                    cy: -drone.position.y,
-                    width: size,
-                    height: size,
-                    fill: 'red',
-                    state: drone.state
-                });
-            }
-            else if (topic.entity === 'parcel') {
-                const parcel = message;
-                const carrier = this.entities[`${parcel.carrier.type}s`][parcel.carrier.id];
-                const size = this.map.displaySize.parcel / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-                this.$set(this.entities.parcels, [topic.id], {
-                    id: parcel.id,
-                    cx: carrier ? carrier.cx : null,
-                    cy: carrier ? carrier.cy : null,
-                    width: size,
-                    height: size,
-                    fill: 'green',
-                    carrier: parcel.carrier,
-                    destination: parcel.destination
-                });
-            }
-        }
+        // updateState(topic, message) {
+        //     if (topic.entity === 'hub') {
+        //         const hub = message;
+        //         const size = this.map.displaySize.hub / (this.map.zoom.entities ? this.map.zoom.factor : 1);
+        //         this.$set(this.entities.hubs, [topic.id], {
+        //             id: hub.id,
+        //             cx: this.map.topology.nodes[hub.position].position.x,
+        //             cy: -this.map.topology.nodes[hub.position].position.y,
+        //             width: size,
+        //             height: size,
+        //             fill: Object.keys(hub.parcels).length > 0 ? 'red' : 'gray',
+        //             stored: Object.keys(hub.parcels).length
+        //         });
+        //     }
+        //     else if (topic.entity === 'car') {
+        //         const car = message;
+        //         const size = this.map.displaySize.car / (this.map.zoom.entities ? this.map.zoom.factor : 1);
+        //         this.$set(this.entities.cars, [topic.id], {
+        //             id: car.id,
+        //             cx: car.position.x,
+        //             cy: -car.position.y,
+        //             width: size,
+        //             height: size,
+        //             fill: 'blue',
+        //             state: car.state
+        //         });
+        //     }
+        //     else if (topic.entity === 'drone') {
+        //         const drone = message;
+        //         const size = this.map.displaySize.drone / (this.map.zoom.entities ? this.map.zoom.factor : 1);
+        //         this.$set(this.entities.drones, [topic.id], {
+        //             id: drone.id,
+        //             cx: drone.position.x,
+        //             cy: -drone.position.y,
+        //             width: size,
+        //             height: size,
+        //             fill: 'red',
+        //             state: drone.state
+        //         });
+        //     }
+        //     else if (topic.entity === 'parcel') {
+        //         const parcel = message;
+        //         const carrier = this.entities[`${parcel.carrier.type}s`][parcel.carrier.id];
+        //         const size = this.map.displaySize.parcel / (this.map.zoom.entities ? this.map.zoom.factor : 1);
+        //         this.$set(this.entities.parcels, [topic.id], {
+        //             id: parcel.id,
+        //             cx: carrier ? carrier.cx : null,
+        //             cy: carrier ? carrier.cy : null,
+        //             width: size,
+        //             height: size,
+        //             fill: 'green',
+        //             carrier: parcel.carrier,
+        //             destination: parcel.destination
+        //         });
+        //     }
+        // }
     },
     computed: {
         parcelPosition: function() {
@@ -814,12 +796,12 @@ export default {
         svgHubs: function() {
             return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x-3, y: this.map.topology.nodes[h.position].position.y-3, width: 6, height: 6, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length }));
         },
-        edgesRoad: function() {
-            return Object.values(this.map.topology.edges).filter( e => e.type === 'road')
-        },
-        edgesAir: function() {
-            return Object.values(this.map.topology.edges).filter( e => e.type === 'air')
-        },
+        // edgesRoad: function() {
+        //     return Object.values(this.map.topology.edges).filter( e => e.type === 'road')
+        // },
+        // edgesAir: function() {
+        //     return Object.values(this.map.topology.edges).filter( e => e.type === 'air')
+        // },
         toggleStatsTable: {
             get() {
                 return this.display.statsTableVisible;
