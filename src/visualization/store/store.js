@@ -14,7 +14,8 @@ const plural = {
     car: 'cars',
     bus: 'buses',
     parcel: 'parcels',
-    hub: 'hubs'
+    hub: 'hubs',
+    address: 'addresses'
 };
 
 export default new Vuex.Store({
@@ -24,7 +25,8 @@ export default new Vuex.Store({
             cars: {},
             buses: {},
             parcels: {},
-            hubs: {}
+            hubs: {},
+            addresses: {}
         },
         topology: topology,
         settings: {
@@ -42,7 +44,8 @@ export default new Vuex.Store({
                     bus: 10,
                     parcel: 12,
                     node: 2,
-                    edge: 1
+                    edge: 1,
+                    address: 7
                 }
             }
         }
@@ -55,7 +58,7 @@ export default new Vuex.Store({
             Vue.set(state.entities[plural[type]], id, payload);
         },
         mapZoom(state, { factor }) {
-            state.settings.map.zoom.factor *= factor > 0 ? 1 / 1.05 : 1.05;
+            state.settings.map.zoom.factor *= factor;
         },
         mapMove(state, { offsetX, offsetY }) {
             state.settings.map.origin.x += offsetX;

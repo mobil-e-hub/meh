@@ -30,7 +30,7 @@
             displayPosition: function() {
                 return this.position ? {
                     cx: this.position.cx * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.x,
-                    cy: this.position.cy * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.y
+                    cy: -this.position.cy * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.y
                 } : null;
             }
         }

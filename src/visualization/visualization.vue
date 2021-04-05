@@ -29,33 +29,29 @@
                 <b-nav-form>
                     <b-button-toolbar>
                         <!--Start/stop listening to messages-->
-                        <b-button variant="link" :title="state === 'listening' ? 'Stop listening' : 'Start listening'" @click="clickListenButton">
-                            <b-icon icon="record-circle-fill" :variant="state === 'listening' ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
+                        <b-button variant="link" :title="listening ? 'Stop listening' : 'Start listening'" @click="listening = !listening">
+                            <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-button variant="link" title="Start simulation" @click="clickStartSimulationButton">
-                            <b-icon :icon="state === 'running' ? 'pause-fill' : 'play-fill'" aria-hidden="true"></b-icon>
+                        <b-button variant="link" title="Start simulation" @click="$mqtt.publish('start')">
+                            <b-icon icon="play-fill" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-button variant="link" title="Stop simulation" @click="clickStopSimulationButton">
+                        <b-button variant="link" title="Stop simulation" @click="$mqtt.publish('stop')">
                             <b-icon icon="stop-fill" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-button variant="link" title="Reset simulation" @click="clickResetSimulationButton">
+                        <b-button variant="link" title="Reset simulation" @click="$mqtt.publish('reset')">
                             <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>
                         </b-button>
 
-<!--                        <b-button variant="link" title="Place order" @click="clickPlaceOrderButton" :disabled="state === 'stopped'">-->
-<!--                            <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>-->
-<!--                        </b-button>-->
-
-                        <b-button variant="link" title="Zoom in" @click="clickZoomInButton">
+                        <b-button variant="link" title="Zoom in" @click="$store.commit('mapZoom', { factor: 1.25 })">
                             <b-icon icon="zoom-in" aria-hidden="true"></b-icon>
                         </b-button>
 
                         <b-nav-text style="min-width: 50px; text-align: center">{{ Math.round($store.state.settings.map.zoom.factor * 100) }}%</b-nav-text>
 
-                        <b-button variant="link" title="Zoom out" @click="clickZoomOutButton">
+                        <b-button variant="link" title="Zoom out" @click="$store.commit('mapZoom', { factor: 0.8 })">
                             <b-icon icon="zoom-out" aria-hidden="true"></b-icon>
                         </b-button>
 
@@ -68,8 +64,12 @@
                         </b-button>
 
                         <b-modal id="modal-send-message" title="Send message" @ok="clickSendButton">
+                            <b-form-group label="Sender" label-for="input-message-sender">
+                                <b-form-input id="input-message-sender" v-model="command.message.sender" placeholder="from/visualization/..."></b-form-input>
+                            </b-form-group>
+
                             <b-form-group label="Topic" label-for="input-message-topic">
-                                <b-form-input id="input-message-topic" v-model="command.message.topic" placeholder="from/visualization/..." required></b-form-input>
+                                <b-form-input id="input-message-topic" v-model="command.message.topic" placeholder="status" required></b-form-input>
                             </b-form-group>
 
                             <b-form-group label="Message" label-for="input-message-message">
@@ -177,42 +177,7 @@
 
                                         <!--Content-->
                                         <!--Static content (hubs, addresses)-->
-                                        <g v-for="(hub, id) in $store.state.entities.hubs" :key="id">
-                                                    <!--Hub-->
-                                                    <hub :id="id"></hub>
-<!--                                                    <use :x="hub.cx - hub.width / 2"-->
-<!--                                                         :y="hub.cy - hub.height / 2"-->
-<!--                                                         :width="hub.width"-->
-<!--                                                         :height="hub.height"-->
-<!--                                                         :href="require('../../assets/entities.svg') + '#hub-symbol'"-->
-<!--                                                         :fill="hub.fill"-->
-<!--                                                         v-b-popover.hover.right="`Hub ${id} (Parcels: ${hub.stored})`"-->
-<!--                                                         title="Hub details"-->
-<!--                                                         transform="scale(1, -1)">-->
-<!--                                                    </use>-->
-
-                                                    <!--Badge with Parcel count-->
-                                                    <!--                                                    <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">-->
-                                                    <!--&lt;!&ndash;                                                        rotate(-180 ${hub.x} ${hub.y} ` scale(1, -1)`)&ndash;&gt;-->
-                                                    <!--                                                        <circle class="SVGBadge-svgBackground" :cx="hub.x" :cy="hub.y - hub.height" r="3"/>-->
-                                                    <!--&lt;!&ndash;                                                                TODO text in SVG: flip + translate correctly&ndash;&gt;-->
-                                                    <!--                                                        &lt;!&ndash;                                                        <text class="SVGBadge-number" :x="hub.x" :y="hub.y - hub.height+1.5" transform="scale(-1,1)" text-anchor="middle" >{{ hub.stored +1}} </text>&ndash;&gt;-->
-                                                    <!--                                                    </g>-->
-                                                </g>
-
-<!--                                        <g v-for="hub in svgHubs" :key="hub.id">-->
-<!--                                            <use :x="hub.x" :y="hub.y" :width="hub.width" :height="hub.height" :href="hub.href" :fill="hub.fill"-->
-<!--                                                 v-b-popover.hover.right="`Hub ${hub.id} (Parcels: ${hub.stored})`" title="Hub details" transform="scale(1, -1)">-->
-<!--&lt;!&ndash;                                                        <title>Hub {{ hub.id }} (Parcels:{{ hub.stored }})</title>&ndash;&gt;-->
-<!--                                            </use>-->
-<!--&lt;!&ndash;                                                     Badges with Parcel count&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    <g class="SVGBadge" v-if="hub.stored +1 > 0"  :transform="`rotate(-180 ${hub.x} ${hub.y})`">&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                                                        rotate(-180 ${hub.x} ${hub.y} ` scale(1, -1)`)&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        <circle class="SVGBadge-svgBackground" :cx="hub.x" :cy="hub.y - hub.height" r="3"/>&ndash;&gt;-->
-<!--&lt;!&ndash;&lt;!&ndash;                                                                TODO text in SVG: flip + translate correctly&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        &lt;!&ndash;                                                        <text class="SVGBadge-number" :x="hub.x" :y="hub.y - hub.height+1.5" transform="scale(-1,1)" text-anchor="middle" >{{ hub.stored +1}} </text>&ndash;&gt;&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    </g>&ndash;&gt;-->
-<!--                                        </g>-->
+                                        <hub v-for="(hub, id) in $store.state.entities.hubs" :key="id" :id="id"></hub>
 
 <!--                                        <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.car" :y="-address.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">-->
 <!--                                            <title>Address {{ address.id }} ({{ address.name }})</title>-->
@@ -240,19 +205,6 @@
 
                                         <drone v-for="(drone, id) in $store.state.entities.drones" :key="id" :id="id" />
 
-                                        <use v-for="(drone, id) in entities.drones"
-                                             :key="id"
-                                             :x="drone.cx - drone.width / 2"
-                                             :y="drone.cy - drone.height / 2"
-                                             :width="drone.width"
-                                             :height="drone.height"
-                                             :fill="drone.fill"
-                                             :href="require('../../assets/entities.svg') + '#drone-symbol'"
-                                             transform="scale(1, -1)"
-                                        >
-                                            <title>Drone {{ id }} ({{ drone.state }})</title>
-                                        </use>
-
                                         <use v-for="(parcel, id) in lodash.pickBy(entities.parcels, (p, key) => p.cx !== null)"
                                              :key="id"
                                              :x="parcel.cx - parcel.width / 2"
@@ -269,28 +221,6 @@
                                 </b-col>
 
                                 <b-col cols="3">
-<!--                                    <b-card v-if="state !== 'stopped'" class="my-3" no-body>-->
-<!--                                        <b-card-header>-->
-<!--                                            Place Order-->
-<!--                                        </b-card-header>-->
-
-<!--                                        <b-card-body>-->
-<!--                                            <div>-->
-<!--                                                <b-form-group label="Source Hub" label-for="input-source-hub">-->
-<!--                                                    <b-form-select id="input-source-hub" v-model="command.order.source" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>-->
-<!--                                                </b-form-group>-->
-
-<!--                                                <b-form-group label="Destination Hub" label-for="input-destination-hub">-->
-<!--                                                    <b-form-select id="input-destination-hub" v-model="command.order.destination" :options="Object.values(this.entities.hubs).map(h => h.id)" required></b-form-select>-->
-<!--                                                </b-form-group>-->
-
-<!--                                                <b-button variant="primary" @click="clickPlaceOrderButton">-->
-<!--                                                    Place Order-->
-<!--                                                </b-button>-->
-<!--                                            </div>-->
-<!--                                        </b-card-body>-->
-<!--                                    </b-card>-->
-
                                     <template v-if="display.statsTableVisible">
                                         <div class="card" style="width: 22rem;">
                                             <div class="card-header">
@@ -343,155 +273,79 @@
                             </b-row>
                         </b-container>
                     </div>
-                    <div v-else-if="view === 'messages'">
-                        <h4 class="mb-5">Messages</h4>
-                        <pre style="max-height: 70vh; overflow-y: scroll; white-space: pre-wrap; word-break: keep-all;">{{ receivedMessages.slice(0, 100).map(m => `${m.timestamp} ${m.topic}: ${m.message.toString()}`).join('\n\n') }}</pre>
-                    </div>
-                    <div v-else-if="view === 'entities'">
-                        <h4 class="mb-5">Entities</h4>
-                        <b-container fluid>
-                            <b-row>
-                                <b-col>
-                                    <h4>Hubs</h4>
-                                    <b-list-group>
-                                        <b-list-group-item v-for="(hub, id) in entities.hubs" :key="id">{{ id }}</b-list-group-item>
-                                    </b-list-group>
-                                </b-col>
-                                <b-col>
-                                    <h4>Drones</h4>
-                                    <b-list-group>
-                                        <b-list-group-item v-for="(drone, id) in entities.drones" :key="id">{{ id }}</b-list-group-item>
-                                    </b-list-group>
-                                </b-col>
-                                <b-col>
-                                    <h4>Cars</h4>
-                                    <b-list-group>
-                                        <b-list-group-item v-for="(car, id) in entities.cars" :key="id">{{ id }}</b-list-group-item>
-                                    </b-list-group>
-                                </b-col>
-                                <b-col>
-                                    <h4>Buses</h4>
-                                    <b-list-group>
-                                        <b-list-group-item v-for="(bus, id) in entities.buss" :key="id">{{ id }}</b-list-group-item>
-                                    </b-list-group>
-                                </b-col>
-                                <b-col>
-                                    <h4>Parcels</h4>
-                                    <b-list-group>
-                                        <b-list-group-item v-for="(parcel, id) in entities.parcels" :key="id">{{ id }}</b-list-group-item>
-                                    </b-list-group>
-                                </b-col>
-                            </b-row>
-                        </b-container>
-                    </div>
-                    <div v-else-if="view === 'settings'">
-                        <h4 class="mb-5">Settings</h4>
-                        <b-container fluid>
-                            <b-row class="my-4">
-                                <b-col>
-                                    <h5>Display</h5>
-                                    <b-form-checkbox id="checkbox-zoom-entities" v-model="map.zoom.entities">
-                                        Zoom entity sizes
-                                    </b-form-checkbox>
-                                    <b-form-checkbox id="checkbox-zoom-topology" v-model="map.zoom.topology">
-                                        Zoom node/edge sizes
-                                    </b-form-checkbox>
-                                </b-col>
-                            </b-row>
-
-                            <b-row class="my-4">
-                                <b-col>
-                                    <h5>MQTT Broker</h5>
-                                    <div>
-                                        <b-form-group label="Broker URL:" label-for="input-mqtt-broker">
-                                            <b-form-input id="input-mqtt-broker" v-model="mqtt.url" type="url" placeholder="Enter URL" required></b-form-input>
-                                        </b-form-group>
-                                        <b-form-group label="Message Prefix:" label-for="input-mqtt-prefix">
-                                            <b-form-input id="input-mqtt-prefix" v-model="mqtt.root" placeholder="Enter prefix" required></b-form-input>
-                                        </b-form-group>
-                                    </div>
-                                </b-col>
-                            </b-row>
-                        </b-container>
-                    </div>
+                    <messages v-else-if="view === 'messages'" :messages="messages.messages"></messages>
+                    <entities v-else-if="view === 'entities'"></entities>
+                    <settings v-else-if="view === 'settings'"></settings>
                 </b-col>
             </b-row>
         </b-container>
 
         <b-navbar fixed="bottom" variant="light">
             <b-navbar-nav class="mx-auto">
-                <b-nav-text v-if="state === 'listening'" class="mx-3">{{incomingMessageCounter}}</b-nav-text>
+                <b-nav-text v-if="listening" class="mx-3">{{incomingMessageCounter}}</b-nav-text>
 
-                <template v-if="state !== 'stopped'">
+                <b-nav-text class="mx-2" title="Number of hubs">
+                    <font-awesome-icon icon="warehouse" style="color: gray" />: {{Object.keys(entities.hubs).length }}
+                </b-nav-text>
 
-                    <b-nav-text class="mx-2" title="Number of hubs">
-                        <font-awesome-icon icon="warehouse" style="color: gray" />: {{Object.keys(entities.hubs).length }}
-                    </b-nav-text>
+                <b-nav-text class="mx-3" title="Number of drones">
+                    <font-awesome-icon icon="plane" style="color: red" />: {{Object.keys(entities.drones).length }}
+                </b-nav-text>
 
-                    <b-nav-text class="mx-3" title="Number of drones">
-                        <font-awesome-icon icon="plane" style="color: red" />: {{Object.keys(entities.drones).length }}
-                    </b-nav-text>
+                <b-nav-text class="mx-3" title="Number of cars">
+                    <font-awesome-icon icon="car" style="color: blue" />: {{Object.keys(entities.cars).length }}
+                </b-nav-text>
 
-                    <b-nav-text class="mx-3" title="Number of cars">
-                        <font-awesome-icon icon="car" style="color: blue" />: {{Object.keys(entities.cars).length }}
-                    </b-nav-text>
+                <b-nav-text class="mx-3" title="Number of busses">
+                    <font-awesome-icon icon="bus" style="color: blue" />: {{ Object.keys(entities.buss).length }}
+                </b-nav-text>
 
-                    <b-nav-text class="mx-3" title="Number of busses">
-                        <font-awesome-icon icon="bus" style="color: blue" />: {{ Object.keys(entities.buss).length }}
-                    </b-nav-text>
-
-                    <b-nav-text class="mx-3" title="Number of parcels">
-                        <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
-                    </b-nav-text>
-
-                </template>
-                <template v-else>
-                    <b-nav-text class="mx-3">
-                        Click <b-icon icon="play-fill" aria-hidden="true"></b-icon> to start a simulation
-                    </b-nav-text>
-                </template>
+                <b-nav-text class="mx-3" title="Number of parcels">
+                    <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
+                </b-nav-text>
             </b-navbar-nav>
         </b-navbar>
 
-        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : ''" style="bottom: 220px" title="Map View" @click="setView('simulation')">
+        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : ''" style="bottom: 220px" title="Map View" @click="view = 'simulation'">
             <b-icon icon="map" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'messages' ? 'primary' : ''" style="bottom: 160px" title="Messages View" @click="setView('messages')">
+        <b-button class="floating" :variant="view === 'messages' ? 'primary' : ''" style="bottom: 160px" title="Messages View" @click="view = 'messages'">
             <b-icon icon="chat-left-text" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'entities' ? 'primary' : ''" style="bottom: 100px" title="Entities View" @click="setView('entities')">
+        <b-button class="floating" :variant="view === 'entities' ? 'primary' : ''" style="bottom: 100px" title="Entities View" @click="view = 'entities'">
             <b-icon icon="clipboard-data" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'settings' ? 'primary' : ''" style="bottom: 40px" title="Settings View" @click="setView('settings')">
+        <b-button class="floating" :variant="view === 'settings' ? 'primary' : ''" style="bottom: 40px" title="Settings View" @click="view = 'settings'">
             <b-icon icon="gear-fill" aria-hidden="true"></b-icon>
         </b-button>
     </div>
 </template>
 
 <script>
-const mqtt = require('mqtt');
 const uuid = require('../simulator/helpers').uuid;
-const mqttMatch = require('mqtt-match');
 const _ = require('lodash');
 
-const topology = require('../topology');
+import Messages from './components/Messages';
+import Entities from './components/Entities';
+import Settings from './components/Settings';
+
 import Node from './components/Node';
 import Edge from './components/Edge';
 import Hub from './components/Hub';
 import Drone from './components/Drone';
+import Car from './components/Car';
+import Bus from './components/Bus';
+import Address from './components/Address';
 
 export default {
     data: function () {
         return {
             lodash: _,
-            state: 'listening',
+            listening: true,
             view: 'simulation',
-            receivedMessages: [],
-            mqtt: {
-                client: null,
-                id: uuid(),
-                root: 'mobil-e-hub/viz',
-                url: 'ws://broker.hivemq.com:8000/mqtt'
+            messages: {
+                messages: [],
+                counterInterval: 10
             },
             entities: {
                 raw: {
@@ -507,28 +361,11 @@ export default {
                 hubs: { }
             },
             map: {
-                // origin: { x: 0, y: 0 },
-                // offset: { x: 0, y: 0 },
-                // zoom: {
-                //     factor: 4,
-                //     entities: true,
-                //     topology: true
-                // },
-                // displaySize: {
-                //     hub: 25,
-                //     drone: 15,
-                //     car: 20,
-                //     //bus: 10,
-                //     parcel: 12,
-                //     node: 2,
-                //     edge: 1
-                // },
                 drag: {
                     isDragging: false,
                     x: 0,
                     y: 0
                 },
-                // topology: topology
             },
             display: {
                 isSidebarVisible: false,
@@ -544,7 +381,8 @@ export default {
             command: {
                 message: {
                     topic: null,
-                    message: null
+                    message: null,
+                    sender: null
                 },
                 order: {
                     vendor: null,
@@ -557,81 +395,40 @@ export default {
         }
     },
     components: {
+        Messages,
+        Entities,
+        Settings,
         Node,
         Edge,
         Hub,
-        Drone
+        Drone,
+        // Car,
+        // Bus,
+        // Address
     },
     created: function() {
-
+        // Subscribe to all relevant topics
+        this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
+        this.$mqtt.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
+        this.$mqtt.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
+        this.$mqtt.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
+        this.$mqtt.subscribe('from/car/+/arrived', (topic, message) => this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`));
+        this.$mqtt.subscribe('from/+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
+        this.$mqtt.subscribe('from/+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
+        this.$mqtt.subscribe('from/parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('to/visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },
     mounted: function() {
-        try {
-            this.mqtt.client = mqtt.connect(this.mqtt.url);
-            this.mqtt.client.on('connect', () => {
-                this.mqtt.client.subscribe(this.mqtt.root + '/#');
-            });
-            this.mqtt.client.on('message', (topic, message) => {
-                this.receivedMessages.unshift({ topic, message, timestamp: Date.now() });
-                let [project, version, direction, entity, id, ...args] = topic.split('/');
-                if (this.state === 'listening') {
-                    this.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
-                }
-            });
+        // Update incoming message counter regularly
+        setInterval(() => { this.currentTime = Date.now(); }, 1000);
 
-            setInterval(() => { this.currentTime = Date.now(); }, 1000)
-        }
-        catch (err) {
-            this.receivedMessages.unshift({ topic: 'error', message: err.toString(), timestamp: Date.now() });
-        }
-
+        // Set map origin to center of viewport
         this.$store.commit('mapSetOrigin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
     },
     methods: {
-        clickStartSimulationButton: function() {
-            this.publish('start');
-            // switch (this.state) {
-            //     case 'running':
-            //         this.publish('pause');
-            //         this.state = 'paused';
-            //         break;
-            //     case 'paused':
-            //         this.publish('resume');
-            //         this.state = 'running';
-            //         break;
-            //     case 'stopped':
-            //         this.publish('start');
-            //         this.state = 'running';
-            //         this.$set(this.map, 'origin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
-            //         break;
-            // }
-        },
-        clickStopSimulationButton: function() {
-            this.publish('stop');
-            // this.state = 'stopped';
-            // this.$set(this.entities.raw, 'drones', { });
-            // this.$set(this.entities.raw, 'cars', { });
-            // this.$set(this.entities.raw, 'hubs', { });
-            // this.$set(this.entities.raw, 'parcels', { });
-            // this.$set(this.entities, 'drones', { });
-            // this.$set(this.entities, 'cars', { });
-            // this.$set(this.entities, 'hubs', { });
-            // this.$set(this.entities, 'parcels', { });
-        },
-        clickResetSimulationButton: function() {
-            this.publish('reset');
-        },
-        clickZoomInButton: function() {
-            this.map.zoom.factor *= 1.25;
-        },
-        clickZoomOutButton: function() {
-            this.map.zoom.factor *= 0.8;
-        },
-        setView: function(view) {
-            this.view = view;
-        },
         onMouseWheelMap: function(event) {
-            this.$store.commit('mapZoom', { factor: event.deltaY });
+            this.$store.commit('mapZoom', { factor: event.deltaY > 0 ? 1 / 1.05 : 1.05 });
         },
         onMouseDownMap: function(event) {
             this.map.drag.x = event.offsetX;
@@ -649,38 +446,6 @@ export default {
             this.$store.commit('mapMove', { offsetX: event.offsetX - this.map.drag.x, offsetY: event.offsetY - this.map.drag.y });
             this.map.drag.isDragging = false;
         },
-        publish: function(topic, message = '') {
-            this.mqtt.client.publish(`${this.mqtt.root}/from/visualization/${this.mqtt.id}/${topic}`, JSON.stringify(message));
-        },
-        receive: function(topic, message) {
-            if (this.matchTopic(topic, 'from/+/+/state')) {
-                this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message });
-            }
-            else if (this.matchTopic(topic, 'to/drone/+/tasks')) {
-                this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`);
-            }
-            else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
-                this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`);
-            }
-            else if (this.matchTopic(topic, 'from/control-system/+/route-update')) {
-                this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`);
-            }
-            else if (this.matchTopic(topic, 'from/car/+/arrived')) {
-                this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`);
-            }
-            else if (this.matchTopic(topic, 'from/+/+/mission/+/complete')) {
-                this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`);
-            }
-            else if (this.matchTopic(topic, 'from/+/+/transaction/+/complete')) {
-                this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`);
-            }
-            else if (this.matchTopic(topic, 'from/parcel/+/delivered')) {
-                this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`);
-            }
-            else if (this.matchTopic(topic, 'to/visualization/#')) {
-                this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`);
-            }
-        },
         showToastStatus: function(title, message) {
             if (this.display.enabledToastTypes.includes('status')){
                 this.showToast(title, message)
@@ -697,31 +462,14 @@ export default {
                 this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});
             }
         },
-        matchTopic: function(topic, pattern) {
-            return mqttMatch(pattern, topic.string.short);
-        },
-        getX: function(node) {
-            return this.map.topology.nodes[node].position.x;
-        },
-        getY: function(node) {
-            return this.map.topology.nodes[node].position.y;
-        },
-        clickListenButton: function() {
-            if (this.state === 'listening') {
-                this.state = 'notListening';
-            }
-            else {
-                this.state = 'listening';
-            }
-        },
         clickSendButton: function() {
-            this.mqtt.client.publish(`${this.mqtt.root}/${this.command.message.topic}`, JSON.stringify(this.command.message.message));
+            this.$mqtt.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
         },
         clickTestButton: function() {
-            this.publish('test');
+            this.$mqtt.publish('bla', 'hello');
         },
         clickPlaceOrderButton: function() {
-            this.publish('place-order', {
+            this.$mqtt.publish('place-order', {
                 id: uuid(),
                 vendor: { type: 'customer', id: this.command.order.vendor },
                 customer: { type: 'customer', id: this.command.order.customer },
@@ -732,76 +480,8 @@ export default {
         toggleSidebar: function() {
             this.display.isSidebarVisible = !this.display.isSidebarVisible
         },
-        // updateState(topic, message) {
-        //     if (topic.entity === 'hub') {
-        //         const hub = message;
-        //         const size = this.map.displaySize.hub / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-        //         this.$set(this.entities.hubs, [topic.id], {
-        //             id: hub.id,
-        //             cx: this.map.topology.nodes[hub.position].position.x,
-        //             cy: -this.map.topology.nodes[hub.position].position.y,
-        //             width: size,
-        //             height: size,
-        //             fill: Object.keys(hub.parcels).length > 0 ? 'red' : 'gray',
-        //             stored: Object.keys(hub.parcels).length
-        //         });
-        //     }
-        //     else if (topic.entity === 'car') {
-        //         const car = message;
-        //         const size = this.map.displaySize.car / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-        //         this.$set(this.entities.cars, [topic.id], {
-        //             id: car.id,
-        //             cx: car.position.x,
-        //             cy: -car.position.y,
-        //             width: size,
-        //             height: size,
-        //             fill: 'blue',
-        //             state: car.state
-        //         });
-        //     }
-        //     else if (topic.entity === 'drone') {
-        //         const drone = message;
-        //         const size = this.map.displaySize.drone / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-        //         this.$set(this.entities.drones, [topic.id], {
-        //             id: drone.id,
-        //             cx: drone.position.x,
-        //             cy: -drone.position.y,
-        //             width: size,
-        //             height: size,
-        //             fill: 'red',
-        //             state: drone.state
-        //         });
-        //     }
-        //     else if (topic.entity === 'parcel') {
-        //         const parcel = message;
-        //         const carrier = this.entities[`${parcel.carrier.type}s`][parcel.carrier.id];
-        //         const size = this.map.displaySize.parcel / (this.map.zoom.entities ? this.map.zoom.factor : 1);
-        //         this.$set(this.entities.parcels, [topic.id], {
-        //             id: parcel.id,
-        //             cx: carrier ? carrier.cx : null,
-        //             cy: carrier ? carrier.cy : null,
-        //             width: size,
-        //             height: size,
-        //             fill: 'green',
-        //             carrier: parcel.carrier,
-        //             destination: parcel.destination
-        //         });
-        //     }
-        // }
     },
     computed: {
-        parcelPosition: function() {
-            return (parcel) => (parcel.carrier.type === 'hub' ? this.map.topology.nodes[this.entities.hubs[parcel.carrier.id].position].position : this.entities[`${parcel.carrier.type}s`][parcel.carrier.id].position);
-        },
-        svgHubs: function() {
-            return Object.values(this.entities.hubs).map(h => ({ id: h.id, x: this.map.topology.nodes[h.position].position.x-3, y: this.map.topology.nodes[h.position].position.y-3, width: 6, height: 6, href: require('../../assets/entities.svg') + '#hub-symbol', fill: Object.keys(h.parcels).length > 0 ? 'red' : 'gray', stored: Object.keys(h.parcels).length }));
-        },
-        // edgesRoad: function() {
-        //     return Object.values(this.map.topology.edges).filter( e => e.type === 'road')
-        // },
-        // edgesAir: function() {
-        //     return Object.values(this.map.topology.edges).filter( e => e.type === 'air')
-        // },
         toggleStatsTable: {
             get() {
                 return this.display.statsTableVisible;
@@ -821,9 +501,8 @@ export default {
             }
         },
         incomingMessageCounter: function() {
-            const interval = 10;
-            const count = this.receivedMessages.reduce(((n, m) => n + (this.currentTime - m.timestamp <= interval * 1000 ? 1 : 0)), 0);
-            return count > 0 ? `${count / interval} messages per second` : 'No messages incoming';
+            const count = this.messages.messages.reduce(((n, m) => n + (this.currentTime - m.timestamp <= this.messages.counterInterval * 1000 ? 1 : 0)), 0);
+            return count > 0 ? `${count / this.messages.counterInterval} messages per second` : 'No messages incoming';
         }
     }
 }
@@ -1052,6 +731,5 @@ button:focus {
 }
 
 </style>
-
 
 <!-- TODO elements ideas: add clock-->

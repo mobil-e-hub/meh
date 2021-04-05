@@ -45,9 +45,9 @@
             displayPosition: function() {
                 return this.position ? {
                     x1: this.position.x1 * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.x,
-                    y1: this.position.y1 * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.y,
+                    y1: -this.position.y1 * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.y,
                     x2: this.position.x2 * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.x,
-                    y2: this.position.y2 * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.y
+                    y2: -this.position.y2 * this.$store.state.settings.map.zoom.factor + this.$store.state.settings.map.origin.y
                 } : null;
             }
         }
