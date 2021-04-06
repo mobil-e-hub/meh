@@ -1,22 +1,22 @@
-# mobil-e-Hub: Drone Logistics Network
+# mobil-e-Hub: Intelligent Drone Logistics Network
 Authors: 
 - Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
 - Alexander Becker
 - Tim Grams
 
-
-
-TODO: Distribute content below over the three subprojects (README files in folders `/opt`, `/viz` and `/sim`)
-
-# mobil-e-Hub: Node.js-based simulation and visualization for Drone Logistics Networks
-Author: Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
-
 ## Purpose of this project
-This project allows for the simulation and visualization of a Drone Logistics Network (DLN). It consists of two components:
-- Visualization: This components shows the current status of the DLN.
-- Simulator: This component simulates drones, vehicles, parcels, hubs and orders.
+This project allows for the simulation, control and visualization of a Drone Logistics Network (DLN). It consists of three modules:
+- Simulator (`/sim`): This module simulates drones, vehicles, parcels, hubs and orders.
+- Optimization Engine (`/opt`): This module controls the routing of drones and vehicles.
+- Visualization (`/viz`): This module shows the current status of the DLN in the browser.
 
-The Control System is built as a [Python-based component](https://www.github.com/michaelpernpeintner/meh-python) and not part of this project.
+Please refer to the `README.md` files in the respective sub-folder for instructions and documentation.
+
+## Interaction and Communication
+TODO: Describe Eventgrid and interaction between modules
+
+---
+TODO: Distribute content below over the three sub-projects (README files in folders `/opt`, `/viz` and `/sim`)
 
 ## Installation and usage
 ```
@@ -49,7 +49,7 @@ All entities communicate via MQTT. This allows for a very flexible addition of n
 ### Simulation
 Node.js server with simulator modules `HubSimulator` `DroneSimulator`, `VehicleSimulator` and `ParcelSimulator`.
 
-### HubSimulator
+#### HubSimulator
 ...
 
 #### DroneSimulator
