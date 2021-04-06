@@ -1,26 +1,25 @@
+// Vue modules
 import Vue from 'vue';
 import App from './visualization.vue';
 
+// Own modules
+import store from './store/store';
+import mqttPlugin from './plugins/mqtt';
+
+// UI
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faCar, faPlane, faWarehouse, faArchive } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-
-library.add(faCar);
-library.add(faPlane);
-library.add(faWarehouse);
-library.add(faArchive);
-
-Vue.component('font-awesome-icon', FontAwesomeIcon);
+// Icons
+// TODO: Include Material Design Icons
 
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 
+// Setup
 Vue.config.productionTip = false;
+Vue.use(mqttPlugin, { broker: 'ws://broker.hivemq.com:8000/mqtt', root: 'mobil-e-hub/viz' }); // TODO: Replace MQTT plugin by Eventgrid plugin
 
-new Vue({
-    render: (h) => h(App)
-}).$mount('#app');
+// Create app
+new Vue({ render: (h) => h(App), store }).$mount('#app');

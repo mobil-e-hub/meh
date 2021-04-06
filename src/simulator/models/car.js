@@ -32,9 +32,10 @@ class Car {
         this.id = id;
         this.position = position;
 
-        this.speed = 20;
+        this.speed = 10;
         this.parcel = null;
         this.state = CarState.idle;
+        // TODO model capacity: number of parcels that car can load
     }
 
     move(interval, simulator) {

@@ -1,6 +1,9 @@
 const random = require('random');
 const { v4: uuid } = require('uuid');
 
+// Internal modules
+const topology = require("../topology");
+
 module.exports = {
     random: {
         key: (dict) => {
@@ -51,11 +54,22 @@ module.exports = {
                 x: random.float(-range, range),
                 y: random.float(-range, range),
                 z: random.float(0, range),
-            }
+            };
+        },
+        // TODO refactor! --> doesnt belong here
+        droneHubs: () => {
+            return Object.values(topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'parking');
         },
         rand: random
     },
     uuid: () => {
         return uuid().substr(0, 8);
+    },
+    dist2d: (a, b) => {
+        console.log(a, b);
+        return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+    },
+    dist3d: (a, b) => {
+        return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2);
     }
 };
