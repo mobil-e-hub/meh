@@ -52,6 +52,10 @@ function shutdown() {
 }
 
 // Endpoints
+app.get('/ping', (req, res) => {
+    res.json('pong');
+});
+
 app.post('/meh/viz/hubs/find', (req, res) => {
     res.json(controlSystem.getHubs(req.body.position, req.body.radius));
 });
