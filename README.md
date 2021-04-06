@@ -1,3 +1,13 @@
+# mobil-e-Hub: Drone Logistics Network
+Authors: 
+- Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
+- Alexander Becker
+- Tim Grams
+
+
+
+TODO: Distribute content below over the three subprojects (README files in folders `/opt`, `/viz` and `/sim`)
+
 # mobil-e-Hub: Node.js-based simulation and visualization for Drone Logistics Networks
 Author: Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
 
