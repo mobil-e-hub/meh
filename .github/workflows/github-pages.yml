@@ -28,6 +28,7 @@ jobs:
             ${{ runner.os }}-node-
       - run: npm ci
       - run: npm install -g @vue/cli
+      - run: npm install -g @vue/cli-service-global
       - run: npm run build
 
       - name: Deploy
