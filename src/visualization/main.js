@@ -19,7 +19,7 @@ Vue.use(IconsPlugin);
 
 // Setup
 Vue.config.productionTip = false;
-Vue.use(mqttPlugin, { broker: 'wss://broker.hivemq.com:8000/mqtt', root: 'mobil-e-hub/viz' }); // TODO: Replace MQTT plugin by Eventgrid plugin
+Vue.use(mqttPlugin, { broker: 'mqtt://broker.hivemq.com:8000/mqtt', root: 'mobil-e-hub/viz' }); // TODO: Replace MQTT plugin by Eventgrid plugin
 
 // Create app
 new Vue({ render: (h) => h(App), store }).$mount('#app');
