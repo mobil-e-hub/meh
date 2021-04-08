@@ -82,12 +82,12 @@ process.on('SIGINT', shutdown);
 
 function shutdown() {
     server.close(() => {
-        droneSimulator.destructor();
-        carSimulator.destructor();
-        busSimulator.destructor();
-        hubSimulator.destructor();
-        parcelSimulator.destructor();
-        controlSystem.destructor();
+        // droneSimulator.destructor();
+        // carSimulator.destructor();
+        // busSimulator.destructor();
+        // hubSimulator.destructor();
+        // parcelSimulator.destructor();
+        // controlSystem.destructor();
 
         console.log('< Server shut down.');
         process.exit(0);
@@ -100,7 +100,7 @@ app.get('/ping', (req, res) => {
 });
 
 app.get('/ping/eventgrid', (req, res) => {
-    publish('ping');
+    eventGrid.publish('ping');
     res.status(200).json({ eventgrid: 'pong' });
 });
 
