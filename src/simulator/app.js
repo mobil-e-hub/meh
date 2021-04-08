@@ -58,6 +58,10 @@ app.get('/ping', (req, res) => {
     res.status(200).json('pong');
 });
 
+app.get('/ping', (req, res) => {
+    res.status(200).json('/pong');
+});
+
 app.post('/eventgrid', (req, res) => {
     res.status(200).end();
 });
