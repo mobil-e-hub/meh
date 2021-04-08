@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "sim": "nodemon sim/src/server.js",
     "viz": "vue serve viz/src/app.js",
-    "opt": "export FLASK_APP=opt/src/server.py && flask run",
+    "opt": "export FLASK_APP=opt/src/server.py && export FLASK_ENV=development && flask run",
     "all": "npm-run-all -p sim viz opt"
   },
   "dependencies": {
