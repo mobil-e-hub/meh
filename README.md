@@ -12,8 +12,14 @@ This project allows for the simulation, control and visualization of a Drone Log
 
 Please refer to the `README.md` files in the respective sub-folders for instructions and documentation.
 
+## Installation and usage
+```shell script
+meh % npm install
+meh % npm run all  # the commands 'npm run sim', 'npm run opt' and 'npm run viz' also work individually
+```
+
 ## Interaction and Communication
-TODO: Describe Eventgrid and interaction between modules
+TODO: Describe Event Grid and interaction between modules
 
 ## Server Architecture
 TODO: Describe entire connection between nginx, port forwarding, updater, git webhook, smee, ...

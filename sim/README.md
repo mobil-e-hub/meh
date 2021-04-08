@@ -10,3 +10,6 @@ meh % cd sim
 sim % npm install
 sim % npm run sim
 ```
+
+## Communication with Azure Event Grid
+This server receives Event Grid messages on the endpoint `POST /eventgrid`.
