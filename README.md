@@ -4,6 +4,8 @@ Authors:
 - Alexander Becker
 - Tim Grams
 
+[![github pages](https://github.com/mobil-e-hub/meh/actions/workflows/github-pages.yml/badge.svg)](https://github.com/mobil-e-hub/meh/actions/workflows/github-pages.yml)
+
 ## Purpose of this project
 This project allows for the simulation, control and visualization of a Drone Logistics Network (DLN). It consists of three modules:
 - Simulator (node.js server in `/sim`): This module simulates drones, vehicles, parcels, hubs and orders.
@@ -22,7 +24,17 @@ meh % npm run all  # the commands 'npm run sim', 'npm run opt' and 'npm run viz'
 TODO: Describe Event Grid and interaction between modules
 
 ## Server Architecture
-TODO: Describe entire connection between nginx, port forwarding, updater, git webhook, smee, ...
+The following figure gives an overview of the components used:
+<img src="https://i.ibb.co/0fM9mTF/server-structure.png" alt="Server Structure">
+<!--- https://ibb.co/MRV1ZrG --->
+
+NGINX forwards the client's paths _.../meh/sim_ and _.../meh/opt_ to the simulator's and optimization engine's ports. 
+In order to stay up to date, GitHub performs a WebHook after every push to the master branch that is being forwarded to the 
+updater service. This Node.js component then updates the project.
+
+The latest version of the visualization can be found on [GitHub Pages](https://mobil-e-hub.github.io/meh/) which is 
+linked to the _gh-pages_ branch. 
+An [Action](https://github.com/mobil-e-hub/meh/actions/workflows/github-pages.yml) keeps it up to date.
 
 ---
 EVERYTHING BELOW THIS LINE GOES INTO THE RESPECTIVE README FILES!
