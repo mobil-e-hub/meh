@@ -12,7 +12,7 @@ const {Bus, BusState} = require("../models/bus");
 const Hub = require('../models/hub');
 const Parcel = require('../models/parcel');
 
-const topology = require('../../topology');
+const topology = require('../../assets/topology');
 
 
 module.exports = class ControlSystem extends MQTTClient {

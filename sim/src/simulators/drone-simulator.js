@@ -5,7 +5,7 @@ const { random, uuid } = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const { Drone, DroneState, TaskState} = require('../models/drone');
 
-const topology = require('../../topology');
+const topology = require('../../assets/topology');
 
 // Class
 module.exports = class DroneSimulator extends MQTTClient {

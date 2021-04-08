@@ -4,14 +4,14 @@
          :y="displayPosition.y"
          :width="size"
          :height="size"
-         :href="require('../../../assets/entities.svg') + '#drone-symbol'"
+         :href="require('../../assets/entities.svg') + '#drone-symbol'"
          fill="red"
     >
     </use>
 </template>
 
 <script>
-    const topology = require('../../topology');
+    const topology = require('../../assets/topology');
 
     export default {
         name: 'Drone',

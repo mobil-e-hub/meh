@@ -2,7 +2,7 @@ const random = require('random');
 const { v4: uuid } = require('uuid');
 
 // Internal modules
-const topology = require("../topology");
+const topology = require("../assets/topology");
 
 module.exports = {
     random: {

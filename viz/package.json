@@ -1,0 +1,35 @@
+{
+  "name": "meh-viz",
+  "version": "1.0.0",
+  "description": "Visualization (Vue web app) for mobil-e-Hub",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "viz": "vue serve src/app.js",
+    "build": "vue build src/app.js"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "bootstrap": "^4.6.0",
+    "bootstrap-vue": "^2.21.2",
+    "lodash": "^4.17.20",
+    "mqtt": "^4.2.6",
+    "mqtt-match": "^2.0.3",
+    "random": "^2.2.0",
+    "uuid": "^8.3.2",
+    "vue": "^2.6.12",
+    "vuex": "^3.6.2",
+    "ws": "^7.4.2"
+  },
+  "author": "",
+  "license": "ISC",
+  "eslintConfig": {
+    "rules": {
+      "no-undef": "off",
+      "no-unused-vars": "off"
+    }
+  },
+  "devDependencies": {
+    "jquery": "^3.5.1"
+  }
+}

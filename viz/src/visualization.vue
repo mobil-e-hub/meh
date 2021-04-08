@@ -191,14 +191,14 @@
                                              :width="car.width"
                                              :height="car.height"
                                              :fill="car.fill"
-                                             :href="require('../../assets/entities.svg') + '#car-symbol'"
+                                             :href="require('../assets/entities.svg') + '#car-symbol'"
                                              transform="scale(1, -1)"
                                         >
                                             <title>Car {{ id }} ({{ car.state }})</title>
                                         </use>
 
 
-                                        <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
+                                        <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
 <!--                                                    TODO add loaded parcels / capacity?-->
                                             <title>Bus {{ bus.id }} ({{ bus.state }})</title>
                                         </use>
@@ -212,7 +212,7 @@
                                              :width="parcel.width"
                                              :height="parcel.height"
                                              :fill="parcel.fill"
-                                             :href="require('../../assets/entities.svg') + '#parcel-symbol'"
+                                             :href="require('../assets/entities.svg') + '#parcel-symbol'"
                                              transform="scale(1, -1)"
                                              v-b-popover.hover.right="`Parcel ${id} (Source: ${parcel.carrier.id}, Destination: ${parcel.destination.id})`"
                                              title="Parcel details">
@@ -322,7 +322,6 @@
 </template>
 
 <script>
-const uuid = require('../simulator/helpers').uuid;
 const _ = require('lodash');
 
 import Messages from './components/Messages';
@@ -470,7 +469,7 @@ export default {
         },
         clickPlaceOrderButton: function() {
             this.$mqtt.publish('place-order', {
-                id: uuid(),
+                id: this.$uuid(),
                 vendor: { type: 'customer', id: this.command.order.vendor },
                 customer: { type: 'customer', id: this.command.order.customer },
                 pickup: this.command.order.pickup,

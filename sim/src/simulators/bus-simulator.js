@@ -6,7 +6,7 @@ const { random, uuid } = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const {Bus} = require("../models/bus");
 
-const topology = require('../../topology');
+const topology = require('../../assets/topology');
 
 module.exports = class BusSimulator extends MQTTClient {
     constructor(numberOfBuses) {

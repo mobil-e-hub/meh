@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    const topology = require('../../topology');
+    const topology = require('../../assets/topology');
 
     export default {
         name: 'Edge',

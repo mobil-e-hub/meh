@@ -3,4 +3,4 @@ app = Flask(__name__)
 
 @app.route('/ping')
 def ping():
-    return 'pong'
+    return { 'opt': 'pong' }

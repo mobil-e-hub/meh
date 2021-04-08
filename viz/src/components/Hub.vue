@@ -1,5 +1,5 @@
 <template>
-    <use v-if="hub && node" :x="displayPosition.x" :y="displayPosition.y" :width="size" :height="size" :href="require('../../../assets/entities.svg') + '#hub-symbol'" :fill="fill">
+    <use v-if="hub && node" :x="displayPosition.x" :y="displayPosition.y" :width="size" :height="size" :href="require('../../assets/entities.svg') + '#hub-symbol'" :fill="fill">
         <title>Hub {{ hub.id }} (Parcels: {{ Object.keys(hub.parcels).length }})</title>
     </use>
     <!--TODO: Show badge-->
@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    const topology = require('../../topology');
+    const topology = require('../../assets/topology');
 
     export default {
         name: 'Hub',

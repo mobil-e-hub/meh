@@ -14,7 +14,7 @@ const ParcelSimulator = require('./simulators/parcel-simulator');
 const ControlSystem = require('./control-system/control-system');
 
 const { uuid } = require('./helpers');
-const topology = require('../topology');
+const topology = require('../assets/topology');
 
 // Server
 const app = express();
@@ -54,19 +54,12 @@ function shutdown() {
 }
 
 // Endpoints
-app.get('ping', (req, res) => {
-    res.status(200).json('pong');
-});
-
 app.get('/ping', (req, res) => {
-    res.status(200).json('/pong');
-});
-
-app.get('//ping', (req, res) => {
-    res.status(200).json('//pong');
+    res.status(200).json({ sim: 'pong' });
 });
 
 app.post('/eventgrid', (req, res) => {
+    // TODO: Handle incoming messages
     res.status(200).end();
 });
 

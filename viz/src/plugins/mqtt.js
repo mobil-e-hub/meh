@@ -2,9 +2,9 @@
 const mqtt = require('mqtt');
 const mqttMatch = require('mqtt-match');
 const _ = require('lodash');
+const { v4: UUID } = require('uuid');
 
 // Internal modules
-const uuid = require('../../simulator/helpers').uuid;
 
 // Plugin definition
 export default {
@@ -41,4 +41,9 @@ export default {
             }
         };
     }
+}
+
+// Helper functions
+function uuid() {
+    return UUID().substr(0, 8);
 }

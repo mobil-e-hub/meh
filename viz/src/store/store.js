@@ -3,7 +3,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 //Own modules
-import topology from '../../topology';
+import topology from '../../assets/topology';
 
 // Setup
 Vue.use(Vuex);
