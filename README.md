@@ -6,15 +6,20 @@ Authors:
 
 ## Purpose of this project
 This project allows for the simulation, control and visualization of a Drone Logistics Network (DLN). It consists of three modules:
-- Simulator (`/sim`): This module simulates drones, vehicles, parcels, hubs and orders.
-- Optimization Engine (`/opt`): This module controls the routing of drones and vehicles.
-- Visualization (`/viz`): This module shows the current status of the DLN in the browser.
+- Simulator (node.js server in `/sim`): This module simulates drones, vehicles, parcels, hubs and orders.
+- Optimization Engine (Flask server in `/opt`): This module controls the routing of drones and vehicles.
+- Visualization (Vue app in `/viz`): This module shows the current status of the DLN in the browser.
 
-Please refer to the `README.md` files in the respective sub-folder for instructions and documentation.
+Please refer to the `README.md` files in the respective sub-folders for instructions and documentation.
 
 ## Interaction and Communication
 TODO: Describe Eventgrid and interaction between modules
 
+## Server Architecture
+TODO: Describe entire connection between nginx, port forwarding, updater, git webhook, smee, ...
+
+---
+EVERYTHING BELOW THIS LINE GOES INTO THE RESPECTIVE README FILES!
 ---
 TODO: Distribute content below over the three sub-projects (README files in folders `/opt`, `/viz` and `/sim`)
 
