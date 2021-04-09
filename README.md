@@ -25,8 +25,8 @@ TODO: Describe Event Grid and interaction between modules
 
 ## Server Architecture
 The following figure gives an overview of the components used:
-<img src="https://i.ibb.co/0fM9mTF/server-structure.png" alt="Server Structure">
-<!--- https://ibb.co/MRV1ZrG --->
+<img src="https://i.ibb.co/mRr7Kh6/server.png" alt="Server Structure">
+<!--- https://ibb.co/6yc5SDg --->
 
 NGINX forwards the client's paths _.../meh/sim_ and _.../meh/opt_ to the simulator's and optimization engine's ports. 
 In order to stay up to date, GitHub performs a WebHook after every push to the master branch that is being forwarded to the 

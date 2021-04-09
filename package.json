@@ -8,6 +8,7 @@
     "viz-wss": "nodemon viz/wss/src/server.js",
     "viz-vue": "vue serve viz/vue/src/app.js",
     "opt": "export FLASK_APP=opt/src/server.py && export FLASK_ENV=development && flask run",
+    "optwindows": "set FLASK_APP=opt/src/server.py && set FLASK_ENV=development && python -m flask run -p 3001",
     "all": "npm-run-all -p sim viz-wss viz-vue opt"
   },
   "dependencies": {
