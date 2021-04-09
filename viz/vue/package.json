@@ -1,11 +1,11 @@
 {
-  "name": "meh-viz",
+  "name": "meh-viz-vue",
   "version": "1.0.0",
   "description": "Visualization (Vue web app) for mobil-e-Hub",
   "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "viz": "vue serve src/app.js",
+    "vue": "vue serve src/app.js",
     "build": "vue build src/app.js"
   },
   "dependencies": {
@@ -16,10 +16,11 @@
     "mqtt": "^4.2.6",
     "mqtt-match": "^2.0.3",
     "random": "^2.2.0",
+    "socket.io-client": "^4.0.1",
     "uuid": "^8.3.2",
     "vue": "^2.6.12",
-    "vuex": "^3.6.2",
-    "ws": "^7.4.2"
+    "vue-socket.io": "^3.0.10",
+    "vuex": "^3.6.2"
   },
   "author": "",
   "license": "ISC",
