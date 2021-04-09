@@ -7,7 +7,7 @@ const mqttMatch = require('mqtt-match');
 // Plugin definition
 export default {
     install: (app, options) => {
-        const socket = io('localhost:3002'); // TODO: Add authentication for socket connections
+        const socket = io('wss://ines-gpu-01.informatik.uni-mannheim.de/meh/wss'); // TODO: Add authentication for socket connection
         const subscriptions = { };
 
         socket.on('eventgrid', ({ topic, message }) => {
