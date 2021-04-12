@@ -1,6 +1,44 @@
-from flask import Flask
-app = Flask(__name__)
+# External modules
+from flask import Flask, request
+import json
 
+
+# Internal modules
+from optimization_engine.optimization_engine import OptimizationEngine
+from event_grid import EventGrid
+
+
+# Setup
+app = Flask(__name__)
+event_grid = EventGrid()
+opt = OptimizationEngine(event_grid)
+
+
+# Endpoints
 @app.route('/ping')
 def ping():
     return { 'opt': 'pong' }
+
+@app.route('/ping/eventgrid')
+def ping_eventgrid():
+    event_grid.publish('pong')
+    return { 'eventgrid': 'pong' }
+
+# Endpoint for incoming EventGrid messages (both validation and MEH events)
+@app.route('/eventgrid', methods=['POST'])
+def eventgrid():
+    try:
+        events = request.get_json()
+        for event in events:
+            if event['eventType'] == 'Microsoft.EventGrid.SubscriptionValidationEvent':
+                validation_code = event['data']['validationCode']
+                print("Got a SubscriptionValidation event, validation code is: {}".format(validation_code))
+                return { "validationResponse": validation_code }  # No events are handled after receiving a SubscriptionValidationEvent
+            elif event['eventType'] == 'mobil-e-hub':
+                event_grid.receive(event)
+            elif event['eventType'] == 'Portal_Echo':
+                print(f'Echo received: {event["data"]}')
+    except Error as err:
+        print(f'Invalid EventGrid message received: {err}')
+    finally:
+        return ''

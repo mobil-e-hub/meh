@@ -31,9 +31,9 @@ const server = app.listen(port, () => {
 
 // Event Grid client (@azure/eventgrid)
 const client = new EventGridPublisherClient(
-    "https://mobilehub-dev-azweu.westeurope-1.eventgrid.azure.net/api/events",
-    "EventGrid",
-    new AzureKeyCredential("mIODu+I1dUE6EbEUZzTDC1QDLxWb0btNujdvlVpObE4=")
+    'https://mobilehub-dev-azweu.westeurope-1.eventgrid.azure.net/api/events',
+    'EventGrid',
+    new AzureKeyCredential('mIODu+I1dUE6EbEUZzTDC1QDLxWb0btNujdvlVpObE4=')
 );
 
 const eventGridSubscriptions = { };
@@ -100,7 +100,7 @@ app.get('/ping', (req, res) => {
 });
 
 app.get('/ping/eventgrid', (req, res) => {
-    eventGrid.publish('ping');
+    eventGrid.publish('pong');
     res.status(200).json({ eventgrid: 'pong' });
 });
 
@@ -108,9 +108,15 @@ app.get('/ping/eventgrid', (req, res) => {
 app.post('/eventgrid', async (req, res) => {
     for (const event of req.body) {
         // If this is a validation request, reply appropriately
-        if (event.data && event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
-            console.log("Got SubscriptionValidation event data, validation code: " + event.data.validationCode + " topic: " + event.topic);
-            res.status(200).json({ ValidationResponse: event.data.validationCode });
+        if (event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
+            try {
+                console.log("Got SubscriptionValidation event data, validation code: " + event.data.validationCode + " topic: " + event.topic);
+                res.status(200).json({ ValidationResponse: event.data.validationCode });
+            }
+            catch (err)
+            {
+                res.status(404).end();
+            }
         }
         // Otherwise process request
         else {
