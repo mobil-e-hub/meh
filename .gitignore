@@ -4,3 +4,4 @@
 /viz/wss/node_modules/
 /viz/vue/node_modules/
 /opt/venv/
+**/.env

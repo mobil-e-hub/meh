@@ -1,6 +1,6 @@
 // Vue modules
 import Vue from 'vue';
-import App from './visualization.vue';
+import App from './app.vue';
 
 // External modules
 const { v4: uuid } = require('uuid');

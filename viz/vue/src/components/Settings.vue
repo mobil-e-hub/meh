@@ -14,19 +14,19 @@
                 </b-col>
             </b-row>
 
-            <b-row class="my-4">
-                <b-col>
-                    <h5>MQTT Broker</h5>
-                    <div>
-                        <b-form-group label="Broker URL:" label-for="input-mqtt-broker">
-                            <b-form-input id="input-mqtt-broker" v-model="$mqtt.broker" type="url" placeholder="Enter URL" required></b-form-input>
-                        </b-form-group>
-                        <b-form-group label="Message Prefix:" label-for="input-mqtt-prefix">
-                            <b-form-input id="input-mqtt-prefix" v-model="$mqtt.root" placeholder="Enter prefix" required></b-form-input>
-                        </b-form-group>
-                    </div>
-                </b-col>
-            </b-row>
+<!--            <b-row class="my-4">-->
+<!--                <b-col>-->
+<!--                    <h5>MQTT Broker</h5>-->
+<!--                    <div>-->
+<!--                        <b-form-group label="Broker URL:" label-for="input-mqtt-broker">-->
+<!--                            <b-form-input id="input-mqtt-broker" v-model="$mqtt.broker" type="url" placeholder="Enter URL" required></b-form-input>-->
+<!--                        </b-form-group>-->
+<!--                        <b-form-group label="Message Prefix:" label-for="input-mqtt-prefix">-->
+<!--                            <b-form-input id="input-mqtt-prefix" v-model="$mqtt.root" placeholder="Enter prefix" required></b-form-input>-->
+<!--                        </b-form-group>-->
+<!--                    </div>-->
+<!--                </b-col>-->
+<!--            </b-row>-->
         </b-container>
     </div>
 </template>

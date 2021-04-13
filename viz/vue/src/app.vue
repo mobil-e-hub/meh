@@ -105,71 +105,72 @@
 
         <b-container fluid class="my-5">
             <b-row class="pt-4">
-                <b-col cols="12">
-                    <div v-if="view === 'simulation'">
+                <!--Map view-->
+                <b-col :cols="view === 'none' ? 12 : 9">
+<!--                    <div>-->
                         <!-- Sidebar Menu-->
-                        <template>
-                            <div class="sidebar">
-                                <div class="sidebar-backdrop" @click="toggleSidebar" v-if="this.display.isSidebarVisible"></div>
-                                <transition name="slide">
-                                    <div v-if="this.display.isSidebarVisible" class="sidebar-panel mt-lg-4">
-                                        <label class="mt-md-2 mb-auto" > <u> Settings: </u> </label>
-                                        <ul>
-                                            <li>
-                                                <!-- ToggleButton - Stats Table-->
-                                                <template>
-                                                    <label for="toggle_stats_btn" :class="{'active': this.display.statsTableVisible}" class="toggle__button">
+<!--                        <template>-->
+<!--                            <div class="sidebar">-->
+<!--                                <div class="sidebar-backdrop" @click="toggleSidebar" v-if="this.display.isSidebarVisible"></div>-->
+<!--                                <transition name="slide">-->
+<!--                                    <div v-if="this.display.isSidebarVisible" class="sidebar-panel mt-lg-4">-->
+<!--                                        <label class="mt-md-2 mb-auto" > <u> Settings: </u> </label>-->
+<!--                                        <ul>-->
+<!--                                            <li>-->
+<!--                                                &lt;!&ndash; ToggleButton - Stats Table&ndash;&gt;-->
+<!--                                                <template>-->
+<!--                                                    <label for="toggle_stats_btn" :class="{'active': this.display.statsTableVisible}" class="toggle__button">-->
 
-                                                        <span  class="toggle__label"> Stats:   </span>
+<!--                                                        <span  class="toggle__label"> Stats:   </span>-->
 
-                                                        <input type="checkbox"  id="toggle_stats_btn"  v-model="toggleStatsTable">
-                                                        <span class="mr-auto toggle__switch"></span>
-                                                    </label>
-                                                </template>
-                                            </li>
-                                            <li>
-                                                <!-- ToggleButton Toasts-->
-                                                <template>
-                                                    <label for="toggle_toast_btn" :class="{'active': this.display.areToastsEnabled}" class="toggle__button">
+<!--                                                        <input type="checkbox"  id="toggle_stats_btn"  v-model="toggleStatsTable">-->
+<!--                                                        <span class="mr-auto toggle__switch"></span>-->
+<!--                                                    </label>-->
+<!--                                                </template>-->
+<!--                                            </li>-->
+<!--                                            <li>-->
+<!--                                                &lt;!&ndash; ToggleButton Toasts&ndash;&gt;-->
+<!--                                                <template>-->
+<!--                                                    <label for="toggle_toast_btn" :class="{'active': this.display.areToastsEnabled}" class="toggle__button">-->
 
-                                                        <span  class="toggle__label"> Toasts: </span>
-                                                        <input type="checkbox"  id="toggle_toast_btn"  v-model="toggleToasts">
-                                                        <span class="ml-auto toggle__switch"></span>
-                                                    </label>
-                                                </template>
-                                                <ul>
-                                                    <li>
-                                                        <label for="checkbox_status" >Status  </label>
-                                                        <input class="float-right" type="checkbox" id="checkbox_status" value="status" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">                                                    </li>
-                                                    <li>
-                                                        <label for="checkbox_routing" >Routing</label>
-                                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">
-                                                    </li>
-                                                    <li>
-                                                        <label for="checkbox_mission" >Missions</label>
-                                                        <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">
-                                                    </li>
-                                                </ul>
-
-<!--                                                <label>{{ this.display.enabledToastTypes}}"</label>-->
-<!--                                                <ul id="example-1">-->
-<!--                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">-->
-<!--                                                        {{ item }}-->
+<!--                                                        <span  class="toggle__label"> Toasts: </span>-->
+<!--                                                        <input type="checkbox"  id="toggle_toast_btn"  v-model="toggleToasts">-->
+<!--                                                        <span class="ml-auto toggle__switch"></span>-->
+<!--                                                    </label>-->
+<!--                                                </template>-->
+<!--                                                <ul>-->
+<!--                                                    <li>-->
+<!--                                                        <label for="checkbox_status" >Status  </label>-->
+<!--                                                        <input class="float-right" type="checkbox" id="checkbox_status" value="status" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">                                                    </li>-->
+<!--                                                    <li>-->
+<!--                                                        <label for="checkbox_routing" >Routing</label>-->
+<!--                                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">-->
+<!--                                                    </li>-->
+<!--                                                    <li>-->
+<!--                                                        <label for="checkbox_mission" >Missions</label>-->
+<!--                                                        <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">-->
 <!--                                                    </li>-->
 <!--                                                </ul>-->
 
-                                            </li>
-                                        </ul>
+<!--&lt;!&ndash;                                                <label>{{ this.display.enabledToastTypes}}"</label>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                <ul id="example-1">&ndash;&gt;-->
+<!--&lt;!&ndash;                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">&ndash;&gt;-->
+<!--&lt;!&ndash;                                                        {{ item }}&ndash;&gt;-->
+<!--&lt;!&ndash;                                                    </li>&ndash;&gt;-->
+<!--&lt;!&ndash;                                                </ul>&ndash;&gt;-->
 
-                                    </div>
-                                </transition>
-                            </div>
-                        </template>
+<!--                                            </li>-->
+<!--                                        </ul>-->
 
-                        <b-container fluid>
-                            <b-row>
-                                <!-- Map-->
-                                <b-col cols="9">
+<!--                                    </div>-->
+<!--                                </transition>-->
+<!--                            </div>-->
+<!--                        </template>-->
+
+<!--                        <b-container fluid>-->
+<!--                            <b-row>-->
+<!--                                &lt;!&ndash; Map&ndash;&gt;-->
+<!--                                <b-col :cols="view === 'none' ? 12 : 9">-->
                                     <svg ref="svg" width="100%" height="85vh" xmlns="http://www.w3.org/2000/svg" @wheel.prevent="onMouseWheelMap" @mousedown.prevent="onMouseDownMap" @mousemove.prevent="onMouseMoveMap" @mouseup.prevent="onMouseUpMap">
                                         <!--Topology (nodes, edges)-->
                                         <node v-for="(node, id) in $store.state.topology.nodes" :key="id" :id="id" />
@@ -218,69 +219,79 @@
                                              title="Parcel details">
                                         </use>
                                     </svg>
-                                </b-col>
+<!--                                </b-col>-->
 
-                                <b-col cols="3">
-                                    <template v-if="display.statsTableVisible">
-                                        <div class="card" style="width: 22rem;">
-                                            <div class="card-header">
-                                                <b>Statistics (Dummy)</b>
-                                            </div>
-                                            <table class="card-table table">
-                                                <thead>
-                                                <tr>
-                                                    <th scope="col">Entity</th>
-                                                    <th scope="col">Engaged</th>
-                                                    <th scope="col">Avg. wait (?)</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                <tr>
-                                                    <td>Drones</td>
-                                                    <td> _x / {{Object.keys(entities.drones).length }}</td>
-                                                    <td>_10 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Cars</td>
-                                                    <td> _x / {{Object.keys(entities.cars).length }}</td>
-                                                    <td>_20 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Buses</td>
-                                                    <td> _x / {{ Object.keys(entities.buss).length }}</td>
-                                                    <td>_50 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        Parcel
-                                                        <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
-                                                    </td>
-                                                    <td> _{{Object.keys(entities.parcels).length }} </td>
-                                                    <td>_42 min</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Parcel
-                                                        <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>
-                                                    </td>
-                                                    <td> _{{Object.keys(entities.parcels).length }} </td>
-                                                    <td>_2 h</td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </template>
-                                </b-col>
-                            </b-row>
-                        </b-container>
-                    </div>
-                    <messages v-else-if="view === 'messages'" :messages="messages.messages"></messages>
-                    <entities v-else-if="view === 'entities'"></entities>
-                    <settings v-else-if="view === 'settings'"></settings>
+<!--                                <b-col cols="3">-->
+<!--                                    <template v-if="display.statsTableVisible">-->
+<!--                                        <div class="card" style="width: 22rem;">-->
+<!--                                            <div class="card-header">-->
+<!--                                                <b>Statistics (Dummy)</b>-->
+<!--                                            </div>-->
+<!--                                            <table class="card-table table">-->
+<!--                                                <thead>-->
+<!--                                                <tr>-->
+<!--                                                    <th scope="col">Entity</th>-->
+<!--                                                    <th scope="col">Engaged</th>-->
+<!--                                                    <th scope="col">Avg. wait (?)</th>-->
+<!--                                                </tr>-->
+<!--                                                </thead>-->
+<!--                                                <tbody>-->
+<!--                                                <tr>-->
+<!--                                                    <td>Drones</td>-->
+<!--                                                    <td> _x / {{Object.keys(entities.drones).length }}</td>-->
+<!--                                                    <td>_10 min</td>-->
+<!--                                                </tr>-->
+<!--                                                <tr>-->
+<!--                                                    <td>Cars</td>-->
+<!--                                                    <td> _x / {{Object.keys(entities.cars).length }}</td>-->
+<!--                                                    <td>_20 min</td>-->
+<!--                                                </tr>-->
+<!--                                                <tr>-->
+<!--                                                    <td>Buses</td>-->
+<!--                                                    <td> _x / {{ Object.keys(entities.buss).length }}</td>-->
+<!--                                                    <td>_50 min</td>-->
+<!--                                                </tr>-->
+<!--                                                <tr>-->
+<!--                                                    <td>-->
+<!--                                                        Parcel-->
+<!--                                                        <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>-->
+<!--                                                    </td>-->
+<!--                                                    <td> _{{Object.keys(entities.parcels).length }} </td>-->
+<!--                                                    <td>_42 min</td>-->
+<!--                                                </tr>-->
+<!--                                                <tr>-->
+<!--                                                    <td>Parcel-->
+<!--                                                        <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>-->
+<!--                                                    </td>-->
+<!--                                                    <td> _{{Object.keys(entities.parcels).length }} </td>-->
+<!--                                                    <td>_2 h</td>-->
+<!--                                                </tr>-->
+<!--                                                </tbody>-->
+<!--                                            </table>-->
+<!--                                        </div>-->
+<!--                                    </template>-->
+<!--                                </b-col>-->
+<!--                            </b-row>-->
+<!--                        </b-container>-->
+<!--                    </div>-->
+                </b-col>
+
+                <!--Side Panel-->
+                <b-col v-if="view !== 'none'" cols="3">
+                  <messages v-if="view === 'messages'" :messages="messages.messages"></messages>
+                  <entities v-else-if="view === 'entities'"></entities>
+                  <settings v-else-if="view === 'settings'"></settings>
                 </b-col>
             </b-row>
         </b-container>
 
         <b-navbar fixed="bottom" variant="light">
+            <b-navbar-nav>
+              <b-nav-item href="https://www.institute-for-enterprise-systems.de/">
+                © 2021 InES
+              </b-nav-item>
+            </b-navbar-nav>
+
             <b-navbar-nav class="mx-auto">
                 <b-nav-text v-if="listening" class="mx-3">{{incomingMessageCounter}}</b-nav-text>
 
@@ -304,18 +315,24 @@
                     <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
                 </b-nav-text>
             </b-navbar-nav>
+
+            <b-navbar-nav>
+              <b-nav-item href="https://github.com/mobil-e-hub/meh">
+                <b-icon class="mr-2" icon="github" aria-hidden="true"></b-icon>View on Github
+              </b-nav-item>
+            </b-navbar-nav>
         </b-navbar>
 
-        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : ''" style="bottom: 220px" title="Map View" @click="view = 'simulation'">
-            <b-icon icon="map" aria-hidden="true"></b-icon>
-        </b-button>
-        <b-button class="floating" :variant="view === 'messages' ? 'primary' : ''" style="bottom: 160px" title="Messages View" @click="view = 'messages'">
+<!--        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : ''" style="bottom: 220px" title="Map View" @click="view = 'simulation'">-->
+<!--            <b-icon icon="map" aria-hidden="true"></b-icon>-->
+<!--        </b-button>-->
+        <b-button class="floating" :variant="view === 'messages' ? 'primary' : 'secondary'" style="bottom: 170px" title="Messages View" @click="onClickView('messages')">
             <b-icon icon="chat-left-text" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'entities' ? 'primary' : ''" style="bottom: 100px" title="Entities View" @click="view = 'entities'">
+        <b-button class="floating" :variant="view === 'entities' ? 'primary' : 'secondary'" style="bottom: 110px" title="Entities View" @click="onClickView('entities')">
             <b-icon icon="clipboard-data" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'settings' ? 'primary' : ''" style="bottom: 40px" title="Settings View" @click="view = 'settings'">
+        <b-button class="floating" :variant="view === 'settings' ? 'primary' : 'secondary'" style="bottom: 50px" title="Settings View" @click="onClickView('settings')">
             <b-icon icon="gear-fill" aria-hidden="true"></b-icon>
         </b-button>
     </div>
@@ -341,7 +358,7 @@ export default {
         return {
             lodash: _,
             listening: true,
-            view: 'simulation',
+            view: 'none',
             messages: {
                 messages: [],
                 counterInterval: 10
@@ -444,6 +461,9 @@ export default {
         onMouseUpMap: function(event) {
             this.$store.commit('mapMove', { offsetX: event.offsetX - this.map.drag.x, offsetY: event.offsetY - this.map.drag.y });
             this.map.drag.isDragging = false;
+        },
+        onClickView: function(view) {
+            this.view = (this.view === view) ? 'none' : view;
         },
         showToastStatus: function(title, message) {
             if (this.display.enabledToastTypes.includes('status')){
