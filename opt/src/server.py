@@ -1,11 +1,18 @@
 # External modules
 from flask import Flask, request
 import json
+import os
+from dotenv import load_dotenv
 
 
 # Internal modules
 from optimization_engine.optimization_engine import OptimizationEngine
 from event_grid import EventGrid
+
+
+# Environment variables
+load_dotenv()
+port = int(os.environ.get('OPT_PORT', 3001))
 
 
 # Setup
@@ -42,3 +49,5 @@ def eventgrid():
         print(f'Invalid EventGrid message received: {err}')
     finally:
         return ''
+
+app.run(port=port)

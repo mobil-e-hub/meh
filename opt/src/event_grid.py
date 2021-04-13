@@ -1,13 +1,23 @@
+# External modules
+import os
+from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.eventgrid import EventGridPublisherClient, EventGridEvent
 
-endpoint = 'https://mobilehub-dev-azweu.westeurope-1.eventgrid.azure.net/api/events'
-key = 'mIODu+I1dUE6EbEUZzTDC1QDLxWb0btNujdvlVpObE4='
+# Internal modules
 
+
+# Environment variables
+load_dotenv()
+event_grid_endpoint = os.environ.get('EVENT_GRID_ENDPOINT')
+event_grid_key = os.environ.get('EVENT_GRID_KEY')
+
+
+# EventGrid singleton
 class EventGrid:
     def __init__(self):
         self.subscriptions = {}
-        self.client = EventGridPublisherClient(endpoint, AzureKeyCredential(key))
+        self.client = EventGridPublisherClient(event_grid_endpoint, AzureKeyCredential(event_grid_key))
 
     def publish(self, topic, message=''):
        try:
@@ -18,6 +28,7 @@ class EventGrid:
             print(err)
 
     def receive(self, event):
+        # Decompose event
         topic = event['subject']
         message = event['data']
         entity, id, *args = topic.split('/')
@@ -25,6 +36,7 @@ class EventGrid:
 
         print(f'> {topic["string"]}: {message}')
 
+        # Call matching subscriptions
         for pattern, handlers in self.subscriptions.items():
             if match_topic(pattern, topic['string']):
                 for handler in handlers:

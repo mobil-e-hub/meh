@@ -15,10 +15,13 @@ This project allows for the simulation, control and visualization of a Drone Log
 Please refer to the `README.md` files in the respective sub-folders for instructions and documentation.
 
 ## Installation and usage
+To install the required packages and start all modules in parallel, run
 ```shell script
-meh % npm install
-meh % npm run all  # the commands 'npm run sim', 'npm run opt' and 'npm run viz' also work individually
+meh % npm run setup
+meh % npm run start
 ```
+The individual modules can also be started using the commands `npm run start:sim`, `npm run start:opt`, `npm run start:viz` and `npm run start:vue`.
+
 
 ## Interaction and Communication
 TODO: Describe Event Grid and interaction between modules

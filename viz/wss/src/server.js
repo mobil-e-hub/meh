@@ -6,13 +6,20 @@ const _ = require('lodash');
 const morgan = require('morgan');
 const socket = require('socket.io');
 const { EventGridPublisherClient, AzureKeyCredential } = require("@azure/eventgrid");
+const dotenv = require('dotenv');
 
 // Internal modules
 
 
+// Environment variables
+dotenv.config();
+const eventGridEndpoint = process.env.EVENT_GRID_ENDPOINT;
+const eventGridKey = process.env.EVENT_GRID_KEY;
+const port = process.env.WSS_PORT || 3002;
+
+
 // Server for incoming EventGrid messages
 const app = express();
-const port = 3002;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(morgan('combined'));
@@ -21,6 +28,8 @@ const server = app.listen(port, () => {
     console.log(`< Server listening at http://localhost:${port}.`);
 });
 
+
+// Endpoints
 app.get('/ping', (req, res) => {
     res.status(200).json({ wss: 'pong' });
 });
@@ -30,7 +39,7 @@ app.get('/ping', (req, res) => {
 const io = socket(server, { cors: { origin: '*', methods: ["GET", "POST"], credentials: true }, allowEIO3: true });
 io.on('connection', (socket) => {
     socket.on('disconnect', () => {
-        console.log("> Socket disconnected.");
+        console.log("> Client disconnected.");
     });
 
     socket.on('eventgrid', async ({ topic, message }) => {
@@ -42,16 +51,12 @@ io.on('connection', (socket) => {
         }
     });
 
-    console.log("> Socket connected.");
+    console.log("> Client connected.");
 });
 
 
 // EventGrid client
-const eventGridClient = new EventGridPublisherClient(
-    "https://mobilehub-dev-azweu.westeurope-1.eventgrid.azure.net/api/events",
-    "EventGrid",
-    new AzureKeyCredential("mIODu+I1dUE6EbEUZzTDC1QDLxWb0btNujdvlVpObE4=")
-);
+const eventGridClient = new EventGridPublisherClient(eventGridEndpoint, 'EventGrid', new AzureKeyCredential(eventGridKey));
 
 
 // Receive events from EventGrid

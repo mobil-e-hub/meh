@@ -1,0 +1,13 @@
+{
+  "name": "meh-opt",
+  "version": "1.0.0",
+  "description": "Optimization engine (Flask server) for mobil-e-Hub",
+  "main": "src/server.py",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "setup": "python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
+    "start": ". venv/bin/activate && python3 src/server.py"
+  },
+  "author": "",
+  "license": "ISC"
+}

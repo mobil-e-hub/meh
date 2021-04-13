@@ -5,7 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "vue": "vue serve src/app.js",
+    "setup": "npm install",
+    "start": "vue serve src/app.js",
     "build": "vue build src/app.js"
   },
   "dependencies": {
