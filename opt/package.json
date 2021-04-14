@@ -5,8 +5,10 @@
   "main": "src/server.py",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "setup": "python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
-    "start": ". venv/bin/activate && python3 src/server.py"
+    "setup:mac": "python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
+    "start:mac": ". venv/bin/activate && python3 src/server.py",
+    "setup:windows": "python3 -m venv venv && venv/Scripts/activate.bat && pip install -r requirements.txt",
+    "start:windows": "venv/Scripts/activate.bat && python3 src/server.py"
   },
   "author": "",
   "license": "ISC"
