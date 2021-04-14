@@ -101,12 +101,12 @@ function shutdown() {
 }
 
 // Endpoints
-app.get('/ping', (req, res) => {
+app.get('/', (req, res) => {
     res.status(200).json('This is the base url of the meh/sim module.');
 });
 
 app.get('/ping', (req, res) => {
-    res.status(200).json({ sim3: 'pong' });
+    res.status(200).json({ sim: 'pong' });
 });
 
 app.get('/ping/eventgrid', (req, res) => {
