@@ -1,8 +1,4 @@
-/node_modules/
-/opt/node_modules/
-/sim/node_modules/
-/viz/node_modules/
-/viz/wss/node_modules/
-/viz/vue/node_modules/
+**/node_modules/
 /opt/venv/
 **/.env
+**/package-lock.json
