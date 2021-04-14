@@ -1,4 +1,5 @@
 /node_modules/
+/opt/node_modules/
 /sim/node_modules/
 /viz/node_modules/
 /viz/wss/node_modules/
