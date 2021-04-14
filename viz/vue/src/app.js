@@ -10,6 +10,10 @@ import store from './store/store';
 import uuidPlugin from './plugins/uuid';
 import eventGridPlugin from './plugins/eventgrid';
 
+// Environment variables
+const wssUrl = process.env.VUE_APP_WSS_URL;
+console.log('wssUrl:', wssUrl);
+
 // UI
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -24,7 +28,7 @@ Vue.use(IconsPlugin);
 // Setup
 Vue.config.productionTip = false;
 Vue.use(uuidPlugin);
-Vue.use(eventGridPlugin, { type: 'visualization', id: uuid().substr(0, 8) });
+Vue.use(eventGridPlugin, { type: 'visualization', id: uuid().substr(0, 8), wssUrl });
 
 // Create app
 new Vue({ render: (h) => h(App), store }).$mount('#app');

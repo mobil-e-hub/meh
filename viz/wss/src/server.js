@@ -36,7 +36,7 @@ app.get('/ping', (req, res) => {
 
 
 // WebSocket to forward messages to Visualization
-const io = socket(server, { cors: { origin: '*', methods: ["GET", "POST"], credentials: true }, allowEIO3: true });
+const io = socket(server, { cors: { origin: ['http://localhost:8080', 'https://mobil-e-hub.github.io'], methods: ["GET", "POST"], credentials: true }, allowEIO3: true });
 io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log("> Client disconnected.");
