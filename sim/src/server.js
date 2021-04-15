@@ -110,7 +110,7 @@ app.get('/ping', (req, res) => {
 });
 
 app.get('/ping/eventgrid', (req, res) => {
-    eventGrid.publish('pong');
+    eventGrid.publish('pong', 'simulator');
     res.status(200).json({ eventgrid: 'pong' });
 });
 
