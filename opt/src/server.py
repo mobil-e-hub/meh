@@ -28,7 +28,7 @@ def ping():
 
 @app.route('/ping/eventgrid')
 def ping_eventgrid():
-    event_grid.publish('pong')
+    event_grid.publish('pong', 'optimization-engine')
     return { 'eventgrid': 'pong' }
 
 # Endpoint for incoming EventGrid messages (both validation and MEH events)
