@@ -44,7 +44,7 @@ def eventgrid():
             elif event['eventType'] == 'mobil-e-hub':
                 event_grid.receive(event)
             elif event['eventType'] == 'Portal_Echo':
-                print(f'Echo received: {event["data"]}')
+                print(f'> (opt) Echo received')
     except Error as err:
         print(f'Invalid EventGrid message received: {err}')
     finally:

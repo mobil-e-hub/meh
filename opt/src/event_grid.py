@@ -34,7 +34,7 @@ class EventGrid:
         entity, id, *args = topic.split('/')
         topic = { 'entity': entity, 'id': id, 'args': args, 'rest': '/'.join(args), 'string': topic }
 
-        print(f'> {topic["string"]}: {message}')
+        print(f'> (opt) {topic["string"]}: {message}')
 
         # Call matching subscriptions
         for pattern, handlers in self.subscriptions.items():

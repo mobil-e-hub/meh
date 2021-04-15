@@ -128,6 +128,9 @@ app.post('/eventgrid', async (req, res) => {
                 res.status(404).end();
             }
         }
+        else if (event.eventType === "Portal_Echo") {
+            console.log(`> (sim) Echo received!`);
+        }
         // Otherwise process request
         else {
             try {

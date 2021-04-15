@@ -2,3 +2,4 @@
 /opt/venv/
 **/.env
 **/package-lock.json
+**/__pycache__/
