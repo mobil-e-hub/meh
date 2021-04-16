@@ -11,7 +11,7 @@ import uuidPlugin from './plugins/uuid';
 import eventGridPlugin from './plugins/eventgrid';
 
 // Environment variables
-const wssUrl = process.env.VUE_APP_WSS_URL;
+const wssUrl = process.env.VUE_APP_WSS_URL || 'wss://ines-gpu-01.informatik.uni-mannheim.de/meh/wss';
 console.log('wssUrl:', wssUrl);
 
 // UI
