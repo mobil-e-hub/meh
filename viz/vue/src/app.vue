@@ -33,6 +33,7 @@
                             <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
+<!--                      TODO move to functions-->
                         <b-button variant="link" title="Start simulation" @click="$eventGrid.publish('start')">
                             <b-icon icon="play-fill" aria-hidden="true"></b-icon>
                         </b-button>
@@ -108,7 +109,7 @@
                 <!--Map view-->
                 <b-col :cols="view === 'none' ? 12 : 9">
 <!--                    <div>-->
-                        <!-- Sidebar Menu-->
+<!--                         Sidebar Menu-->
 <!--                        <template>-->
 <!--                            <div class="sidebar">-->
 <!--                                <div class="sidebar-backdrop" @click="toggleSidebar" v-if="this.display.isSidebarVisible"></div>-->
@@ -152,12 +153,12 @@
 <!--                                                    </li>-->
 <!--                                                </ul>-->
 
-<!--&lt;!&ndash;                                                <label>{{ this.display.enabledToastTypes}}"</label>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <ul id="example-1">&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        {{ item }}&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    </li>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                </ul>&ndash;&gt;-->
+<!--                                                <label>{{ this.display.enabledToastTypes}}"</label>-->
+<!--                                                <ul id="example-1">-->
+<!--                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">-->
+<!--                                                        {{ item }}-->
+<!--                                                    </li>-->
+<!--                                                </ul>-->
 
 <!--                                            </li>-->
 <!--                                        </ul>-->
@@ -179,32 +180,20 @@
                                         <!--Content-->
                                         <!--Static content (hubs, addresses)-->
                                         <hub v-for="(hub, id) in $store.state.entities.hubs" :key="id" :id="id"></hub>
-
+                                        <address v-for="(hub, id) in $store.state.entities.addresses" :key="id" :id="id"> </address>
 <!--                                        <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.car" :y="-address.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">-->
 <!--                                            <title>Address {{ address.id }} ({{ address.name }})</title>-->
 <!--                                        </use>-->
 
                                         <!--Dynamic content (cars, drones, parcels-->
-                                        <use v-for="(car, id) in entities.cars"
-                                             :key="id"
-                                             :x="car.cx - car.width / 2"
-                                             :y="car.cy - car.height / 2"
-                                             :width="car.width"
-                                             :height="car.height"
-                                             :fill="car.fill"
-                                             :href="require('../assets/entities.svg') + '#car-symbol'"
-                                             transform="scale(1, -1)"
-                                        >
-                                            <title>Car {{ id }} ({{ car.state }})</title>
-                                        </use>
-
-
-                                        <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
-<!--                                                    TODO add loaded parcels / capacity?-->
-                                            <title>Bus {{ bus.id }} ({{ bus.state }})</title>
-                                        </use>
-
                                         <drone v-for="(drone, id) in $store.state.entities.drones" :key="id" :id="id" />
+
+                                        <car v-for="(car, id) in $store.state.entities.cars" :key="id" :id="id" />
+
+                                        <bus v-for="(bus, id) in $store.state.entities.buses" :key="id" :id="id" >
+                                          <title>Bus {{id}}</title>
+                                        </bus>
+
 
                                         <use v-for="(parcel, id) in lodash.pickBy(entities.parcels, (p, key) => p.cx !== null)"
                                              :key="id"
@@ -308,7 +297,7 @@
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of busses">
-                    <font-awesome-icon icon="bus" style="color: blue" />: {{ Object.keys(entities.buss).length }}
+                    <font-awesome-icon icon="bus" style="color: blue" />: {{ Object.keys(entities.buses).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of parcels">
@@ -372,7 +361,7 @@ export default {
                 },
                 drones: { },
                 cars: { },
-                buss: {},   //plural busses breaks mqtt topic matching TODO
+                buses: {},   //plural busses breaks mqtt topic matching TODO
                 parcels: { },
                 hubs: { }
             },
@@ -418,8 +407,8 @@ export default {
         Edge,
         Hub,
         Drone,
-        // Car,
-        // Bus,
+        Car,
+        Bus,
         // Address
     },
     created: function() {
