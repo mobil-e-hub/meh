@@ -1,5 +1,5 @@
 <template>
-    <div id="app">
+    <div id="app" class="bg-light">
         <b-navbar fixed="top" variant="light">
 
             <!--          Burger Menu to toggle Sidebar Menu-->
@@ -33,17 +33,17 @@
                             <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-button variant="link" title="Start simulation" @click="$eventGrid.publish('start')">
-                            <b-icon icon="play-fill" aria-hidden="true"></b-icon>
-                        </b-button>
+<!--                        <b-button variant="link" title="Start simulation" @click="$eventGrid.publish('start')">-->
+<!--                            <b-icon icon="play-fill" aria-hidden="true"></b-icon>-->
+<!--                        </b-button>-->
 
-                        <b-button variant="link" title="Stop simulation" @click="$eventGrid.publish('stop')">
-                            <b-icon icon="stop-fill" aria-hidden="true"></b-icon>
-                        </b-button>
+<!--                        <b-button variant="link" title="Stop simulation" @click="$eventGrid.publish('stop')">-->
+<!--                            <b-icon icon="stop-fill" aria-hidden="true"></b-icon>-->
+<!--                        </b-button>-->
 
-                        <b-button variant="link" title="Reset simulation" @click="$eventGrid.publish('reset')">
-                            <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>
-                        </b-button>
+<!--                        <b-button variant="link" title="Reset simulation" @click="$eventGrid.publish('reset')">-->
+<!--                            <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>-->
+<!--                        </b-button>-->
 
                         <b-button variant="link" title="Zoom in" @click="$store.commit('mapZoom', { factor: 1.25 })">
                             <b-icon icon="zoom-in" aria-hidden="true"></b-icon>
@@ -55,33 +55,33 @@
                             <b-icon icon="zoom-out" aria-hidden="true"></b-icon>
                         </b-button>
 
-                        <b-button variant="link" title="Run test function" @click="clickTestButton">
-                            <b-icon icon="braces" aria-hidden="true"></b-icon>
-                        </b-button>
+<!--                        <b-button variant="link" title="Run test function" @click="clickTestButton">-->
+<!--                            <b-icon icon="braces" aria-hidden="true"></b-icon>-->
+<!--                        </b-button>-->
 
-                        <b-button v-b-modal.modal-send-message variant="link" title="Send message">
-                            <b-icon icon="terminal-fill" aria-hidden="true"></b-icon>
-                        </b-button>
+<!--                        <b-button v-b-modal.modal-send-message variant="link" title="Send message">-->
+<!--                            <b-icon icon="terminal-fill" aria-hidden="true"></b-icon>-->
+<!--                        </b-button>-->
 
-                        <b-modal id="modal-send-message" title="Send message" @ok="clickSendButton">
-                            <b-form-group label="Sender" label-for="input-message-sender">
-                                <b-form-input id="input-message-sender" v-model="command.message.sender" placeholder="from/visualization/..."></b-form-input>
-                            </b-form-group>
+<!--                        <b-modal id="modal-send-message" title="Send message" @ok="clickSendButton">-->
+<!--                            <b-form-group label="Sender" label-for="input-message-sender">-->
+<!--                                <b-form-input id="input-message-sender" v-model="command.message.sender" placeholder="from/visualization/..."></b-form-input>-->
+<!--                            </b-form-group>-->
 
-                            <b-form-group label="Topic" label-for="input-message-topic">
-                                <b-form-input id="input-message-topic" v-model="command.message.topic" placeholder="status" required></b-form-input>
-                            </b-form-group>
+<!--                            <b-form-group label="Topic" label-for="input-message-topic">-->
+<!--                                <b-form-input id="input-message-topic" v-model="command.message.topic" placeholder="status" required></b-form-input>-->
+<!--                            </b-form-group>-->
 
-                            <b-form-group label="Message" label-for="input-message-message">
-                                <b-form-input id="input-message-message" v-model="command.message.message" placeholder="{ data: 'Hello World' }" required></b-form-input>
-                            </b-form-group>
-                        </b-modal>
+<!--                            <b-form-group label="Message" label-for="input-message-message">-->
+<!--                                <b-form-input id="input-message-message" v-model="command.message.message" placeholder="{ data: 'Hello World' }" required></b-form-input>-->
+<!--                            </b-form-group>-->
+<!--                        </b-modal>-->
 
-                        <b-button v-b-modal.modal-place-order variant="link" title="Place order">
-                            <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>
-                        </b-button>
+<!--                        <b-button v-b-modal.modal-place-order variant="link" title="Place order">-->
+<!--                            <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>-->
+<!--                        </b-button>-->
 
-                        <b-modal id="modal-place-order" title="Place order" @ok="clickPlaceOrderButton">
+<!--                        <b-modal id="modal-place-order" title="Place order" @ok="clickPlaceOrderButton">-->
 <!--                            <b-form-group label="Vendor" label-for="input-order-vendor">-->
 <!--                                <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>-->
 <!--                            </b-form-group>-->
@@ -97,7 +97,7 @@
 <!--                            <b-form-group label="Drop-off time" label-for="input-order-dropoff">-->
 <!--                                <b-form-select id="input-order-dropoff" v-model="command.order.dropoff" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>-->
 <!--                            </b-form-group>-->
-                        </b-modal>
+<!--                        </b-modal>-->
                     </b-button-toolbar>
                 </b-nav-form>
             </b-navbar-nav>
@@ -106,7 +106,7 @@
         <b-container fluid class="my-5">
             <b-row class="pt-4">
                 <!--Map view-->
-                <b-col :cols="view === 'none' ? 12 : 9">
+                <b-col :cols="view === 'none' ? 12 : 9" class="bg-white">
 <!--                    <div>-->
                         <!-- Sidebar Menu-->
 <!--                        <template>-->
@@ -281,6 +281,7 @@
                   <messages v-if="view === 'messages'" :messages="messages.messages"></messages>
                   <entities v-else-if="view === 'entities'"></entities>
                   <settings v-else-if="view === 'settings'"></settings>
+                  <simulation v-else-if="view === 'simulation'"></simulation>
                 </b-col>
             </b-row>
         </b-container>
@@ -323,17 +324,17 @@
             </b-navbar-nav>
         </b-navbar>
 
-<!--        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : ''" style="bottom: 220px" title="Map View" @click="view = 'simulation'">-->
-<!--            <b-icon icon="map" aria-hidden="true"></b-icon>-->
-<!--        </b-button>-->
-        <b-button class="floating" :variant="view === 'messages' ? 'primary' : 'secondary'" style="bottom: 170px" title="Messages View" @click="onClickView('messages')">
+        <b-button class="floating" :variant="view === 'messages' ? 'primary' : 'secondary'" style="bottom: 230px" title="Messages View" @click="onClickView('messages')">
             <b-icon icon="chat-left-text" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'entities' ? 'primary' : 'secondary'" style="bottom: 110px" title="Entities View" @click="onClickView('entities')">
+        <b-button class="floating" :variant="view === 'entities' ? 'primary' : 'secondary'" style="bottom: 170px" title="Entities View" @click="onClickView('entities')">
             <b-icon icon="clipboard-data" aria-hidden="true"></b-icon>
         </b-button>
-        <b-button class="floating" :variant="view === 'settings' ? 'primary' : 'secondary'" style="bottom: 50px" title="Settings View" @click="onClickView('settings')">
+        <b-button class="floating" :variant="view === 'settings' ? 'primary' : 'secondary'" style="bottom: 110px" title="Settings View" @click="onClickView('settings')">
             <b-icon icon="gear-fill" aria-hidden="true"></b-icon>
+        </b-button>
+        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : 'secondary'" style="bottom: 50px" title="Simulation View" @click="onClickView('simulation')">
+          <b-icon icon="collection-play-fill" aria-hidden="true"></b-icon>
         </b-button>
     </div>
 </template>
@@ -344,6 +345,7 @@ const _ = require('lodash');
 import Messages from './components/Messages';
 import Entities from './components/Entities';
 import Settings from './components/Settings';
+import Simulation from './components/Simulation';
 
 import Node from './components/Node';
 import Edge from './components/Edge';
@@ -414,6 +416,7 @@ export default {
         Messages,
         Entities,
         Settings,
+        Simulation,
         Node,
         Edge,
         Hub,
