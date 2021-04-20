@@ -33,6 +33,7 @@
                             <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
+<!--                            TODO move to sim view-->
 <!--                        <b-button variant="link" title="Start simulation" @click="$eventGrid.publish('start')">-->
 <!--                            <b-icon icon="play-fill" aria-hidden="true"></b-icon>-->
 <!--                        </b-button>-->
@@ -293,27 +294,39 @@
               </b-nav-item>
             </b-navbar-nav>
 
-            <b-navbar-nav class="mx-auto">
-                <b-nav-text v-if="listening" class="mx-3">{{incomingMessageCounter}}</b-nav-text>
+            <b-navbar-nav class="mx-auto" align-v="center" >
+                <b-nav-text v-if="listening" class="mx-3 pr-5" >{{incomingMessageCounter}}      </b-nav-text>
 
-                <b-nav-text class="mx-2" title="Number of hubs">
-                    <font-awesome-icon icon="warehouse" style="color: gray" />: {{Object.keys(entities.hubs).length }}
+                <b-nav-text class="mx-2 pl-2" title="Number of hubs">
+<!--                  <md-icon>thumb_up</md-icon>-->
+                  <vue-material-icon class="mt-4" name="home"  :size="24" :color="gray"/>
+<!--                    <font-awesome-icon icon="warehouse" style="color: gray" />:-->
+                   : {{Object.keys(entities.hubs).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of drones">
-                    <font-awesome-icon icon="plane" style="color: red" />: {{Object.keys(entities.drones).length }}
+                    <vue-material-icon class="red-text" name="flight"  :size="24" style="color: red" :color="red"/>
+<!--                    <font-awesome-icon icon="plane" style="color: red" />-->
+                  : {{Object.keys(entities.drones).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of cars">
-                    <font-awesome-icon icon="car" style="color: blue" />: {{Object.keys(entities.cars).length }}
+                  <vue-material-icon name="directions_car"  :size="24" :color="blue"/>
+<!--                    <font-awesome-icon icon="car" style="color: blue" />-->
+                  : {{Object.keys(entities.cars).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of busses">
-                    <font-awesome-icon icon="bus" style="color: blue" />: {{ Object.keys(entities.buss).length }}
+                  <vue-material-icon name="directions_bus"  :size="24" :color="blue"/>
+<!--                    <font-awesome-icon class="icon-red" icon="bus" style="color: blue" />-->
+                  : {{ Object.keys(entities.buss).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of parcels">
-                    <font-awesome-icon icon="archive" style="color: green" />: {{Object.keys(entities.parcels).length }}
+                  <!--                  // better: inventory_2 (parcel box)  &ndash;&gt; didn't  work-->
+                  <vue-material-icon name="mail"  :size="24" :color="green"/>
+<!--                    <font-awesome-icon icon="archive" style="color: green" />-->
+                  : {{Object.keys(entities.parcels).length }}
                 </b-nav-text>
             </b-navbar-nav>
 
@@ -750,6 +763,9 @@ button:focus {
     font-size: 5px;
     letter-spacing: -1px;
     z-index: 5;
+}
+vue-material-icon.icon-red {
+  color: red;
 }
 
 </style>
