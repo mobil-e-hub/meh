@@ -298,7 +298,6 @@
                 <b-nav-text v-if="listening" class="mx-3 pr-5" >{{incomingMessageCounter}}      </b-nav-text>
 
                 <b-nav-text class="mx-2 pl-2" title="Number of hubs">
-<!--                  <md-icon>thumb_up</md-icon>-->
                   <vue-material-icon class="mt-4" name="home"  :size="24" :color="gray"/>
 <!--                    <font-awesome-icon icon="warehouse" style="color: gray" />:-->
                    : {{Object.keys(entities.hubs).length }}
