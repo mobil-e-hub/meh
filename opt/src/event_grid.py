@@ -17,7 +17,7 @@ event_grid_key = os.environ.get('EVENT_GRID_KEY')
 class EventGrid:
     def __init__(self):
         self.subscriptions = {}
-        self.client = EventGridPublisherClient(event_grid_endpoint, AzureKeyCredential(event_grid_key))
+        self.client = EventGridPublisherClient(event_grid_endpoint, AzureKeyCredential(str(event_grid_key)))
 
     def publish(self, topic, message=''):
        try:
