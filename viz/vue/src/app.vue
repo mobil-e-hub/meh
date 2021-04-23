@@ -4,7 +4,8 @@
 
             <!--          Burger Menu to toggle Sidebar Menu-->
             <template>
-                <div id="burger" :class="{ 'active' : this.display.isSidebarVisible }" @click.prevent="toggleSidebar">
+<!--              -->
+                <div id="burger" :class="{ 'active' : $store.state.settings.sideMenuVisible }" @click.prevent="toggleSidebar">
                     <slot>
                         <button type="button" class="burger-button" title="Menu">
                             <span class="hidden">Toggle menu</span>
@@ -33,19 +34,6 @@
                             <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
-<!--                            TODO move to sim view-->
-<!--                        <b-button variant="link" title="Start simulation" @click="$eventGrid.publish('start')">-->
-<!--                            <b-icon icon="play-fill" aria-hidden="true"></b-icon>-->
-<!--                        </b-button>-->
-
-<!--                        <b-button variant="link" title="Stop simulation" @click="$eventGrid.publish('stop')">-->
-<!--                            <b-icon icon="stop-fill" aria-hidden="true"></b-icon>-->
-<!--                        </b-button>-->
-
-<!--                        <b-button variant="link" title="Reset simulation" @click="$eventGrid.publish('reset')">-->
-<!--                            <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>-->
-<!--                        </b-button>-->
-
                         <b-button variant="link" title="Zoom in" @click="$store.commit('mapZoom', { factor: 1.25 })">
                             <b-icon icon="zoom-in" aria-hidden="true"></b-icon>
                         </b-button>
@@ -56,49 +44,6 @@
                             <b-icon icon="zoom-out" aria-hidden="true"></b-icon>
                         </b-button>
 
-<!--                        <b-button variant="link" title="Run test function" @click="clickTestButton">-->
-<!--                            <b-icon icon="braces" aria-hidden="true"></b-icon>-->
-<!--                        </b-button>-->
-
-<!--                        <b-button v-b-modal.modal-send-message variant="link" title="Send message">-->
-<!--                            <b-icon icon="terminal-fill" aria-hidden="true"></b-icon>-->
-<!--                        </b-button>-->
-
-<!--                        <b-modal id="modal-send-message" title="Send message" @ok="clickSendButton">-->
-<!--                            <b-form-group label="Sender" label-for="input-message-sender">-->
-<!--                                <b-form-input id="input-message-sender" v-model="command.message.sender" placeholder="from/visualization/..."></b-form-input>-->
-<!--                            </b-form-group>-->
-
-<!--                            <b-form-group label="Topic" label-for="input-message-topic">-->
-<!--                                <b-form-input id="input-message-topic" v-model="command.message.topic" placeholder="status" required></b-form-input>-->
-<!--                            </b-form-group>-->
-
-<!--                            <b-form-group label="Message" label-for="input-message-message">-->
-<!--                                <b-form-input id="input-message-message" v-model="command.message.message" placeholder="{ data: 'Hello World' }" required></b-form-input>-->
-<!--                            </b-form-group>-->
-<!--                        </b-modal>-->
-
-<!--                        <b-button v-b-modal.modal-place-order variant="link" title="Place order">-->
-<!--                            <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>-->
-<!--                        </b-button>-->
-
-<!--                        <b-modal id="modal-place-order" title="Place order" @ok="clickPlaceOrderButton">-->
-<!--                            <b-form-group label="Vendor" label-for="input-order-vendor">-->
-<!--                                <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>-->
-<!--                            </b-form-group>-->
-
-<!--                            <b-form-group label="Customer" label-for="input-order-customer">-->
-<!--                                <b-form-select id="input-order-customer" v-model="command.order.customer" :options="Object.values(map.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${map.topology.addresses[c.address].name})` }))" required></b-form-select>-->
-<!--                            </b-form-group>-->
-
-<!--                            <b-form-group label="Pick-up time" label-for="input-order-pickup">-->
-<!--                                <b-form-select id="input-order-pickup" v-model="command.order.pickup" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>-->
-<!--                            </b-form-group>-->
-
-<!--                            <b-form-group label="Drop-off time" label-for="input-order-dropoff">-->
-<!--                                <b-form-select id="input-order-dropoff" v-model="command.order.dropoff" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>-->
-<!--                            </b-form-group>-->
-<!--                        </b-modal>-->
                     </b-button-toolbar>
                 </b-nav-form>
             </b-navbar-nav>
@@ -110,63 +55,8 @@
                 <b-col :cols="view === 'none' ? 12 : 9" class="bg-white">
 <!--                    <div>-->
                         <!-- Sidebar Menu-->
-<!--                        <template>-->
-<!--                            <div class="sidebar">-->
-<!--                                <div class="sidebar-backdrop" @click="toggleSidebar" v-if="this.display.isSidebarVisible"></div>-->
-<!--                                <transition name="slide">-->
-<!--                                    <div v-if="this.display.isSidebarVisible" class="sidebar-panel mt-lg-4">-->
-<!--                                        <label class="mt-md-2 mb-auto" > <u> Settings: </u> </label>-->
-<!--                                        <ul>-->
-<!--                                            <li>-->
-<!--                                                &lt;!&ndash; ToggleButton - Stats Table&ndash;&gt;-->
-<!--                                                <template>-->
-<!--                                                    <label for="toggle_stats_btn" :class="{'active': this.display.statsTableVisible}" class="toggle__button">-->
+                        <SideMenu v-if="$store.state.settings.sideMenuVisible"></SideMenu>
 
-<!--                                                        <span  class="toggle__label"> Stats:   </span>-->
-
-<!--                                                        <input type="checkbox"  id="toggle_stats_btn"  v-model="toggleStatsTable">-->
-<!--                                                        <span class="mr-auto toggle__switch"></span>-->
-<!--                                                    </label>-->
-<!--                                                </template>-->
-<!--                                            </li>-->
-<!--                                            <li>-->
-<!--                                                &lt;!&ndash; ToggleButton Toasts&ndash;&gt;-->
-<!--                                                <template>-->
-<!--                                                    <label for="toggle_toast_btn" :class="{'active': this.display.areToastsEnabled}" class="toggle__button">-->
-
-<!--                                                        <span  class="toggle__label"> Toasts: </span>-->
-<!--                                                        <input type="checkbox"  id="toggle_toast_btn"  v-model="toggleToasts">-->
-<!--                                                        <span class="ml-auto toggle__switch"></span>-->
-<!--                                                    </label>-->
-<!--                                                </template>-->
-<!--                                                <ul>-->
-<!--                                                    <li>-->
-<!--                                                        <label for="checkbox_status" >Status  </label>-->
-<!--                                                        <input class="float-right" type="checkbox" id="checkbox_status" value="status" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">                                                    </li>-->
-<!--                                                    <li>-->
-<!--                                                        <label for="checkbox_routing" >Routing</label>-->
-<!--                                                        <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">-->
-<!--                                                    </li>-->
-<!--                                                    <li>-->
-<!--                                                        <label for="checkbox_mission" >Missions</label>-->
-<!--                                                        <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" :disabled="!this.display.areToastsEnabled" v-model="this.display.enabledToastTypes">-->
-<!--                                                    </li>-->
-<!--                                                </ul>-->
-
-<!--&lt;!&ndash;                                                <label>{{ this.display.enabledToastTypes}}"</label>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                <ul id="example-1">&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    <li v-for="item in this.display.enabledToastTypes" :key="item.message">&ndash;&gt;-->
-<!--&lt;!&ndash;                                                        {{ item }}&ndash;&gt;-->
-<!--&lt;!&ndash;                                                    </li>&ndash;&gt;-->
-<!--&lt;!&ndash;                                                </ul>&ndash;&gt;-->
-
-<!--                                            </li>-->
-<!--                                        </ul>-->
-
-<!--                                    </div>-->
-<!--                                </transition>-->
-<!--                            </div>-->
-<!--                        </template>-->
 
 <!--                        <b-container fluid>-->
 <!--                            <b-row>-->
@@ -223,54 +113,6 @@
 <!--                                </b-col>-->
 
 <!--                                <b-col cols="3">-->
-<!--                                    <template v-if="display.statsTableVisible">-->
-<!--                                        <div class="card" style="width: 22rem;">-->
-<!--                                            <div class="card-header">-->
-<!--                                                <b>Statistics (Dummy)</b>-->
-<!--                                            </div>-->
-<!--                                            <table class="card-table table">-->
-<!--                                                <thead>-->
-<!--                                                <tr>-->
-<!--                                                    <th scope="col">Entity</th>-->
-<!--                                                    <th scope="col">Engaged</th>-->
-<!--                                                    <th scope="col">Avg. wait (?)</th>-->
-<!--                                                </tr>-->
-<!--                                                </thead>-->
-<!--                                                <tbody>-->
-<!--                                                <tr>-->
-<!--                                                    <td>Drones</td>-->
-<!--                                                    <td> _x / {{Object.keys(entities.drones).length }}</td>-->
-<!--                                                    <td>_10 min</td>-->
-<!--                                                </tr>-->
-<!--                                                <tr>-->
-<!--                                                    <td>Cars</td>-->
-<!--                                                    <td> _x / {{Object.keys(entities.cars).length }}</td>-->
-<!--                                                    <td>_20 min</td>-->
-<!--                                                </tr>-->
-<!--                                                <tr>-->
-<!--                                                    <td>Buses</td>-->
-<!--                                                    <td> _x / {{ Object.keys(entities.buss).length }}</td>-->
-<!--                                                    <td>_50 min</td>-->
-<!--                                                </tr>-->
-<!--                                                <tr>-->
-<!--                                                    <td>-->
-<!--                                                        Parcel-->
-<!--                                                        <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>-->
-<!--                                                    </td>-->
-<!--                                                    <td> _{{Object.keys(entities.parcels).length }} </td>-->
-<!--                                                    <td>_42 min</td>-->
-<!--                                                </tr>-->
-<!--                                                <tr>-->
-<!--                                                    <td>Parcel-->
-<!--                                                        <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>-->
-<!--                                                    </td>-->
-<!--                                                    <td> _{{Object.keys(entities.parcels).length }} </td>-->
-<!--                                                    <td>_2 h</td>-->
-<!--                                                </tr>-->
-<!--                                                </tbody>-->
-<!--                                            </table>-->
-<!--                                        </div>-->
-<!--                                    </template>-->
 <!--                                </b-col>-->
 <!--                            </b-row>-->
 <!--                        </b-container>-->
@@ -336,18 +178,19 @@
             </b-navbar-nav>
         </b-navbar>
 
-        <b-button class="floating" :variant="view === 'messages' ? 'primary' : 'secondary'" style="bottom: 230px" title="Messages View" @click="onClickView('messages')">
-            <b-icon icon="chat-left-text" aria-hidden="true"></b-icon>
-        </b-button>
-        <b-button class="floating" :variant="view === 'entities' ? 'primary' : 'secondary'" style="bottom: 170px" title="Entities View" @click="onClickView('entities')">
-            <b-icon icon="clipboard-data" aria-hidden="true"></b-icon>
-        </b-button>
-        <b-button class="floating" :variant="view === 'settings' ? 'primary' : 'secondary'" style="bottom: 110px" title="Settings View" @click="onClickView('settings')">
-            <b-icon icon="gear-fill" aria-hidden="true"></b-icon>
-        </b-button>
-        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : 'secondary'" style="bottom: 50px" title="Simulation View" @click="onClickView('simulation')">
+        <b-button class="floating" :variant="view === 'simulation' ? 'primary' : 'secondary'" style="bottom: 230px" title="Simulation View" @click="onClickView('simulation')">
           <b-icon icon="collection-play-fill" aria-hidden="true"></b-icon>
         </b-button>
+        <b-button class="floating" :variant="view === 'entities' ? 'primary' : 'secondary'" style="bottom: 170px" title="Entities View" @click="onClickView('entities')">
+          <b-icon icon="clipboard-data" aria-hidden="true"></b-icon>
+        </b-button>
+        <b-button class="floating" :variant="view === 'messages' ? 'primary' : 'secondary'" style="bottom: 110px" title="Messages View" @click="onClickView('messages')">
+            <b-icon icon="chat-left-text" aria-hidden="true"></b-icon>
+        </b-button>
+        <b-button class="floating" :variant="view === 'settings' ? 'primary' : 'secondary'" style="bottom: 50px" title="Settings View" @click="onClickView('settings')">
+          <b-icon icon="gear-fill" aria-hidden="true"></b-icon>
+        </b-button>
+
     </div>
 </template>
 
@@ -358,6 +201,8 @@ import Messages from './components/Messages';
 import Entities from './components/Entities';
 import Settings from './components/Settings';
 import Simulation from './components/Simulation';
+
+import SideMenu from './components/SideMenu';
 
 import Node from './components/Node';
 import Edge from './components/Edge';
@@ -398,33 +243,19 @@ export default {
                 },
             },
             display: {
-                isSidebarVisible: false,
                 areToastsEnabled: true,
                 enabledToastTypes: ['status'],
-                statsTableVisible: false
             },
             stats: {
                 waitingDrones:0,
                 avgDroneWaitTime:0,
                 waitingCars: 0,
             },
-            command: {
-                message: {
-                    topic: null,
-                    message: null,
-                    sender: null
-                },
-                order: {
-                    vendor: null,
-                    customer: null,
-                    pickup: null,
-                    dropoff: null
-                }
-            },
             currentTime: Date.now()
         }
     },
     components: {
+        SideMenu,
         Messages,
         Entities,
         Settings,
@@ -490,50 +321,16 @@ export default {
                 this.showToast(title, message)
             }
         },
-        // TODO debug showToastType --> freezes (?)
         showToast: function(title, message) {
             if (this.display.areToastsEnabled) {
                 this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});
             }
         },
-        clickSendButton: function() {
-            this.$eventGrid.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
-        },
-        clickTestButton: function() {
-            this.$eventGrid.publish('bla', 'hello');
-        },
-        clickPlaceOrderButton: function() {
-            this.$eventGrid.publish('place-order', {
-                id: this.$uuid(),
-                vendor: { type: 'customer', id: this.command.order.vendor },
-                customer: { type: 'customer', id: this.command.order.customer },
-                pickup: this.command.order.pickup,
-                dropoff: this.command.order.dropoff
-            });
-        },
         toggleSidebar: function() {
-            this.display.isSidebarVisible = !this.display.isSidebarVisible
+          this.$store.commit('toggleSideMenu');
         },
     },
     computed: {
-        toggleStatsTable: {
-            get() {
-                return this.display.statsTableVisible;
-            },
-            set(newValue) {
-                this.display.statsTableVisible = newValue;
-                this.$emit('change', newValue);
-            }
-        },
-        toggleToasts: {
-            get() {
-                return this.display.areToastsEnabled;
-            },
-            set(newValue) {
-                this.display.areToastsEnabled = newValue;
-                this.$emit('change', newValue);
-            }
-        },
         incomingMessageCounter: function() {
             const count = this.messages.messages.reduce(((n, m) => n + (this.currentTime - m.timestamp <= this.messages.counterInterval * 1000 ? 1 : 0)), 0);
             return count > 0 ? `${count / this.messages.counterInterval} messages per second` : 'No messages incoming';
@@ -554,19 +351,6 @@ export default {
     overflow: hidden;
     perspective: 1px;
     z-index: 10000;
-}
-
-.card.floating{
-    position: fixed;
-    /*width: 50px;*/
-    /*height: 50px;*/
-    right: 30px;
-    /*text-align: center;*/
-    /*border-radius: 50px;*/
-    /*box-shadow: 2px 2px 3px #999;*/
-    overflow: hidden;
-    perspective: 1px;
-    z-index: 10;
 }
 
 /*!*    Burger Menu for Sidebar*!*/
@@ -638,135 +422,8 @@ button:focus {
     transform: rotate(-45deg);
 }
 
-/*    Sidebar_Menu*/
-
-.slide-enter-active,
-.slide-leave-active
-{
-    transition: transform 0.2s ease;
-}
-.slide-enter,
-.slide-leave-to {
-    transform: translateX(-100%);
-    transition: all 150ms ease-in 0s
-}
-.sidebar-backdrop {
-    background-color: rgba(19, 15, 64, 0.4);
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    cursor: pointer;
-    z-index: 899;
-}
-.sidebar-panel {
-    overflow-y: auto;
-    background-color: #f8f9fa;
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 999;
-    padding: 3rem 20px 2rem 20px;
-    width: 200px;
-}
-
-/*    Toggle Button in Sidemenu*/
-.toggle__button {
-    vertical-align: middle;
-    user-select: none;
-    cursor: pointer;
-}
-.toggle__button input[type="checkbox"] {
-    opacity: 0;
-    position: absolute;
-    width: 1px;
-    height: 1px;
-}
-.toggle__button .toggle__switch {
-    display:inline-block;
-    height:12px;
-    border-radius:6px;
-    width:40px;
-    background: #BFCBD9;
-    box-shadow: inset 0 0 1px #BFCBD9;
-    position:relative;
-    margin-left: 10px;
-    transition: all .25s;
-}
-.toggle__button .toggle__switch::after,
-.toggle__button .toggle__switch::before {
-    content: "";
-    position: absolute;
-    display: block;
-    height: 18px;
-    width: 18px;
-    border-radius: 50%;
-    left: 0;
-    top: -3px;
-    transform: translateX(0);
-    transition: all .25s cubic-bezier(.5, -.6, .5, 1.6);
-}
-.toggle__button .toggle__switch::after {
-    background: #4D4D4D;
-    box-shadow: 0 0 1px #666;
-}
-.toggle__button .toggle__switch::before {
-    background: #4D4D4D;
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
-    opacity:0;
-}
-.active .toggle__switch {
-    background: #adedcb;
-    box-shadow: inset 0 0 1px #adedcb;
-}
-.active .toggle__switch::after,
-.active .toggle__switch::before{
-    transform:translateX(22px);
-}
-.active .toggle__switch::after {
-    /*left: 23px;*/
-    background: #53B883;
-    box-shadow: 0 0 1px #53B883;
-}
-
-
-/*.SVGBadge-svg {*/
-/*     font-size: 30px;*/
-/*     position: absolute;*/
-/*     bottom: 100%;*/
-/*     left: 100%;*/
-/*     width: 1em;*/
-/*     height: 1em;*/
-/*     margin-left: -0.6em;*/
-/*     margin-bottom: -0.6em;*/
-/* }*/
-
-.SVGBadge {
-    /*transform-origin: center;*/
-    /*transform-box: fill-box;*/
-}
-
-.SVGBadge-svgBackground {
-    fill: forestgreen;
-    fill-opacity: 0.4;
-    z-index: 5;
-}
-
-.SVGBadge-number {
-    /*transform-origin: center center;*/
-
-    fill: purple;
-    font-family: sans-serif;
-    font-size: 5px;
-    letter-spacing: -1px;
-    z-index: 5;
-}
 vue-material-icon.icon-red {
   color: red;
 }
 
 </style>
-
-<!-- TODO elements ideas: add clock-->

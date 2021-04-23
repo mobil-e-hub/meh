@@ -47,7 +47,8 @@ export default new Vuex.Store({
                     edge: 1,
                     address: 7
                 }
-            }
+            },
+            sideMenuVisible: false,
         }
     },
     getters: {
@@ -67,6 +68,10 @@ export default new Vuex.Store({
         mapSetOrigin(state, { x, y }) {
             state.settings.map.origin.x = x;
             state.settings.map.origin.y = y;
+        },
+        toggleSideMenu(state) {
+            state.settings.sideMenuVisible = !this.state.settings.sideMenuVisible;
         }
+
     }
 });
