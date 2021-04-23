@@ -40,7 +40,7 @@ const server = app.listen(port, () => {
 
 
 // Event Grid client (@azure/eventgrid)
-const client = new EventGridPublisherClient(eventGridEndpoint, 'EventGrid', new AzureKeyCredential(eventGridKey));
+const client = new EventGridPublisherClient(eventGridEndpoint, 'EventGrid', new AzureKeyCredential(String(eventGridKey)));
 
 const eventGridSubscriptions = { };
 
