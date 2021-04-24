@@ -28,12 +28,13 @@ TODO: Describe Event Grid and interaction between modules
 
 ## Server Architecture
 The following figure gives an overview of the components used:
-<img src="https://i.ibb.co/mRr7Kh6/server.png" alt="Server Structure">
-<!--- https://ibb.co/6yc5SDg --->
+<img src="https://i.ibb.co/FhrnpCM/structure-1.png" alt="Server Structure">
+<!--- https://ibb.co/YNCbgwM --->
 
 NGINX forwards the client's paths _.../meh/sim_ and _.../meh/opt_ to the simulator's and optimization engine's ports. 
 In order to stay up to date, GitHub performs a WebHook after every push to the master branch that is being forwarded to the 
-updater service. This Node.js component then updates the project.
+updater service. This Node.js component then updates the project. A monitoring page serves as a routing fallback and 
+keeps track of services' health.
 
 The latest version of the visualization can be found on [GitHub Pages](https://mobil-e-hub.github.io/meh/) which is 
 linked to the _gh-pages_ branch. 
