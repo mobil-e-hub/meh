@@ -27,6 +27,8 @@ const TaskState = {
     completed: 4
 };
 
+// TODO add timeout mechanism / abort transaction mechanism
+
 class Drone {
     constructor(id, position) {
         this.id = id;

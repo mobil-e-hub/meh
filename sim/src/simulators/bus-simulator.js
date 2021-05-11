@@ -8,6 +8,9 @@ const {Bus} = require("../models/bus");
 
 const topology = require('../../assets/topology');
 
+// TODO s:  - add change route
+//          - add abort mission
+
 module.exports = class BusSimulator extends EventGridClient {
     constructor(eventGrid, numberOfBuses) {
         super('bus-simulator',eventGrid);
@@ -60,7 +63,7 @@ module.exports = class BusSimulator extends EventGridClient {
         this.buses = { };
     }
 
-    init() { //TODO change to fixed route along the Rectangle for testing
+    reset() { //TODO change to fixed route along the Rectangle for testing
         this.buses = Object.assign({}, ...Array.from({ length: this.numberOfBuses }).map(() => {
             let id = uuid();
             let start = random.key(_.pickBy(topology.nodes, n => ['parking', 'road-junction'].includes(n.type)));
@@ -68,10 +71,41 @@ module.exports = class BusSimulator extends EventGridClient {
 
             return { [id]: new Bus(id, topology.nodes[start].position, []) };
         }));
+        // TODO weg??
         for (const [id, bus] of Object.entries(this.buses)) {
             this.publishFrom(`bus/${id}`, 'state', bus);
         }
     }
+
+    handleCommand(topic, message) {
+        if (['start', 'stop', 'reset'].includes(topic.rest)) {
+            this[topic.rest]();
+        }
+    }
+
+    //TODO alex refactor to multiple missions
+    handleMission(topic, message) {
+        this.buses[topic.id].setMission(message, this);
+    }
+
+    //TODO alex refactor to multiple missions
+    handleTransactionReady(topic, message) {
+        // This message is only received if the bus is the transaction's "from" instance
+        let transaction = this.buses[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
+        transaction.ready = true;
+    }
+
+    handleTransactionExecute(topic, message) {
+        // This message is only received if the bus is the transaction's "to" instance and has already sent the "ready" message
+        this.buses[topic.id].completeTransaction(this);
+    }
+
+    handleTransactionComplete(topic, message) {
+        // This message is only received if the bus is the transaction's "from" instance and has already sent the "execute" message
+        this.buses[topic.id].completeTask(this);
+    }
+
+    // TODO -----end  of copied part-----
 
     moveBuses = () => {
         for (const [id, bus] of Object.entries(this.buses)) {
@@ -81,32 +115,33 @@ module.exports = class BusSimulator extends EventGridClient {
         }
     };
 
-    receive(topic, message) {
-        super.receive(topic, message);
-
-        if (topic.direction === 'from' && topic.entity === 'visualization') {
-            if (['start', 'pause', 'resume', 'stop'].includes(topic.rest)) {
-                this[topic.rest]();
-            }
-        }
-        else if (this.matchTopic(topic, 'to/bus/+/mission')) {
-            this.buses[topic.id].setMission(message, this);
-        }
-        else if (this.matchTopic(topic, 'to/bus/+/transaction/+/ready')) {
-            // This message is only received if the car is the transaction's "from" instance
-            let transaction = this.buses[topic.id].missions.find(m => m.task && m).tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction; //TODO multiple missions: find mission -> task -> transaction
-            transaction.ready = true;
-        }
-        else if (this.matchTopic(topic, 'to/bus/+/transaction/+/execute')) {
-            // This message is only received if the car is the transaction's "to" instance and has already sent the "ready" message
-            this.buses[topic.id].completeTra nsaction(this);
-        }
-        else if (this.matchTopic(topic, 'to/bus/+/transaction/+/complete')) {
-            // This message is only received if the car is the transaction's "from" instance and has already sent the "execute" message
-            this.buses[topic.id].completeTask(this);
-        }
-        // TODO add change route
-    }
+    // old stuff here
+    // receive(topic, message) {
+    //     super.receive(topic, message);
+    //
+    //     if (topic.direction === 'from' && topic.entity === 'visualization') {
+    //         if (['start', 'pause', 'resume', 'stop'].includes(topic.rest)) {
+    //             this[topic.rest]();
+    //         }
+    //     }
+    //     else if (this.matchTopic(topic, 'to/bus/+/mission')) {
+    //         this.buses[topic.id].setMission(message, this);
+    //     }
+    //     else if (this.matchTopic(topic, 'to/bus/+/transaction/+/ready')) {
+    //         // This message is only received if the car is the transaction's "from" instance
+    //         let transaction = this.buses[topic.id].missions.find(m => m.task && m).tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction; //TODO multiple missions: find mission -> task -> transaction
+    //         transaction.ready = true;
+    //     }
+    //     else if (this.matchTopic(topic, 'to/bus/+/transaction/+/execute')) {
+    //         // This message is only received if the car is the transaction's "to" instance and has already sent the "ready" message
+    //         this.buses[topic.id].completeTransaction(this);
+    //     }
+    //     else if (this.matchTopic(topic, 'to/bus/+/transaction/+/complete')) {
+    //         // This message is only received if the car is the transaction's "from" instance and has already sent the "execute" message
+    //         this.buses[topic.id].completeTask(this);
+    //     }
+    //     // TODO add change route
+    // }
 
 
 };

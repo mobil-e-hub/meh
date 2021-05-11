@@ -27,6 +27,9 @@ const TaskState = {
     completed: 4
 };
 
+// TODO model capacity: number of parcels that car can load
+//      - model timeout/  transaction abort mechanism
+
 class Car {
     constructor(id, position) {
         this.id = id;
@@ -35,7 +38,7 @@ class Car {
         this.speed = 10;
         this.parcel = null;
         this.state = CarState.idle;
-        // TODO model capacity: number of parcels that car can load
+
     }
 
     move(interval, simulator) {
