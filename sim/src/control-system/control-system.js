@@ -109,7 +109,7 @@ module.exports = class ControlSystem extends MQTTClient {
         this.distances = dist;
 
         let mapping = _.invert(nodes);
-        let s_h = this.hubSimulator.hubs[parcel.carrier.id];  // TODO sometimes undefined --> crash ... Couldn't reproduce...
+        let s_h = this.hubSimulator.hubs[parcel.carrier.id];  // hub id // TODO sometimes undefined --> crash ... Couldn't reproduce...
         let source = mapping[s_h.position];
         let destination = mapping[this.hubSimulator.hubs[parcel.destination.id].position];
 

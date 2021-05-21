@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from optimization_engine.optimization_engine import OptimizationEngine
 from event_grid import EventGrid
 
+# TODO add logging
+
 # Environment variables
 load_dotenv()
 port = int(os.environ.get('OPT_PORT', 3001))
