@@ -314,7 +314,7 @@ module.exports = class ControlSystem extends MQTTClient {
         let dronePos = drone1.position;
         let m01 = {
             id: 'm01',
-                tasks: [
+            tasks: [
                 {type: 'move', state: TaskState.notStarted, destination: this.hubSimulator.hubs[parcel.destination].location, minimumDuration: 10},
                 {type: 'pickup', state: TaskState.notStarted, transaction: _.clone(t00)},
                 {type: 'move', state: TaskState.notStarted, destination: route.air1.path[route.air1.path - 1], minimumDuration: 10},
@@ -326,30 +326,30 @@ module.exports = class ControlSystem extends MQTTClient {
         dronePos = drone2.position;
         let m02 = {
             id: 'm02',
-                tasks: [
-                { type: 'move', state: TaskState.notStarted, destination:  route.air2.path[0], minimumDuration: 10 },  // TODO function that returns location of nodeId (string)
+            tasks: [
+                { type: 'move', state: TaskState.notStarted, destination:  route.air2.path[0], minimumDuration: 10 },
                 { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(t02) },
                 { type: 'move', state: TaskState.notStarted, destination: this.hubSimulator.hubs[parcel.destination].location, minimumDuration: 10 },
                 { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(t03) },
-                {type: 'move', state: TaskState.notStarted, destination: dronePos, minimumDuration: 10}
+                { type: 'move', state: TaskState.notStarted, destination: dronePos, minimumDuration: 10}
             ]
         };
 
         let carPos = car.position;
         let m03 = {
-                    id: 'm03',
-                        tasks: [
-                        { type: 'move', state: TaskState.notStarted, destination: route.road.path[0].location, minimumDuration: 10 },
-                        { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(t01)},
-                        { type: 'move', state: TaskState.notStarted, destination: route.road.path[0].location, minimumDuration: 10 },
-                        { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(t02) },
-                        { type: 'move', state: TaskState.notStarted, destination: carPos, minimumDuration: 10 }
+            id: 'm03',
+            tasks: [
+                { type: 'move', state: TaskState.notStarted, destination: route.road.path[0].location, minimumDuration: 10 },
+                { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(t01)},
+                { type: 'move', state: TaskState.notStarted, destination: route.road.path[].location, minimumDuration: 10 },
+                { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(t02) },
+                { type: 'move', state: TaskState.notStarted, destination: carPos, minimumDuration: 10 }
             ]
         };
 
         let m04 = {
             id: 'm04',
-                tasks: [
+            tasks: [
                 { type: 'take', state: TaskState.notStarted, transaction: _.clone(t03) }
             ]
         }
