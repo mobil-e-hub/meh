@@ -341,7 +341,7 @@ module.exports = class ControlSystem extends MQTTClient {
             tasks: [
                 { type: 'move', state: TaskState.notStarted, destination: route.road.path[0].location, minimumDuration: 10 },
                 { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(t01)},
-                { type: 'move', state: TaskState.notStarted, destination: route.road.path[].location, minimumDuration: 10 },
+                { type: 'move', state: TaskState.notStarted, destination: route.road.path[-1].location, minimumDuration: 10 },
                 { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(t02) },
                 { type: 'move', state: TaskState.notStarted, destination: carPos, minimumDuration: 10 }
             ]
@@ -349,7 +349,6 @@ module.exports = class ControlSystem extends MQTTClient {
 
         let m04 = {
             id: 'm04',
-            tasks: [
                 { type: 'take', state: TaskState.notStarted, transaction: _.clone(t03) }
             ]
         }

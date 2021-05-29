@@ -60,6 +60,8 @@ class OptimizationEngine:
             logging.debug("Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
             # TODO if 1 return is None send a failed mission to visualization instead of publishing missions...
             self.create_and_start_mission(parcel, drone1, vehicle, v_type, drone2, route)
+
+            logging.info(f"Started delivery mission for parcel: {parcel}")
         except ValueError as e:
             logging.error(f"Could not find route for parcel: {parcel}")
             self.reject_parcel(parcel)
@@ -126,7 +128,7 @@ class OptimizationEngine:
         idle_drones = self.get_idle_drones()
 
         try:
-            optimal_drone_id = self.__assign_entity(route, idle_drones, drone_speed)
+            optimal_drone_id, drone_time = self.__assign_entity(route, idle_drones, drone_speed)
         except ValueError as e:
             logging.error("Failed to assign drone: " + str(e))
 
@@ -265,7 +267,7 @@ class OptimizationEngine:
         return passing
 
     # TODO encoding keys as string here: python -> json -> js object: here they should no longer be strings....
-    def create_and_start_mission(self, parcel, drone1, vehicle, vehicle_type, drone2, route):
+    def create_and_start_mission(self, parcel, drone1_id, vehicle_id, vehicle_type, drone2_id, route):
         """
             Takes parcel, the three assigned entities and the routes as inputs.
             Then writes task and mission instructions for each entity as a dict for conversion to json.
@@ -275,10 +277,10 @@ class OptimizationEngine:
         #       --> currently: assumes this is not possible
         #       -->  send FAILED / NOT POSSIBLE message?
 
-        t00 = self.create_transaction(parcel, parcel['carrier']['type'], parcel['carrier']['id'], 'drone', drone1)
-        t01 = self.create_transaction(parcel, 'drone', drone1, vehicle_type, vehicle)
-        t02 = self.create_transaction(parcel, vehicle_type, vehicle, 'drone', drone2)
-        t03 = self.create_transaction(parcel, 'drone', drone2, parcel['destination']['type'],
+        t00 = self.create_transaction(parcel, parcel['carrier']['type'], parcel['carrier']['id'], 'drone', drone1_id)
+        t01 = self.create_transaction(parcel, 'drone', drone1_id, vehicle_type, vehicle_id)
+        t02 = self.create_transaction(parcel, vehicle_type, vehicle_id, 'drone', drone2_id)
+        t03 = self.create_transaction(parcel, 'drone', drone2_id, parcel['destination']['type'],
                                       parcel['destination']['id'])
 
         logging.debug("Create_start_mission: Created all transactions")
@@ -291,7 +293,7 @@ class OptimizationEngine:
         }
 
         # TODO Enums (TaskState) not serializable (to json) -> HotFix: encode as String / better: extra parser
-        drone_pos = self.drones[drone1[0]]['position']
+        drone_pos = self.drones[drone1_id]['position']
         # TODO currently naive approach -> always send 'move'-task: regardless of entity position
         m01 = {
             'id': 'm01',
@@ -307,7 +309,7 @@ class OptimizationEngine:
             ]
         }
 
-        drone_pos = self.drones[drone2[0]]['position']
+        drone_pos = self.drones[drone2_id]['position']
         m02 = {
             'id': 'm02',
             'tasks': [
@@ -324,7 +326,7 @@ class OptimizationEngine:
 
         m03 = {}
         if vehicle_type == 'car':
-            car_pos = self.cars[vehicle[0]]['position']
+            car_pos = self.cars[vehicle_id]['position']
             m03 = {
                 'id': 'm03',
                 'tasks': [
@@ -362,15 +364,29 @@ class OptimizationEngine:
         }
 
         logging.debug("Publish missions to assigned entities: ")
-        self.publish_to(f"hub/{self.hubs[parcel['carrier']['id']]}", "mission", m00)
-        self.publish_to(f"drone/{drone1[0]}", "mission", m01)
-        self.publish_to(f"drone/{drone2[1]}", "mission", m02)
-        self.publish_to(f"{vehicle_type}/{vehicle}", "mission", m03)
-        self.publish_to(f"hub/{self.hubs[parcel['destination']['id']]}", "mission", m04)
+        self.publish_to(f"hub/{self.hubs[parcel['carrier']['id']]['id']}", "mission", m00)
+        self.publish_to(f"drone/{drone1_id}", "mission", m01)
+        self.publish_to(f"drone/{drone2_id}", "mission", m02)
+        self.publish_to(f"{vehicle_type}/{vehicle_id}", "mission", m03)
+        self.publish_to(f"hub/{self.hubs[parcel['destination']['id']]['id']}", "mission", m04)
+
 
     def create_transaction(self, parcel, from_type, from_id, to_type, to_id):
-        """"""
-        return "YOLO"
+        """creates and returns dict modeling a transaction of a given parcel between the given entities from and to,
+         identifiable by a uuid"""
+        transaction = {
+            'id':  self.generate_transaction_id(),
+            'from': {'type': from_type, 'id': from_id},
+            'to':  {'type': to_type, 'id': to_id},
+            'parcel': parcel['id']
+        }
+        return transaction
+
+    # TODO better simple increment?  --> how long? --> 4 chars enough?
+    # TODO move to helpers (generalize to generate_uuid(length))
+    def generate_transaction_id(self):
+        """generates and returns an uuid v4 for usage as transaction identifier"""
+        return str(uuid4())[0:4]
 
     def test_init(self):
         """ inits several hubs, drones, vehicles and parcels to allow for some basic testing until
@@ -384,7 +400,7 @@ class OptimizationEngine:
         self.drones['d01'] = {'id': 'd01', 'position': {'x': -60, 'y': -60, 'z': 0}, 'state': DroneState.IDLE}
         self.drones['d02'] = {'id': 'd02', 'position': {'x': 60, 'y': 0, 'z': 0}, 'state': DroneState.IDLE}
 
-        self.cars['v00'] = {'id': 'v00', 'position': {'x': 50, 'y': -50, 'z': 0}, 'state': VehicleState.IDLE}
+        self.cars['v00'] = {'id': 'v00', 'position': {'x': -50, 'y': 50, 'z': 0}, 'state': VehicleState.IDLE}
 
         self.busses['v01'] = {'id': 'v00', 'position': {'x': 50, 'y': 50, 'z': 0},
                               # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
