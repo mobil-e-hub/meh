@@ -349,6 +349,7 @@ module.exports = class ControlSystem extends MQTTClient {
 
         let m04 = {
             id: 'm04',
+            task: [
                 { type: 'take', state: TaskState.notStarted, transaction: _.clone(t03) }
             ]
         }

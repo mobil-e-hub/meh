@@ -58,27 +58,3 @@ def backtrack_shortest_path(predecessors, start, end, distance):
     path = nx.algorithms.shortest_paths.dense.reconstruct_path(start, end, predecessors)
     return path
 
-
-class DroneState(enum.Enum):
-    IDLE = 0
-    MOVING = 1
-    WAITING_FOR_TRANSACTION = 2
-    EXECUTING_TRANSACTION = 3
-    CHARGING = 4
-
-
-class VehicleState(enum.Enum):
-    IDLE = 0
-    MOVING = 1
-    PLANNED_STOP = 2
-    TRANSACTION_STATE = 3
-    CHARGING = 4
-
-
-# TODO enum values not capitalized since they are defined like that in the js entities...
-class TaskState(enum.Enum):
-    notStarted = 0
-    ongoing = 1
-    waitingForTransaction = 2
-    executingTransaction = 3
-    completed = 4

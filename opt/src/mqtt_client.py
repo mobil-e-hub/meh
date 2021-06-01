@@ -6,9 +6,6 @@ import time
 import logging
 import json
 
-
-# NExt TODOs: - debug connect : run loop from class / send MQTT / tim schreiben /
-
 # TODO:
 #       -root + UUID!
 #       -matchTopic
@@ -23,6 +20,7 @@ class MQTTClient:
     def __init__(self):
         load_dotenv()
         self.MQTT_BROKER = os.environ.get("MQTT_BROKER_test")
+        print(f"DOT_env loaded: {self.MQTT_BROKER}")
         self.MQTT_PORT = int(os.environ.get("BROKER_PORT_test"))
 
         logging.basicConfig(level=logging.DEBUG)  # TODO move to dotenv
@@ -51,6 +49,7 @@ class MQTTClient:
         # time.sleep(5)
         # print("Client: End Loop")
         # self.client.loop_stop()
+
 
     def subscribe(self, topic):
         self.client.subscribe(topic)
@@ -132,7 +131,9 @@ class MQTTClient:
         self.client.loop_stop()
         self.client.disconnect()
 
-    def begin(self):
+    def begin_client(self):
         print("Setting up connection")
         self.client.connect(self.MQTT_BROKER, self.MQTT_PORT)
         self.client.loop_forever()
+        time.sleep(20)
+        self.publish("bar/test", "tested/bar")

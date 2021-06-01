@@ -4,17 +4,23 @@ import logging
 import copy
 
 import networkx as nx
-from .helpers import load_topology, load_mapping, backtrack_shortest_path, DroneState, VehicleState, TaskState
+from .helpers import load_topology, load_mapping, backtrack_shortest_path
+from .datastructures import Hub, Drone, Car, Bus, Parcel, Routes, DroneState, VehicleState, TaskState, Route
+# from ..mqtt_client import MQTTClient
+
+from opt.src.mqtt_client import MQTTClient
 
 
 # TODO: inherits from mqtt Client to enable notifications on new system states
-class OptimizationEngine:
+class OptimizationEngine(MQTTClient):
 
-    def __init__(self, mqtt_client):
+    def __init__(self):
+        MQTTClient.__init__(self)
+
         logging.basicConfig(level=logging.INFO)
 
         self.id = str(uuid4())[0:8]
-        self.mqtt_client = mqtt_client
+        # self.mqtt_client = mqtt_client
 
         # Subscribe to relevant events -> MQTT
         # self.event_grid.subscribe('parcel/+/placed', self.run) TODO remove?
@@ -32,6 +38,8 @@ class OptimizationEngine:
         self.orders = {}
         # addresses / customers
 
+        self.client.message_callback_add("bar/test/#", self.on_message_bar)
+
         # test find_route
         self.test_init()
         self.create_delivery_route(self.parcels['p00'])  # TODO trigger by function
@@ -43,19 +51,20 @@ class OptimizationEngine:
 
     def publish(self, topic, message='', sender=''):
         sender = sender or f'optimization-engine/{self.id}'
-        self.mqtt_client.publish(f'{sender}/{topic}', message)
+        # self.mqtt_client.publish(f'{sender}/{topic}', message)
+        super().publish(f'{sender}/{topic}', message)
 
     def publish_to(self, receiver, topic, message):
         logging.debug(f"Opt_engine publish message to {receiver} on {topic}")
-        self.publish(f'{self.mqtt_client.root}/to/{receiver}/{topic}', json.dumps(message))
+        self.publish(f'{self.root}/to/{receiver}/{topic}', json.dumps(message))
 
     def create_delivery_route(self, parcel):
         """finds route for given parcel, assigns entities to handle the sub-routes and sends them their missions"""
         try:
             route = self.find_route(parcel)
-            drone1 = self.__assign_drone(route['air1'])
-            vehicle, v_type = self.__assign_vehicle(route['road'])  # v_type is 'car' or 'bus'
-            drone2 = self.__assign_drone(route['air2'])
+            drone1 = self.__assign_drone(route.air1)
+            vehicle, v_type = self.__assign_vehicle(route.road)  # v_type is 'car' or 'bus'
+            drone2 = self.__assign_drone(route.air2)
 
             logging.debug("Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
             # TODO if 1 return is None send a failed mission to visualization instead of publishing missions...
@@ -65,6 +74,8 @@ class OptimizationEngine:
         except ValueError as e:
             logging.error(f"Could not find route for parcel: {parcel}")
             self.reject_parcel(parcel)
+
+        self.publish("bar/test", "tested/bar")
 
     def reject_parcel(self, parcel):
         """Called when no delivery route for a parcel can be found -> doesn't exist"""
@@ -81,8 +92,9 @@ class OptimizationEngine:
         # TODO consider edge types, currently: parcel start end should be air nodes, then air -> road -> air is selected
 
         # map hubs to their node location
-        node_source = self.hubs[parcel['carrier']['id']]['position']
-        node_destination = self.hubs[parcel['destination']['id']]['position']
+        carrier_id = parcel.carrier['id']
+        node_source = self.hubs[carrier_id].position
+        node_destination = self.hubs[parcel.destination['id']].position
 
         # find closest road junction to source & destination hubs  (parking: both drones and cars can access)
         nodes_road = [x for x, y in self.g_topo.nodes(data=True) if y['type'] == 'parking']  # map n => n.id
@@ -94,30 +106,31 @@ class OptimizationEngine:
         junction_destination = nodes_road[dest_min_dist_junctions.index(min(dest_min_dist_junctions))]
 
         try:
-            route1 = {'distance': self.dist[node_source][junction_source],
-                      'path': backtrack_shortest_path(self.pred, node_source, junction_source,
-                                                      self.dist[node_source][junction_source])}
+            route1 = Route(distance=self.dist[node_source][junction_source],
+                           path=backtrack_shortest_path(self.pred, node_source, junction_source,
+                                                        self.dist[node_source][junction_source]))
         except ValueError as e:
             logging.error("No first route exists: " + str(e))
             raise ValueError("No first route exists: " + str(e))
         try:
-            route2 = {'distance': self.dist[junction_source][junction_destination],
-                      'path': backtrack_shortest_path(self.pred, junction_source, junction_destination,
-                                                      self.dist[junction_source][junction_destination])}
+            route2 = Route(distance=self.dist[junction_source][junction_destination],
+                           path=backtrack_shortest_path(self.pred, junction_source, junction_destination,
+                                                        self.dist[junction_source][junction_destination]))
         except ValueError as e:
             logging.error("No second route 2 exists: " + str(e))
             raise ValueError("No second route 2 exists: " + str(e))
         try:
-            route3 = {'distance': self.dist[junction_destination][node_destination],
-                      'path': backtrack_shortest_path(self.pred, junction_destination, node_destination,
-                                                      self.dist[junction_destination][node_destination])}
+            route3 = Route(distance=self.dist[junction_destination][node_destination],
+                           path=backtrack_shortest_path(self.pred, junction_destination, node_destination,
+                                                        self.dist[junction_destination][node_destination]))
         except ValueError as e:
             logging.error("No third route exists: " + str(e))
             raise ValueError("No third route exists: " + str(e))
 
-        logging.info(f"New route for parcel {parcel['id']}: {[route1, route2, route3]}")
+        logging.info(f"New route for parcel {parcel.id}: {[route1, route2, route3]}")
 
-        return {"air1": route1, "road": route2, "air2": route3}
+        route = Routes(air1=route1, road=route2, air2=route3)
+        return route
 
     def __assign_drone(self, route):
         """
@@ -167,14 +180,14 @@ class OptimizationEngine:
         optimal_entity_index = 0
         optimal_time = float("inf")
 
-        node = route['path'][0]  # get first element
+        node = route.path[0]  # get first element
         travel_time = [None] * len(entities)
 
         for idx, entity in enumerate(entities):
-            entity_position = self.get_hub_id_by_location(entity[1]['position'])
+            entity_position = self.get_hub_id_by_location(entity[1].position)
             distance = self.dist[entity_position][node]
 
-            travel_time[idx] = (distance + route['distance']) / speed
+            travel_time[idx] = (distance + route.distance) / speed
 
             if optimal_entity is None or travel_time[idx] < travel_time[optimal_entity_index]:
                 optimal_entity = entity
@@ -193,7 +206,7 @@ class OptimizationEngine:
         """Finds bus that is most suitable for handling the route"""
         bus_speed = 10
 
-        buses = self.get_busses_passing_node(route_parcel['path'][0], route_parcel['path'][-1])
+        buses = self.get_busses_passing_node(route_parcel.path[0], route_parcel.path[-1])
         optimal_time = float("inf")
 
         optimal_bus = None
@@ -203,8 +216,8 @@ class OptimizationEngine:
 
         for idx, bus in enumerate(buses):
 
-            route_bus = copy.deepcopy(bus[1]['route'])
-            travel_time[idx] = self.compute_bus_route_time(route_parcel['path'][0], route_parcel['path'][-1],
+            route_bus = copy.deepcopy(bus[1].route)
+            travel_time[idx] = self.compute_bus_route_time(route_parcel.path[0], route_parcel.path[-1],
                                                            route_bus, bus_speed)
 
             if optimal_bus is None or travel_time[idx] < travel_time[optimal_bus_index]:
@@ -243,7 +256,7 @@ class OptimizationEngine:
 
                 distance = self.dist[current_node][next_node]
                 time = time + (distance / speed)  # TODO assumption: not multiple edges between two nodes
-                                                  #         => shortest path = bus_route
+                #         => shortest path = bus_route
                 time = time + waiting_time
 
             bus_route.append(bus_route.pop(0))
@@ -258,7 +271,7 @@ class OptimizationEngine:
         passing = []
 
         for (idx, bus) in self.busses.items():
-            bus_route = bus['route']
+            bus_route = bus.route
             route_nodes = list(map(lambda stop: stop['node'], bus_route))
             print(route_nodes)
             if node_start in route_nodes and node_end in route_nodes:
@@ -277,11 +290,11 @@ class OptimizationEngine:
         #       --> currently: assumes this is not possible
         #       -->  send FAILED / NOT POSSIBLE message?
 
-        t00 = self.create_transaction(parcel, parcel['carrier']['type'], parcel['carrier']['id'], 'drone', drone1_id)
+        t00 = self.create_transaction(parcel, parcel.carrier['type'], parcel.carrier['id'], 'drone', drone1_id)
         t01 = self.create_transaction(parcel, 'drone', drone1_id, vehicle_type, vehicle_id)
         t02 = self.create_transaction(parcel, vehicle_type, vehicle_id, 'drone', drone2_id)
-        t03 = self.create_transaction(parcel, 'drone', drone2_id, parcel['destination']['type'],
-                                      parcel['destination']['id'])
+        t03 = self.create_transaction(parcel, 'drone', drone2_id, parcel.destination['type'],
+                                      parcel.destination['id'])
 
         logging.debug("Create_start_mission: Created all transactions")
 
@@ -293,31 +306,31 @@ class OptimizationEngine:
         }
 
         # TODO Enums (TaskState) not serializable (to json) -> HotFix: encode as String / better: extra parser
-        drone_pos = self.drones[drone1_id]['position']
+        drone_pos = self.drones[drone1_id].position
         # TODO currently naive approach -> always send 'move'-task: regardless of entity position
         m01 = {
             'id': 'm01',
             'tasks': [
                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination':
-                    self.hubs[parcel['carrier']['id']]['position'], 'minimumDuration': 10},
+                    self.hubs[parcel.carrier['id']].position, 'minimumDuration': 10},
                 {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t00)},
                 {'type': 'move', 'state': 'TaskState.notStarted',
-                 'destination': route['air1']['path'][-1], 'minimumDuration': 10},
+                 'destination': route.air1.path[-1], 'minimumDuration': 10},
                 {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t01)},
                 # TODO should drone move back afterwards?
                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': drone_pos, 'minimumDuration': 10}
             ]
         }
 
-        drone_pos = self.drones[drone2_id]['position']
+        drone_pos = self.drones[drone2_id].position
         m02 = {
             'id': 'm02',
             'tasks': [
-                {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route['air2']['path'][0],
+                {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.air2.path[0],
                  'minimumDuration': 10},
                 {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
                 {'type': 'move', 'state': 'TaskState.notStarted',
-                 'destination': self.hubs[parcel['destination']['id']]['position'], 'minimumDuration': 10},
+                 'destination': self.hubs[parcel.destination['id']].position, 'minimumDuration': 10},
                 {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t03)},
                 # TODO should drone move back afterwards?
                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': drone_pos, 'minimumDuration': 10}
@@ -326,14 +339,14 @@ class OptimizationEngine:
 
         m03 = {}
         if vehicle_type == 'car':
-            car_pos = self.cars[vehicle_id]['position']
+            car_pos = self.cars[vehicle_id].position
             m03 = {
                 'id': 'm03',
                 'tasks': [
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route['road']['path'][0],
+                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.road.path[0],
                      'minimumDuration': 10},
                     {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t01)},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route['road']['path'][-1],
+                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.road.path[-1],
                      'minimumDuration': 10},
                     {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
                     # TODO should car move back afterwards?
@@ -347,10 +360,10 @@ class OptimizationEngine:
             m03 = {
                 'id': 'm03',
                 'tasks': [
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route['road']['path'][0],
+                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.road.path[0],
                      'minimumDuration': 10},
                     {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t01)},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route['road']['path'][-1],
+                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.road.path[-1],
                      'minimumDuration': 10},
                     {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
                 ]
@@ -364,21 +377,20 @@ class OptimizationEngine:
         }
 
         logging.debug("Publish missions to assigned entities: ")
-        self.publish_to(f"hub/{self.hubs[parcel['carrier']['id']]['id']}", "mission", m00)
+        self.publish_to(f"hub/{self.hubs[parcel.carrier['id']].id}", "mission", m00)
         self.publish_to(f"drone/{drone1_id}", "mission", m01)
         self.publish_to(f"drone/{drone2_id}", "mission", m02)
         self.publish_to(f"{vehicle_type}/{vehicle_id}", "mission", m03)
-        self.publish_to(f"hub/{self.hubs[parcel['destination']['id']]['id']}", "mission", m04)
-
+        self.publish_to(f"hub/{self.hubs[parcel.destination['id']].id}", "mission", m04)
 
     def create_transaction(self, parcel, from_type, from_id, to_type, to_id):
         """creates and returns dict modeling a transaction of a given parcel between the given entities from and to,
          identifiable by a uuid"""
         transaction = {
-            'id':  self.generate_transaction_id(),
+            'id': self.generate_transaction_id(),
             'from': {'type': from_type, 'id': from_id},
-            'to':  {'type': to_type, 'id': to_id},
-            'parcel': parcel['id']
+            'to': {'type': to_type, 'id': to_id},
+            'parcel': parcel.id
         }
         return transaction
 
@@ -392,26 +404,27 @@ class OptimizationEngine:
         """ inits several hubs, drones, vehicles and parcels to allow for some basic testing until
         data exchange with to control-system is ready (MQTT or AzureEG (?))"""
 
-        self.hubs['h00'] = {'id': 'h00', 'position': 'n05'}
-        self.hubs['h01'] = {'id': 'h01', 'position': 'n07'}
-        self.hubs['h02'] = {'id': 'h02', 'position': 'n11'}
+        self.hubs['h00'] = Hub(id='h00', position='n05')
+        self.hubs['h01'] = Hub(id='h01', position='n07')
+        self.hubs['h02'] = Hub(id='h02', position='n11')
 
-        self.drones['d00'] = {'id': 'd00', 'position': {'x': -50, 'y': 60, 'z': 0}, 'state': DroneState.IDLE}
-        self.drones['d01'] = {'id': 'd01', 'position': {'x': -60, 'y': -60, 'z': 0}, 'state': DroneState.IDLE}
-        self.drones['d02'] = {'id': 'd02', 'position': {'x': 60, 'y': 0, 'z': 0}, 'state': DroneState.IDLE}
+        # TODO also position as named tuple?
+        self.drones['d00'] = Drone(id='d00', position={'x': -50, 'y': 60, 'z': 0}, state=DroneState.IDLE)
+        self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, state=DroneState.IDLE)
+        self.drones['d02'] = Drone(id='d02', position={'x': 60, 'y': 0, 'z': 0}, state=DroneState.IDLE)
 
-        self.cars['v00'] = {'id': 'v00', 'position': {'x': -50, 'y': 50, 'z': 0}, 'state': VehicleState.IDLE}
+        self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, state=VehicleState.IDLE)
 
-        self.busses['v01'] = {'id': 'v00', 'position': {'x': 50, 'y': 50, 'z': 0},
-                              # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
-                              #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
-                              'route': [{'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},
+        self.busses['v01'] = Bus(id='v00', position={'x': 50, 'y': 50, 'z': 0},
+                                 # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
+                                 #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
+                                 route=[{'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},
                                         {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2},
                                         {'node': 'n03', 'time': 10}],
-                              'state': VehicleState.MOVING}
+                                 state=VehicleState.MOVING)
 
-        self.parcels['p00'] = {'id': 'p00', 'carrier': {'type': 'hub', 'id': 'h00'},
-                               'destination': {'type': 'hub', 'id': 'h01'}}
+        self.parcels['p00'] = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
+                                     destination={'type': 'hub', 'id': 'h01'})
 
     def test(self):
         # TODO reset entities to fixed values
@@ -510,12 +523,12 @@ class OptimizationEngine:
     # TODO get data from simulators / some API ???
     def get_idle_drones(self):
         """ returns list with tuples (id, drone) of all idle drones as known by opt_engine """
-        idle = [(idx, drone) for (idx, drone) in self.drones.items() if drone['state'] == DroneState.IDLE]
+        idle = [(idx, drone) for (idx, drone) in self.drones.items() if drone.state == DroneState.IDLE]
         return idle
 
     def get_idle_cars(self):
         """ returns list with tuples (id, car) of all idle cars as known by opt_engine """
-        idle = [(idx, car) for (idx, car) in self.cars.items() if car['state'] == VehicleState.IDLE]
+        idle = [(idx, car) for (idx, car) in self.cars.items() if car.state == VehicleState.IDLE]
         return idle
 
     def get_hub_id_by_location(self, location):
@@ -523,5 +536,12 @@ class OptimizationEngine:
         return self.mapping[tuple(nodeID for (location, nodeID) in location.items())]
 
     # TODO add MQTT functionality to opt_engine!
+    #   --> better handle from parent MQTT controller class!
     def publishTo(self):
         pass
+
+    # TODO add message handler per topic here!!
+    def on_message_bar(self, client, userdata, msg):
+        topic = msg.topic
+        print("OPT_ENGINE: MSG received: -BAR")
+        print(f"Topic: {topic}:  {msg.payload}")
