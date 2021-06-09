@@ -46,7 +46,7 @@ def eventgrid():
             elif event['eventType'] == 'Portal_Echo':
                 print(f'> (opt) Echo received')
     except Error as err:
-        print(f'Invalid EventGrid message received: {err}')
+        print(f'Invalid EventGrid message received: {str(err)}')
     finally:
         return ''
 

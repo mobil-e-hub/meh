@@ -2,12 +2,18 @@ from optimization_engine.optimization_engine import OptimizationEngine
 from mqtt_client import MQTTClient
 
 
-# TODO browser based client for sending MQTT-msgs: http://www.hivemq.com/demos/websocket-client/
+# TODO - browser based client for sending MQTT-msgs: http://www.hivemq.com/demos/websocket-client/
+#      - following currently not working: DEBUG!!
+#           - other testing option: run script test_extra_client in parallel
+#             --> pycharm: edit run configs --> check allow parallel run
 
-# bar = MQTTClient()
+
+# start Optimization Engine
 foo = OptimizationEngine()
-
 foo.begin_client()
 
-# bar.begin_client()
-# bar.terminate()
+# TODO not reached after
+foo.subscribe("bar_test")
+
+
+

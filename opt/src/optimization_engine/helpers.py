@@ -42,7 +42,6 @@ def load_mapping(path):
     mapping = {(value['position']['x'], value['position']['y'], value['position']['z']):
                    key for key, value in nodes.items()}
 
-    print(mapping)
     return mapping
 
 
@@ -57,4 +56,3 @@ def backtrack_shortest_path(predecessors, start, end, distance):
         raise ValueError(f"There is no path between these nodes. start: {start}, end: {end}, distance: {distance});")
     path = nx.algorithms.shortest_paths.dense.reconstruct_path(start, end, predecessors)
     return path
-

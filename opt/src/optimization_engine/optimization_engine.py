@@ -1,3 +1,4 @@
+from typing import List
 from uuid import uuid4
 import json
 import logging
@@ -17,54 +18,31 @@ class OptimizationEngine(MQTTClient):
     def __init__(self):
         MQTTClient.__init__(self)
 
-        logging.basicConfig(level=logging.INFO)
-
-        self.id = str(uuid4())[0:8]
-        # self.mqtt_client = mqtt_client
-
-        # Subscribe to relevant events -> MQTT
-        # self.event_grid.subscribe('parcel/+/placed', self.run) TODO remove?
+        self.id = str(uuid4())[0:8]  # TODO necessary for opt_engine? there should be only one --> self.root
+        self.project = 'meh'
+        self.version = 'v1'
 
         self.g_topo = load_topology('../../assets/topology.json')
         self.mapping = load_mapping('../../assets/topology.json')  # hub_id <-> node_id
         self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
-        print(self.dist)
 
         self.hubs = {}
         self.drones = {}
         self.cars = {}
-        self.busses = {}
+        self.buses = {}
         self.parcels = {}
         self.orders = {}
         # addresses / customers
 
-        self.client.message_callback_add("bar/test/#", self.on_message_bar)
-
-        # test find_route
-        self.test_init()
-        self.create_delivery_route(self.parcels['p00'])  # TODO trigger by function
-
-    # def run(self, topic, message):
-    #     # TODO deprecated
-    #     print('opt_engine.run()')
-    #     self.publish('completed', {'drones': [{'id': 'd00'}, {'id': 'd01'}]})
-
-    def publish(self, topic, message='', sender=''):
-        sender = sender or f'optimization-engine/{self.id}'
-        # self.mqtt_client.publish(f'{sender}/{topic}', message)
-        super().publish(f'{sender}/{topic}', message)
-
-    def publish_to(self, receiver, topic, message):
-        logging.debug(f"Opt_engine publish message to {receiver} on {topic}")
-        self.publish(f'{self.root}/to/{receiver}/{topic}', json.dumps(message))
+        self.add_message_callbacks()
 
     def create_delivery_route(self, parcel):
         """finds route for given parcel, assigns entities to handle the sub-routes and sends them their missions"""
         try:
             route = self.find_route(parcel)
-            drone1 = self.__assign_drone(route.air1)
-            vehicle, v_type = self.__assign_vehicle(route.road)  # v_type is 'car' or 'bus'
-            drone2 = self.__assign_drone(route.air2)
+            drone1 = self._assign_drone(route.air1)
+            vehicle, v_type = self._assign_vehicle(route.road)  # v_type is 'car' or 'bus'
+            drone2 = self._assign_drone(route.air2)
 
             logging.debug("Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
             # TODO if 1 return is None send a failed mission to visualization instead of publishing missions...
@@ -75,7 +53,7 @@ class OptimizationEngine(MQTTClient):
             logging.error(f"Could not find route for parcel: {parcel}")
             self.reject_parcel(parcel)
 
-        self.publish("bar/test", "tested/bar")
+        # self.publish("bar/test", "tested/bar")
 
     def reject_parcel(self, parcel):
         """Called when no delivery route for a parcel can be found -> doesn't exist"""
@@ -132,7 +110,7 @@ class OptimizationEngine(MQTTClient):
         route = Routes(air1=route1, road=route2, air2=route3)
         return route
 
-    def __assign_drone(self, route):
+    def _assign_drone(self, route):
         """
             returns id of idle drone for a sub-route. picks closest one to start of route.
         """
@@ -141,14 +119,14 @@ class OptimizationEngine(MQTTClient):
         idle_drones = self.get_idle_drones()
 
         try:
-            optimal_drone_id, drone_time = self.__assign_entity(route, idle_drones, drone_speed)
+            optimal_drone_id, drone_time = self._assign_entity(route, idle_drones, drone_speed)
         except ValueError as e:
             logging.error("Failed to assign drone: " + str(e))
 
         logging.info(f"Assigned Drone to route: {route} -> Drone/{optimal_drone_id}")
         return optimal_drone_id
 
-    def __assign_vehicle(self, route):
+    def _assign_vehicle(self, route):
         """
             Finds best car and bus for a given route.
             Out of these two returns id of the best suited one and its type ('car' or 'bus').
@@ -159,11 +137,11 @@ class OptimizationEngine(MQTTClient):
         vehicle_type = "car"
 
         try:
-            optimal_vehicle, vehicle_time = self.__assign_entity(route, idle_cars, car_speed)
+            optimal_vehicle, vehicle_time = self._assign_entity(route, idle_cars, car_speed)
         except ValueError as e:
             logging.error("Failed to assign car: " + str(e))
 
-        optimal_bus, bus_time = self.__assign_bus(route)
+        optimal_bus, bus_time = self._assign_bus(route)
 
         if vehicle_time > bus_time:  # Bus preferred if equal time
             optimal_vehicle = optimal_bus
@@ -173,7 +151,7 @@ class OptimizationEngine(MQTTClient):
 
         return optimal_vehicle, vehicle_type
 
-    def __assign_entity(self, route, entities, speed):
+    def _assign_entity(self, route, entities, speed):
         """Finds closest entity (drone or car) to the start node of a route and returns its id"""
 
         optimal_entity = None
@@ -202,7 +180,7 @@ class OptimizationEngine(MQTTClient):
 
         return optimal_entity[0], optimal_time
 
-    def __assign_bus(self, route_parcel):
+    def _assign_bus(self, route_parcel):
         """Finds bus that is most suitable for handling the route"""
         bus_speed = 10
 
@@ -270,10 +248,10 @@ class OptimizationEngine(MQTTClient):
 
         passing = []
 
-        for (idx, bus) in self.busses.items():
+        for (idx, bus) in self.buses.items():
             bus_route = bus.route
             route_nodes = list(map(lambda stop: stop['node'], bus_route))
-            print(route_nodes)
+            # print(route_nodes)
             if node_start in route_nodes and node_end in route_nodes:
                 passing.append((idx, bus))
 
@@ -356,7 +334,7 @@ class OptimizationEngine(MQTTClient):
 
         elif vehicle_type == 'bus':
             # TODO check bus mission structure -> refactor where necessary
-            # difference to car: no inital and final move instructions...
+            # difference to car: no initial and final move instructions...
             m03 = {
                 'id': 'm03',
                 'tasks': [
@@ -415,19 +393,19 @@ class OptimizationEngine(MQTTClient):
 
         self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, state=VehicleState.IDLE)
 
-        self.busses['v01'] = Bus(id='v00', position={'x': 50, 'y': 50, 'z': 0},
-                                 # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
-                                 #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
-                                 route=[{'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},
-                                        {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2},
-                                        {'node': 'n03', 'time': 10}],
-                                 state=VehicleState.MOVING)
+        self.buses['v01'] = Bus(id='v00', position={'x': 50, 'y': 50, 'z': 0},
+                                # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
+                                #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
+                                route=[{'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},
+                                       {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2},
+                                       {'node': 'n03', 'time': 10}],
+                                state=VehicleState.MOVING)
 
         self.parcels['p00'] = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
                                      destination={'type': 'hub', 'id': 'h01'})
 
     def test(self):
-        # TODO reset entities to fixed values
+        """ temporary function for testing durign development process. """
         self.test_init()
 
         transactions = {
@@ -513,14 +491,13 @@ class OptimizationEngine(MQTTClient):
             }
         }
 
-        # TODO convert mission to json --> probably in publish / publish_mission method
         self.publish('mission', missions['m00'])
         self.publish('mission', missions['m01'])
         self.publish('mission', missions['m02'])
         self.publish('mission', missions['m03'])
         self.publish('mission', missions['m04'])
 
-    # TODO get data from simulators / some API ???
+    # Find idle / suitable entities for a new mission
     def get_idle_drones(self):
         """ returns list with tuples (id, drone) of all idle drones as known by opt_engine """
         idle = [(idx, drone) for (idx, drone) in self.drones.items() if drone.state == DroneState.IDLE]
@@ -535,13 +512,86 @@ class OptimizationEngine(MQTTClient):
         """returns nodeID for a location {x,y,z}, converts dict to tuple first to match mapping"""
         return self.mapping[tuple(nodeID for (location, nodeID) in location.items())]
 
-    # TODO add MQTT functionality to opt_engine!
-    #   --> better handle from parent MQTT controller class!
-    def publishTo(self):
+    # Methods for handling incoming MQTT messages
+    # TODO manage subscriptions here???
+    def add_message_callbacks(self):
+        """registers functions for handling different message topics to the MQTT client as callbacks"""
+        # entities: state updates
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/state/#", self.on_message_state)
+
+        # entity: connect updates #difference to state update???
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/connected/#", self.on_message_state)
+
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/placed/#", self.on_message_placed)
+
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/delivered/#",
+                                        self.on_message_parcel_delivered)
+        # TODO default handler is on_message
+        # self.subscribe("meh/#")
+        # self.client.message_callback_add('meh/#', self.on_message_split)
+
+    def subscribe_and_add_callback(self, topic, callback_function):
+        self.subscribe(topic)
+        self.client.message_callback_add(topic, callback_function)
+
+    def on_message_test(self, client, userdata, msg):
         pass
 
-    # TODO add message handler per topic here!!
-    def on_message_bar(self, client, userdata, msg):
-        topic = msg.topic
-        print("OPT_ENGINE: MSG received: -BAR")
-        print(f"Topic: {topic}:  {msg.payload}")
+    def on_message_state(self, client, userdata, msg):
+        # TODO add to the respective dict
+        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        self.update_state(entity, id_, msg.payload)
+        logging.debug(f"Updated state of {entity}/{id_}: {msg.payload}")
+
+    def on_message_parcel_delivered(self, client, userdata, msg):
+        # TODO handle parcel delivered
+        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        pass
+
+    def on_message_placed(self, client, userdata, msg):
+        """handles placed messages from parcels and orders"""
+        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        # TODO handle parcel / order placed
+        if entity == 'parcel':
+            pass
+        elif entity == 'order':
+            pass
+        else:
+            logging.warn(f"Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
+        pass
+
+    # def on_message_split(self, client, userdata, msg):
+    #     split = self.split_topic(msg.topic)
+    #     print("Splitting test LETS GOO!!!")
+    #     for s in split:
+    #         print(s)
+    #     print("MESSAGE: ")
+    #     print(msg.payload)
+
+    def split_topic(self, topic: str) -> List[str]:
+        """splits received MQTT topic into several string values for further processing"""
+        # TODO exception handling --> topic always fixes length? or just do for state messages??
+        # TODO better use named tuples here?
+        project, version, direction, entity, id_, *args = topic.split('/')
+        return [project, version, direction, entity, id_, *args]
+
+    # TODO handle unknown id? --> log?
+    def update_state(self, entity, id_, state):
+        """ finds entity in corresponding dictionary and updates the named_tuple describing its state"""
+        if entity == 'hub':
+            new_state = state  # TODO parse json state / string
+            self.hubs.update({id_: new_state})
+        elif entity == 'drone':
+            new_state = state  # TODO parse json state / string
+            self.drones.update({id_: new_state})
+        elif entity == 'car':
+            new_state = state  # TODO parse json state / string
+            self.cars.update({id_: new_state})
+        elif entity == 'bus':
+            new_state = state  # TODO parse json state / string
+            self.buses.update({id_: new_state})
+        elif entity == 'parcel':
+            new_state = state  # TODO parse json state / string
+            self.parcels.update({id_: new_state})
+        else:
+            logging.warn(f"Could not match entity {entity}/{id_}:  {state}")
