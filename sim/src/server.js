@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const mqttMatch = require('mqtt-match');
 const { EventGridPublisherClient, AzureKeyCredential } = require("@azure/eventgrid");
 const dotenv = require('dotenv');
+const MQTT = require('mqtt');
 
 
 // Internal modules
@@ -73,14 +74,44 @@ const eventGrid = {
     }
 };
 
+// MQTT client
+const mqtt_client = {
+    client: MQTT.connect('wss://ines-gpu-01.informatik.uni-mannheim.de:9001/meh/mqtt'),
+    root: 'mobil-e-hub/sim',
+    id: uuid(),
+    type: 'server'
+};
+mqtt_client.client.on('connect', () => {
+    console.log('Connected');
+    mqtt_client.client.subscribe(subscriptionTopics.map(topic => `${mqtt_client.root}/${topic}`));
+});
+
+mqtt_client.client.on('message', (topic, message) => {
+    let [project, version, direction, entity, id, ...args] = topic.split('/');
+    mqtt.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
+});
+const mqtt = {
+    publish(topic, message = '') {
+        mqtt.publishFrom(`mobil-e-hub/${mqtt_client.id}`, topic, message);
+    },
+    receive(topic, message) {
+        console.log(`> [${mqtt_client.type}] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
+    },
+    publishFrom(sender, topic, message = '') {
+        mqtt_client.client.publish(`mobil-e-hub/sim/from/${sender}/${topic}`, JSON.stringify(message));
+        console.log(`< [${mqtt_client.type}] from/${sender}/${topic}: ${JSON.stringify(message)}`);
+    }
+};
+
+
 // Simulators
-const droneSimulator = new DroneSimulator(eventGrid, 2);   // 2
+const droneSimulator = new DroneSimulator(2);   // 2
 // const carSimulator = new CarSimulator(1);       // 1
 // const busSimulator = new BusSimulator(1);
 // const hubSimulator = new HubSimulator(3);       // 3
 // const parcelSimulator = new ParcelSimulator(hubSimulator);
 // const controlSystem = new ControlSystem(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator);
-const hubSimulator = new HubSimulator(eventGrid, 3);
+const hubSimulator = new HubSimulator(3);
 
 // Graceful shutdown
 process.on('SIGTERM', shutdown);
@@ -104,7 +135,8 @@ function shutdown() {
 app.get('/', (req, res) => {
     res.status(200).send(`This is the base url of the simulation module. 
     <br> <br> <b>/ping:</b> Health-Check <br> 
-    <b>/ping/eventgrid:</b> Eventgrid Health-Check 
+    <b>/ping/eventgrid:</b> Eventgrid Health-Check
+    <br> <b>/ping/mqtt:</b> MQTT Health-Check
     <br> <b>/eventgrid:</b> Eventgrid interface`);
 });
 
@@ -115,6 +147,11 @@ app.get('/ping', (req, res) => {
 app.get('/ping/eventgrid', (req, res) => {
     eventGrid.publish('pong', 'simulator');
     res.status(200).json({ eventgrid: 'pong' });
+});
+
+app.get('/ping/mqtt', (req, res) => {
+    mqtt.publish('pong', 'simulator');
+    res.status(200).json({ mqtt: 'pong' });
 });
 
 // Receive events from EventGrid
