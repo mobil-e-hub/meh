@@ -1,5 +1,6 @@
 # External modules
 import os
+import uuid
 
 from dotenv import load_dotenv
 import paho.mqtt.client as mqtt
@@ -13,16 +14,18 @@ mqtt_endpoint_path = os.environ.get('MQTT_ENDPOINT_PATH')
 class MQTT(object):
 
     def __init__(self):
-        self.client = mqtt.Client('6a676c70-b563-11eb-8529-0242ac130003', transport='websockets')
+        #self.client = mqtt.Client(str(uuid.uuid4()))
+        self.client = mqtt.Client(str(uuid.uuid4()), transport='websockets')
         self.client.ws_set_options(path=mqtt_endpoint_path)
         self.client.tls_set()
-        self.client.username_pw_set(username="roger", password="$6$clQ4Ocu312S0qWgl$Cv2wUxgEN73c6C6jlBkswqR4AkHsvDLWvtEXZZ8NpsBLgP1WAo/qA+WXcmEN/mjDNgdUwcxRAveqNMs2xUVQYA==")
+        #self.client.username_pw_set(username="roger", password="$6$clQ4Ocu312S0qWgl$Cv2wUxgEN73c6C6jlBkswqR4AkHsvDLWvtEXZZ8NpsBLgP1WAo/qA+WXcmEN/mjDNgdUwcxRAveqNMs2xUVQYA==")
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_log = self.on_log
         self.client.publish('pong', 'Hi')
         self.subscriptions = {}
         self.client.connect(mqtt_endpoint, port=443)
+        #self.client.connect('broker.hivemq.com')
         self.client.loop_start()
 
     def on_connect(self, client, userdata, flags, rc):
