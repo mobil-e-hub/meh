@@ -7,13 +7,11 @@ import copy
 import networkx as nx
 from .helpers import load_topology, load_mapping, backtrack_shortest_path
 from .datastructures import Hub, Drone, Car, Bus, Parcel, Routes, DroneState, VehicleState, TaskState, Route
-# from ..mqtt_client import MQTTClient
-
 from opt.src.mqtt_client import MQTTClient
 
 
-# TODO: inherits from mqtt Client to enable notifications on new system states
 class OptimizationEngine(MQTTClient):
+    """TODO add docstring"""
 
     def __init__(self):
         MQTTClient.__init__(self)

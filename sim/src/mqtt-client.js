@@ -11,7 +11,7 @@ module.exports = class MQTTClient {
         this.type = type;
 
         this.mqtt = {
-            client: MQTT.connect('ws://broker.hivemq.com:8000/mqtt'),
+            client: MQTT.connect('wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt'),
             root: 'mobil-e-hub/viz',
             id: uuid()
         };
