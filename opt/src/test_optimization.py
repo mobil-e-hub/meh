@@ -1,7 +1,4 @@
 from optimization_engine.optimization_engine import OptimizationEngine
-from mqtt_client import MQTTClient
-
-
 # TODO - browser based client for sending MQTT-msgs: http://www.hivemq.com/demos/websocket-client/
 #      - following currently not working: DEBUG!!
 #           - other testing option: run script test_extra_client in parallel

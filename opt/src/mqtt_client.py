@@ -49,6 +49,7 @@ class MQTTClient:
         # TODO how to do this?
         self.client.loop_forever()  # on this thread -> blocked -> problem??
         # self.client.loop_start()  # starts new thread -> while loop necessary to keep running
+        # # or:
         # while True:
         #     pass                      # server could do stuff here...
         # time.sleep(20)

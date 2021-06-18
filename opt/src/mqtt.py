@@ -10,7 +10,7 @@ load_dotenv()
 mqtt_endpoint = os.environ.get('MQTT_ENDPOINT')
 mqtt_endpoint_path = os.environ.get('MQTT_ENDPOINT_PATH')
 
-
+# TODO deprecated? --> Opt_engine inherites MQTT functionality from MQTT_CLIENT (wrapper for paho client)
 class MQTT(object):
 
     def __init__(self):

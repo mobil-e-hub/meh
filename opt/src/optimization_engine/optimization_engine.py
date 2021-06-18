@@ -5,9 +5,9 @@ import logging
 import copy
 
 import networkx as nx
-from .helpers import load_topology, load_mapping, backtrack_shortest_path
-from .datastructures import Hub, Drone, Car, Bus, Parcel, Routes, DroneState, VehicleState, TaskState, Route
-from opt.src.mqtt_client import MQTTClient
+from optimization_engine.helpers import load_topology, load_mapping, backtrack_shortest_path
+from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Routes, DroneState, VehicleState, TaskState, Route
+from mqtt_client import MQTTClient
 
 
 class OptimizationEngine(MQTTClient):
@@ -20,8 +20,8 @@ class OptimizationEngine(MQTTClient):
         self.project = 'meh'
         self.version = 'v1'
 
-        self.g_topo = load_topology('../../assets/topology.json')
-        self.mapping = load_mapping('../../assets/topology.json')  # hub_id <-> node_id
+        self.g_topo = load_topology('assets/topology.json')
+        self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
         self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
 
         self.hubs = {}

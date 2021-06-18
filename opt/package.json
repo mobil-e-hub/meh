@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup:mac": "python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
-    "start:mac": ". venv/bin/activate && python3 src/server.py",
+    "start:mac": ". venv/bin/activate && python3 src/server_mqtt.py",
     "setup:windows": "if not exist \"venv\" (py -m venv venv && .\\venv\\Scripts\\activate.bat && pip install -r requirements.txt) else (.\\venv\\Scripts\\activate.bat && pip install -r requirements.txt)",
     "update:windows": ".\\venv\\Scripts\\activate.bat && pip install -r requirements.txt",
     "start:windows": ".\\venv\\Scripts\\activate.bat && python src\\server.py"

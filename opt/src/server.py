@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 # Internal modules
 # TODO add logging
-from src.mqtt import MQTT
+from . import MQTT
 from src.optimization_engine.optimization_engine import OptimizationEngine
 from src.event_grid import EventGrid
 
@@ -19,6 +19,7 @@ event_grid = EventGrid()
 mqtt = MQTT()
 opt = OptimizationEngine(event_grid, mqtt)
 
+# TODO deprecated?? - script currently runs server_mqtt as starting point
 
 # Endpoints
 @app.route('/')

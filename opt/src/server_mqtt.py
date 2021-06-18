@@ -1,5 +1,5 @@
 # External modules
-from flask import Flask, request
+from flask import Flask
 import os
 from dotenv import load_dotenv
 
@@ -15,8 +15,11 @@ port = int(os.environ.get('OPT_PORT', 3001))
 
 # Setup
 app = Flask(__name__)
-mqtt_client = MQTTClient()
-opt = OptimizationEngine(mqtt_client)
+# mqtt_client = MQTTClient()
+opt = OptimizationEngine() # inherits from MQTTClient
+
+opt.begin_client()
+# opt.loop_start() # TODO better? -> starts own thread for MQTT
 
 
 # Endpoints
