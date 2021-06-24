@@ -185,23 +185,23 @@
             publishStart: function() {
               this.isPaused = !this.isPaused;
               //TODO wie schaut Pausiermechanismus aus??
-              this.$eventGrid.publish('start');
+              this.$mqtt.publish('start');
             },
             publishStop: function() {
               this.isPaused = true;
-              this.$eventGrid.publish('stop');
+              this.$mqtt.publish('stop');
             },
             publishReset: function() {
-              this.$eventGrid.publish('reset');
+              this.$mqtt.publish('reset');
             },
             clickSendButton: function() {
-              this.$eventGrid.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
+              this.$mqtt.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
             },
             clickTestButton: function() {
-              this.$eventGrid.publish('bla', 'hello');
+              this.$mqtt.publish('test', { "bla" : "hello"});
             },
             clickPlaceOrderButton: function() {
-              this.$eventGrid.publish('place-order', {
+              this.$mqtt.publish('place-order', {
                 id: this.$uuid(),
                 vendor: { type: 'customer', id: this.command.order.vendor },
                 customer: { type: 'customer', id: this.command.order.customer },

@@ -2,7 +2,7 @@
   "name": "meh-opt",
   "version": "1.0.0",
   "description": "Optimization engine (Flask server) for mobil-e-Hub",
-  "main": "src/server.py",
+  "main": "src/server_mqtt.py",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup:mac": "python3 -m venv venv && . venv/bin/activate && pip install -r requirements.txt",

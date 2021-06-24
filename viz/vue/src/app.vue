@@ -130,26 +130,26 @@
                 <b-nav-text v-if="listening" class="mx-3 pr-5" >{{incomingMessageCounter}}      </b-nav-text>
 
                 <b-nav-text class="mx-2 pl-2" title="Number of hubs">
-                  <vue-material-icon class="mt-4" name="home"  :size="24" :color="gray"/>
+                  <vue-material-icon class="mt-4" name="home"  :size="24" />
 <!--                    <font-awesome-icon icon="warehouse" style="color: gray" />:-->
                    : {{Object.keys(entities.hubs).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of drones">
-                    <vue-material-icon class="red-text" name="flight"  :size="24" style="color: red" :color="red"/>
+                    <vue-material-icon class="red-text" name="flight" :size="24" style="color: red" />
 <!--                    <font-awesome-icon icon="plane" style="color: red" />-->
                   : {{Object.keys(entities.drones).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of cars">
-                  <vue-material-icon name="directions_car"  :size="24" :color="blue"/>
+                  <vue-material-icon name="directions_car"  :size="24" />
 <!--                    <font-awesome-icon icon="car" style="color: blue" />-->
                   : {{Object.keys(entities.cars).length }}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of busses">
 
-                  <vue-material-icon name="directions_bus"  :size="24" :color="blue"/>
+                  <vue-material-icon name="directions_bus"  :size="24" />
 <!--                    <font-awesome-icon class="icon-red" icon="bus" style="color: blue" />-->
                   : {{ Object.keys(entities.buses).length }}
 
@@ -157,7 +157,7 @@
 
                 <b-nav-text class="mx-3" title="Number of parcels">
                   <!--                  // better: inventory_2 (parcel box)  &ndash;&gt; didn't  work-->
-                  <vue-material-icon name="mail"  :size="24" :color="green"/>
+                  <vue-material-icon name="mail"  :size="24" />
 <!--                    <font-awesome-icon icon="archive" style="color: green" />-->
                   : {{Object.keys(entities.parcels).length }}
                 </b-nav-text>
@@ -262,16 +262,17 @@ export default {
     },
     created: function() {
         // Subscribe to all relevant topics
-        this.$eventGrid.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
-        this.$eventGrid.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
-        this.$eventGrid.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
-        this.$eventGrid.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
-        this.$eventGrid.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
-        this.$eventGrid.subscribe('from/car/+/arrived', (topic, message) => this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`));
-        this.$eventGrid.subscribe('from/+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
-        this.$eventGrid.subscribe('from/+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
-        this.$eventGrid.subscribe('from/parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
-        this.$eventGrid.subscribe('to/visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
+        console.log("Subscribing to topics - VUE_CREATED ")
+        this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
+        this.$mqtt.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
+        this.$mqtt.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
+        this.$mqtt.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
+        this.$mqtt.subscribe('from/car/+/arrived', (topic, message) => this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`));
+        this.$mqtt.subscribe('from/+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
+        this.$mqtt.subscribe('from/+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
+        this.$mqtt.subscribe('from/parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('to/visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },
     mounted: function() {
         // Update incoming message counter regularly

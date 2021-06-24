@@ -13,13 +13,14 @@ from src.event_grid import EventGrid
 load_dotenv()
 port = int(os.environ.get('OPT_PORT', 3001))
 
+# TODO deprecated?? - script currently runs server_mqtt as starting point
+
 # Setup
 app = Flask(__name__)
 event_grid = EventGrid()
 mqtt = MQTT()
 opt = OptimizationEngine(event_grid, mqtt)
 
-# TODO deprecated?? - script currently runs server_mqtt as starting point
 
 # Endpoints
 @app.route('/')
@@ -34,6 +35,7 @@ def base():
 
 @app.route('/ping')
 def ping():
+    opt.publish('mobil-e-hub/v0/to/hub/test', 'YOLO')
     return {'opt': 'pong'}
 
 

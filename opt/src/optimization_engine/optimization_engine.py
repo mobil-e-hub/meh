@@ -6,7 +6,8 @@ import copy
 
 import networkx as nx
 from optimization_engine.helpers import load_topology, load_mapping, backtrack_shortest_path
-from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Routes, DroneState, VehicleState, TaskState, Route
+from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Routes, DroneState, VehicleState, \
+    TaskState, Route
 from mqtt_client import MQTTClient
 
 
@@ -17,8 +18,8 @@ class OptimizationEngine(MQTTClient):
         MQTTClient.__init__(self)
 
         self.id = str(uuid4())[0:8]  # TODO necessary for opt_engine? there should be only one --> self.root
-        self.project = 'meh'
-        self.version = 'v1'
+        self.project = 'mobil-e-hub'
+        self.version = 'v0'
 
         self.g_topo = load_topology('assets/topology.json')
         self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
@@ -42,13 +43,13 @@ class OptimizationEngine(MQTTClient):
             vehicle, v_type = self._assign_vehicle(route.road)  # v_type is 'car' or 'bus'
             drone2 = self._assign_drone(route.air2)
 
-            logging.debug("Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
+            logging.debug(f"< [{self.client_name}] - Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
             # TODO if 1 return is None send a failed mission to visualization instead of publishing missions...
             self.create_and_start_mission(parcel, drone1, vehicle, v_type, drone2, route)
 
-            logging.info(f"Started delivery mission for parcel: {parcel}")
+            logging.info(f"< [{self.client_name}] - Started delivery mission for parcel: {parcel}")
         except ValueError as e:
-            logging.error(f"Could not find route for parcel: {parcel}")
+            logging.error(f"< [{self.client_name}] - Could not find route for parcel: {parcel}")
             self.reject_parcel(parcel)
 
         # self.publish("bar/test", "tested/bar")
@@ -86,24 +87,24 @@ class OptimizationEngine(MQTTClient):
                            path=backtrack_shortest_path(self.pred, node_source, junction_source,
                                                         self.dist[node_source][junction_source]))
         except ValueError as e:
-            logging.error("No first route exists: " + str(e))
+            logging.error(f"< [{self.client_name}] - No first route exists: " + str(e))
             raise ValueError("No first route exists: " + str(e))
         try:
             route2 = Route(distance=self.dist[junction_source][junction_destination],
                            path=backtrack_shortest_path(self.pred, junction_source, junction_destination,
                                                         self.dist[junction_source][junction_destination]))
         except ValueError as e:
-            logging.error("No second route 2 exists: " + str(e))
+            logging.error(f"< [{self.client_name}] - No second route 2 exists: " + str(e))
             raise ValueError("No second route 2 exists: " + str(e))
         try:
             route3 = Route(distance=self.dist[junction_destination][node_destination],
                            path=backtrack_shortest_path(self.pred, junction_destination, node_destination,
                                                         self.dist[junction_destination][node_destination]))
         except ValueError as e:
-            logging.error("No third route exists: " + str(e))
+            logging.error(f"< [{self.client_name}] - No third route exists: " + str(e))
             raise ValueError("No third route exists: " + str(e))
 
-        logging.info(f"New route for parcel {parcel.id}: {[route1, route2, route3]}")
+        logging.info(f"< [{self.client_name}] - New route for parcel {parcel.id}: {[route1, route2, route3]}")
 
         route = Routes(air1=route1, road=route2, air2=route3)
         return route
@@ -121,7 +122,7 @@ class OptimizationEngine(MQTTClient):
         except ValueError as e:
             logging.error("Failed to assign drone: " + str(e))
 
-        logging.info(f"Assigned Drone to route: {route} -> Drone/{optimal_drone_id}")
+        logging.info(f"< [{self.client_name}] - Assigned Drone to route: {route} -> Drone/{optimal_drone_id}")
         return optimal_drone_id
 
     def _assign_vehicle(self, route):
@@ -137,7 +138,7 @@ class OptimizationEngine(MQTTClient):
         try:
             optimal_vehicle, vehicle_time = self._assign_entity(route, idle_cars, car_speed)
         except ValueError as e:
-            logging.error("Failed to assign car: " + str(e))
+            logging.error(f"[{self.client_name}] - Failed to assign car: " + str(e))
 
         optimal_bus, bus_time = self._assign_bus(route)
 
@@ -145,7 +146,7 @@ class OptimizationEngine(MQTTClient):
             optimal_vehicle = optimal_bus
             vehicle_type = "bus"
 
-        logging.info(f"Assigned Ground vehicle to route: {route} -> {vehicle_type}/{optimal_vehicle}")
+        logging.info(f"[{self.client_name}] - Assigned Ground vehicle to route: {route} -> {vehicle_type}/{optimal_vehicle}")
 
         return optimal_vehicle, vehicle_type
 
@@ -272,7 +273,7 @@ class OptimizationEngine(MQTTClient):
         t03 = self.create_transaction(parcel, 'drone', drone2_id, parcel.destination['type'],
                                       parcel.destination['id'])
 
-        logging.debug("Create_start_mission: Created all transactions")
+        logging.debug(f"< [{self.client_name}] - Create_start_mission: Created all transactions")
 
         m00 = {
             'id': 'm00',
@@ -352,7 +353,7 @@ class OptimizationEngine(MQTTClient):
             ]
         }
 
-        logging.debug("Publish missions to assigned entities: ")
+        logging.info(f"[{self.client_name}] - Publish missions to assigned entities ")
         self.publish_to(f"hub/{self.hubs[parcel.carrier['id']].id}", "mission", m00)
         self.publish_to(f"drone/{drone1_id}", "mission", m01)
         self.publish_to(f"drone/{drone2_id}", "mission", m02)
@@ -514,6 +515,8 @@ class OptimizationEngine(MQTTClient):
     # TODO manage subscriptions here???
     def add_message_callbacks(self):
         """registers functions for handling different message topics to the MQTT client as callbacks"""
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/test", self.on_message_test)
+
         # entities: state updates
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/state/#", self.on_message_state)
 
@@ -532,14 +535,16 @@ class OptimizationEngine(MQTTClient):
         self.subscribe(topic)
         self.client.message_callback_add(topic, callback_function)
 
+    # TODO remove
     def on_message_test(self, client, userdata, msg):
-        pass
+        logging.warn(f"!!!!!!!!! RECEIVED MESSAGE on {msg.topic}: {msg.payload} !!!!!")
+        self.publish_to("vue", "foo/bar", {"foo": "bar"})
 
     def on_message_state(self, client, userdata, msg):
         # TODO add to the respective dict
         [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
         self.update_state(entity, id_, msg.payload)
-        logging.debug(f"Updated state of {entity}/{id_}: {msg.payload}")
+        logging.debug(f"[{self.client_name}] - Updated state of {entity}/{id_}: {msg.payload}")
 
     def on_message_parcel_delivered(self, client, userdata, msg):
         # TODO handle parcel delivered
@@ -555,7 +560,7 @@ class OptimizationEngine(MQTTClient):
         elif entity == 'order':
             pass
         else:
-            logging.warn(f"Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
+            logging.warn(f"[{self.client_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
 
     # def on_message_split(self, client, userdata, msg):
@@ -592,4 +597,4 @@ class OptimizationEngine(MQTTClient):
             new_state = state  # TODO parse json state / string
             self.parcels.update({id_: new_state})
         else:
-            logging.warn(f"Could not match entity {entity}/{id_}:  {state}")
+            logging.warn(f"< [{self.client_name}] - Could not match entity {entity}/{id_}:  {state}")

@@ -5,21 +5,22 @@ const bodyParser = require('body-parser');
 const _ = require('lodash');
 const morgan = require('morgan');
 const mqttMatch = require('mqtt-match');
-const { EventGridPublisherClient, AzureKeyCredential } = require("@azure/eventgrid");
+const {EventGridPublisherClient, AzureKeyCredential} = require("@azure/eventgrid");
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
 
 
 // Internal modules
 const DroneSimulator = require('./simulators/drone-simulator');
-// const CarSimulator = require('./simulators/car-simulator');
+const CarSimulator = require('./simulators/car-simulator');
 // const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
-// const ParcelSimulator = require('./simulators/parcel-simulator');
-// const ControlSystem = require('./control-system/control-system');
+const ParcelSimulator = require('./simulators/parcel-simulator');
+const ControlSystem = require('./control-system/control-system');
 
-const { uuid } = require('./helpers');
+const {uuid} = require('./helpers');
 const topology = require('../assets/topology');
+// const subscriptionTopics = require("lodash/collection");
 
 
 // Environment variables
@@ -28,6 +29,10 @@ const eventGridEndpoint = process.env.EVENT_GRID_ENDPOINT;
 const eventGridKey = process.env.EVENT_GRID_KEY;
 const port = process.env.SIM_PORT || 3000;
 
+// TODO replace with prod broker
+const mqttBrokerURL = process.env.MQTT_BROKER_test;
+const mqttPort = process.env.BROKER_PORT_test;
+const mqttRoot = process.env.MQTT_ROOT;
 
 // Server
 const app = express();
@@ -39,79 +44,53 @@ const server = app.listen(port, () => {
     console.log(`< Server listening at http://localhost:${port}.`)
 });
 
-
-// Event Grid client (@azure/eventgrid)
-const client = new EventGridPublisherClient(String(eventGridEndpoint), 'EventGrid', new AzureKeyCredential(eventGridKey));
-
-const eventGridSubscriptions = { };
-
-const eventGrid = {
-    publish: async (topic, message='') => {
-        try {
-            await client.send([{ eventType: 'mobil-e-hub', dataVersion: '1.0', subject: topic, data: message }]);
-            return true;
-        }
-        catch (err) {
-            console.log(err);
-            return false;
-        }
-    },
-    subscribe: (pattern, handler) => {
-        if (eventGridSubscriptions[pattern]) {
-            eventGridSubscriptions[pattern].push(handler);
-        }
-        else {
-            eventGridSubscriptions[pattern] = [handler];
-        }
-    },
-    unsubscribe: (pattern, handler) => {
-        if (eventGridSubscriptions[pattern]) {
-            _.remove(eventGridSubscriptions[pattern], h => h === handler);
-            if (eventGridSubscriptions[pattern].length === 0) {
-                delete eventGridSubscriptions[pattern];
-            }
-        }
-    }
-};
-
+ // TODO subscriptionTopics?? --> was macht dieser Client???
 // MQTT client
-const mqtt_client = {
-    client: MQTT.connect('wss://ines-gpu-01.informatik.uni-mannheim.de:9001/meh/mqtt'),
-    root: 'mobil-e-hub/sim',
-    id: uuid(),
-    type: 'server'
-};
-mqtt_client.client.on('connect', () => {
-    console.log('Connected');
-    mqtt_client.client.subscribe(subscriptionTopics.map(topic => `${mqtt_client.root}/${topic}`));
-});
+// const mqtt_client = {
+//     client: MQTT.connect(mqttBrokerURL),
+//     root: mqttRoot,
+//     id: uuid(),
+//     type: 'server'
+// };
+// mqtt_client.client.on('connect', () => {
+//     console.log(` > Sim-Server: Connected to broker ${mqttBrokerURL} on port ${mqttPort}`);
+//     mqtt_client.client.subscribe(subscriptionTopics.map(topic => `${mqtt_client.root}/${topic}`));
+// });
+//
+// mqtt_client.client.on('message', (topic, message) => {
+//     let [project, version, direction, entity, id, ...args] = topic.split('/');
+//     mqtt.receive({
+//         version,
+//         direction,
+//         entity,
+//         id,
+//         args,
+//         rest: args.join('/'),
+//         string: {long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}`}
+//     }, JSON.parse(message.toString()));
+// });
 
-mqtt_client.client.on('message', (topic, message) => {
-    let [project, version, direction, entity, id, ...args] = topic.split('/');
-    mqtt.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
-});
-const mqtt = {
-    publish(topic, message = '') {
-        mqtt.publishFrom(`mobil-e-hub/${mqtt_client.id}`, topic, message);
-    },
-    receive(topic, message) {
-        console.log(`> [${mqtt_client.type}] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
-    },
-    publishFrom(sender, topic, message = '') {
-        mqtt_client.client.publish(`mobil-e-hub/sim/from/${sender}/${topic}`, JSON.stringify(message));
-        console.log(`< [${mqtt_client.type}] from/${sender}/${topic}: ${JSON.stringify(message)}`);
-    }
-};
+// const mqtt = {
+//     publish(topic, message = '') {
+//         mqtt.publishFrom(`mobil-e-hub/${mqtt_client.id}`, topic, message);
+//     },
+//     receive(topic, message) {
+//         console.log(`> [${mqtt_client.type}] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
+//     },
+//     publishFrom(sender, topic, message = '') {
+//         mqtt_client.client.publish(`mobil-e-hub/sim/from/${sender}/${topic}`, JSON.stringify(message));
+//         console.log(`< [${mqtt_client.type}] from/${sender}/${topic}: ${JSON.stringify(message)}`);
+//     }
+// };
 
 
 // Simulators
-const droneSimulator = new DroneSimulator(2);   // 2
-// const carSimulator = new CarSimulator(1);       // 1
+const droneSimulator = new DroneSimulator(2);
+const carSimulator = new CarSimulator(1);
 // const busSimulator = new BusSimulator(1);
-// const hubSimulator = new HubSimulator(3);       // 3
-// const parcelSimulator = new ParcelSimulator(hubSimulator);
-// const controlSystem = new ControlSystem(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator);
 const hubSimulator = new HubSimulator(3);
+const parcelSimulator = new ParcelSimulator(hubSimulator);
+const controlSystem = new ControlSystem(droneSimulator, carSimulator, hubSimulator, parcelSimulator);
 
 // Graceful shutdown
 process.on('SIGTERM', shutdown);
@@ -141,17 +120,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/ping', (req, res) => {
-    res.status(200).json({ sim: "pong" });
+    res.status(200).json({sim: "pong"});
 });
 
 app.get('/ping/eventgrid', (req, res) => {
     eventGrid.publish('pong', 'simulator');
-    res.status(200).json({ eventgrid: 'pong' });
+    res.status(200).json({eventgrid: 'pong'});
 });
 
 app.get('/ping/mqtt', (req, res) => {
     mqtt.publish('pong', 'simulator');
-    res.status(200).json({ mqtt: 'pong' });
+    res.status(200).json({mqtt: 'pong'});
 });
 
 // Receive events from EventGrid
@@ -161,14 +140,11 @@ app.post('/eventgrid', async (req, res) => {
         if (event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
             try {
                 console.log("Got SubscriptionValidation event data, validation code: " + event.data.validationCode + " topic: " + event.topic);
-                res.status(200).json({ ValidationResponse: event.data.validationCode });
-            }
-            catch (err)
-            {
+                res.status(200).json({ValidationResponse: event.data.validationCode});
+            } catch (err) {
                 res.status(404).end();
             }
-        }
-        else if (event.eventType === "Portal_Echo") {
+        } else if (event.eventType === "Portal_Echo") {
             console.log(`> (sim) Echo received!`);
         }
         // Otherwise process request
@@ -177,9 +153,8 @@ app.post('/eventgrid', async (req, res) => {
                 const topic = event.subject;
                 const message = event.data;
                 let [entity, id, ...args] = topic.split('/');
-                await receive({ entity, id, args, rest: args.join('/'), string: topic }, message);
-            }
-            catch (err) {
+                await receive({entity, id, args, rest: args.join('/'), string: topic}, message);
+            } catch (err) {
                 console.log(`Invalid event received: ${err}`);
             }
         }
