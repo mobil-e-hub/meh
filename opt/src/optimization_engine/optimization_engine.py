@@ -597,4 +597,4 @@ class OptimizationEngine(MQTTClient):
             new_state = state  # TODO parse json state / string
             self.parcels.update({id_: new_state})
         else:
-            logging.warn(f"< [{self.client_name}] - Could not match entity {entity}/{id_}:  {state}")
+            logging.info(f"< [{self.client_name}] - Could not match entity {entity}/{id_}:  {state}") #TODO change to warn

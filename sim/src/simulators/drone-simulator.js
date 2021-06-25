@@ -18,7 +18,7 @@ module.exports = class DroneSimulator extends MQTTClient {
         this.timer = null;
         this.interval = 100;
 
-        this.transactionTopics = { };
+        this.transactionTopics = { };       // TODO was macht das??
     }
 
     start() {

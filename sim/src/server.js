@@ -13,7 +13,7 @@ const MQTT = require('mqtt');
 // Internal modules
 const DroneSimulator = require('./simulators/drone-simulator');
 const CarSimulator = require('./simulators/car-simulator');
-// const BusSimulator = require('./simulators/bus-simulator');
+const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
 const ParcelSimulator = require('./simulators/parcel-simulator');
 const ControlSystem = require('./control-system/control-system');
@@ -85,12 +85,12 @@ const server = app.listen(port, () => {
 
 
 // Simulators
-const droneSimulator = new DroneSimulator(2);
+const droneSimulator = new DroneSimulator(3);
 const carSimulator = new CarSimulator(1);
-// const busSimulator = new BusSimulator(1);
+const busSimulator = new BusSimulator(1);
 const hubSimulator = new HubSimulator(3);
 const parcelSimulator = new ParcelSimulator(hubSimulator);
-const controlSystem = new ControlSystem(droneSimulator, carSimulator, hubSimulator, parcelSimulator);
+const controlSystem = new ControlSystem(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator);
 
 // Graceful shutdown
 process.on('SIGTERM', shutdown);
@@ -133,36 +133,40 @@ app.get('/ping/mqtt', (req, res) => {
     res.status(200).json({mqtt: 'pong'});
 });
 
-// Receive events from EventGrid
-app.post('/eventgrid', async (req, res) => {
-    for (const event of req.body) {
-        // If this is a validation request, reply appropriately
-        if (event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
-            try {
-                console.log("Got SubscriptionValidation event data, validation code: " + event.data.validationCode + " topic: " + event.topic);
-                res.status(200).json({ValidationResponse: event.data.validationCode});
-            } catch (err) {
-                res.status(404).end();
-            }
-        } else if (event.eventType === "Portal_Echo") {
-            console.log(`> (sim) Echo received!`);
-        }
-        // Otherwise process request
-        else {
-            try {
-                const topic = event.subject;
-                const message = event.data;
-                let [entity, id, ...args] = topic.split('/');
-                await receive({entity, id, args, rest: args.join('/'), string: topic}, message);
-            } catch (err) {
-                console.log(`Invalid event received: ${err}`);
-            }
-        }
-    }
+function matchTopic(pattern, topic) {
+    return mqttMatch(pattern, topic.string);
+}
 
-    // There's no need to return anything except status 200
-    res.status(200).end();
-});
+// Receive events from EventGrid
+// app.post('/eventgrid', async (req, res) => {
+//     for (const event of req.body) {
+//         // If this is a validation request, reply appropriately
+//         if (event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
+//             try {
+//                 console.log("Got SubscriptionValidation event data, validation code: " + event.data.validationCode + " topic: " + event.topic);
+//                 res.status(200).json({ValidationResponse: event.data.validationCode});
+//             } catch (err) {
+//                 res.status(404).end();
+//             }
+//         } else if (event.eventType === "Portal_Echo") {
+//             console.log(`> (sim) Echo received!`);
+//         }
+//         // Otherwise process request
+//         else {
+//             try {
+//                 const topic = event.subject;
+//                 const message = event.data;
+//                 let [entity, id, ...args] = topic.split('/');
+//                 await receive({entity, id, args, rest: args.join('/'), string: topic}, message);
+//             } catch (err) {
+//                 console.log(`Invalid event received: ${err}`);
+//             }
+//         }
+//     }
+//
+//     // There's no need to return anything except status 200
+//     res.status(200).end();
+// });
 
 // app.post('/meh/viz/hubs/find', (req, res) => {
 //     res.json(controlSystem.getHubs(req.body.position, req.body.radius));
@@ -186,17 +190,15 @@ app.post('/eventgrid', async (req, res) => {
 // });
 
 // Receive and distribute incoming event
-async function receive(topic, message) {
-    console.log(`> ${topic.string}: ${JSON.stringify(message)}`);
-    for (const [pattern, handlers] of Object.entries(eventGridSubscriptions)) {
-        if (matchTopic(pattern, topic)) {
-            for (const handler of handlers) {
-                await handler(topic, message);
-            }
-        }
-    }
-}
+// async function receive(topic, message) {
+//     console.log(`> ${topic.string}: ${JSON.stringify(message)}`);
+//     for (const [pattern, handlers] of Object.entries(eventGridSubscriptions)) {
+//         if (matchTopic(pattern, topic)) {
+//             for (const handler of handlers) {
+//                 await handler(topic, message);
+//             }
+//         }
+//     }
+// }
 
-function matchTopic(pattern, topic) {
-    return mqttMatch(pattern, topic.string);
-}
+

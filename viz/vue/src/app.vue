@@ -209,7 +209,7 @@ export default {
         return {
             lodash: _,
             listening: true,
-            view: 'none',
+            view: 'simulation',
             messages: {
                 messages: [],
                 counterInterval: 10
@@ -223,7 +223,7 @@ export default {
                 },
                 drones: { },
                 cars: { },
-                buses: {},   //plural busses breaks mqtt topic matching TODO
+                buses: { },
                 parcels: { },
                 hubs: { }
             },

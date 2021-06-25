@@ -52,46 +52,54 @@ class Bus {
         this.position = position;
 
         this.capacity = capacity; // number of parcels that can be transported simultaneously
-        this.route = route;      // array of stops that are perpetually visited                         [ {node: n00, time: 10},
-                                 //   --> objects with (node:  stoppingTime)                               {node: n01, time: 3},
-                                 //                                                                       {node: n06, time 6} ]  node object, int - time in seconds
+        this.route = route;      // array of stops that are perpetually visited                         [ {node: n00, position: {}, time: 10},
+                                 //   --> objects with (node:  stoppingTime)                               {node: n01, position: {}, time: 3},
+                                 //                                                                       {node: n06, position: {}, time 6} ]  node object, int - time in seconds
         this.nextStop = null;
 
         //difference to car/drones: Bus can have several Missions -> won't move differently:
-        this.missions = null;
-        this.activeMissions = null;
+        this.missions = {};
+        this.activeMissions = {};
 
         this.speed = 10;
-        this.parcels = null;
+        this.parcels = {};
         this.state = BusState.idle;
 
+        // TODO double check bus states!!! --> hasRoute() => state not idle but moving?
+
         // active tasks are added here --> no dropoff before pickup of parcel etc...
-        this.activeTasks = null;   // {   t00: {type: 'dropoff', node: n00, from: bus00, to: drone02, parcel: p00}            // TODO save as object of Missions with 2 tasks each (transactions)
-                                    //                                                                                 --> alternative: add clock?
-                                    //      }
+        this.activeTasks = [];   // {   t00: {type: 'dropoff', node: n00, from: bus00, to: drone02, parcel: p00}            // TODO save as object of Missions with 2 tasks each (transactions)
+        //                                                                                 --> alternative: add clock?
+        //      }
 
         // TODO refactor to use this task format (from control-system)
         // Tasks currently: { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t00) },
         // Tasks should be: => { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
         // Transactions "":  t01: {id: 't01', from: { type: 'drone', id: 'd00' }, to: { type: 'car', id: 'v00' }, parcel: 'p00'}, // TODO should include stop node where t happens
 
-        this.tasksAtStop = null;  //to-do list of bus for the next waiting time at a stop   --> { m0: t1, m2: t4}
+        this.tasksAtStop = [];  //to-do list of bus for the next waiting time at a stop   --> { m0: t1, m2: t4}
         this.arrivalTimeAtStop = null;
     }
 
     move(interval, simulator) {
         if (!this.route) {     // this.state != BusState.moving; --> also handle BusState.waitingForTransaction
             return false;
-        }
-        else {
+        } else {
             switch (this.state) {
+                case BusState.idle:
+                    if (this.route.length >= 1) {
+                        this.state = BusState.moving;
+                        this.driveToNextStop()
+                    }
+                    return false;
+
                 case BusState.moving:
 
-                    let next = this.nextStop.node;
+                    let next = this.nextStop; // TODO is null... -> call drive to next stop before somewhere!!
                     let direction = {
-                        x: next.destination.x - this.position.x,
-                        y: next.destination.y - this.position.y,
-                        z: next.destination.z - this.position.z,
+                        x: next.position.x - this.position.x,
+                        y: next.position.y - this.position.y,
+                        z: next.position.z - this.position.z,  // TODO kann das weg??
                     };
                     let length = Math.sqrt(direction.x ** 2 + direction.y ** 2 + direction.z ** 2);
                     if (length > this.speed * interval) {
@@ -106,7 +114,7 @@ class Bus {
                     this.position.y += direction.y;
                     this.position.z += direction.z;
 
-                    if (_.isEqual(this.position, next.destination)) {
+                    if (_.isEqual(this.position, next.position)) {
                         this.stopAtBusStop()
                         //this.completeTask(simulator);
                     }
@@ -114,29 +122,25 @@ class Bus {
 
                 case BusState.plannedStop:
                     // move to separate function??
-                    if (this.tasksAtStop != null) {
+                    if (this.tasksAtStop.length > 0) {
                         // TODO remove task from tasksAtStop after they are done
                         // let drive = false;
                         for (let task in this.tasksAtStop) {
-                             if (task.type === 'pickup') {
+                            if (task.type === 'pickup') {
                                 //wait for execute message
-                             }
+                            } else if (task.type === 'dropoff') {
 
-                             else if (task.type === 'dropoff') {
-
-                                 if (task.transaction.ready) {
-                                     simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
-                                     simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
-                                     // drive = false;
-                                     // TODO call Mission Complete? --> done from simulator
-                                 }
-                                 // drive = true;
-                             }
+                                if (task.transaction.ready) {
+                                    simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
+                                    simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
+                                    // drive = false;
+                                    // TODO call Mission Complete? --> done from simulator
+                                }
+                                // drive = true;
+                            }
                         }
                         return false; // drive;
-                    }
-
-                    else {
+                    } else {
                         let now = Date.now();
                         let minTime = this.nextStop.time * 1000;
 
@@ -159,28 +163,27 @@ class Bus {
         // { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
 
         // TasksAtStop: Iterate over activeMissions --> if move task ends here --> close task and do next thing
-        Object.entries(this.activeTasks).filter(t => t.type === 'move' && t.destination === this.position ).forEach(
-                    t => this.completeTask()
-                    // TODO alex
-                    // - call complete task for this task
-                    // - remove task from activeTasks / tasksAtStop / mission / activeMissions
-                    // - add next task to tasksAtStop and activeTasks? --> oder active Tasks immer nur die vom type: 'move'
+        Object.entries(this.activeTasks).filter(t => t.type === 'move' && t.destination === this.position).forEach(
+            t => this.completeTask()
+            // TODO alex
+            // - call complete task for this task
+            // - remove task from activeTasks / tasksAtStop / mission / activeMissions
+            // - add next task to tasksAtStop and activeTasks? --> oder active Tasks immer nur die vom type: 'move'
         )
 
-        if (this.tasksAtStop != null) {
+        if (this.tasksAtStop.length > 0 ) {
 
-            for(let task in this.tasksAtStop) {
+            for (let task in this.tasksAtStop) {
                 if (task.type === 'pickup') {
                     simulator.publishTo(`${task.from.type}/${task.from.id}`, `transaction/${task.id}/ready`);
                     this.state = BusState.transactionState;
                 }
                 //dropoff gets active after ready message received          TODO check can happen from the move method (continuous calls)
-                else if(task.type === 'dropoff') {
+                else if (task.type === 'dropoff') {
                     if (task.transaction.ready) {
                         this.state = BusState.transactionState;
                         task.state = TaskState.executingTransaction;
-                    }
-                    else {
+                    } else {
                         this.state = BusState.transactionState;
                         task.state = TaskState.waitingForTransaction;
                     }
@@ -196,8 +199,7 @@ class Bus {
         let task = this.mission.tasks[0];
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
-        }
-        else {
+        } else {
             let transaction = task.transaction;
             this.parcels = transaction.parcel;
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
@@ -209,7 +211,7 @@ class Bus {
 
     //TODO: message: new Mission = null --> ignore (!) or reset all missions?
     setMission(mission, simulator) {
-        this.missions = Object.assign(this.missions, { mission })  // TODO double check this append -->  which key for this mission?
+        this.missions = Object.assign(this.missions, {mission})  // TODO double check this append -->  which key for this mission?
         if (mission !== null && Object.keys(this.activeTasks).length < this.capacity) {
             let m = mission;
             this.activeTasks = Object.assign(this.activeTasks, mission.tasks[0]);//{ m:id: mission.tasks[0]});
@@ -220,8 +222,7 @@ class Bus {
         this.route = route;
         if (route === null) {
             this.state = BusState.idle;
-        }
-        else {
+        } else {
             this.driveToNextStop();
         }
     }
@@ -229,7 +230,7 @@ class Bus {
     driveToNextStop() {
         // TODO check if 'move' mission arrived at goal -> then move to next task for this mission
 
-        if(this.route == null){
+        if (this.route == null) {
             this.state = BusState.idle;
             return false;
         }
@@ -254,19 +255,16 @@ class Bus {
             // movement handled seperately
             // this.state = BusState.moving;
             // task.state = TaskState.ongoing;
-        }
-        else if (task.type === 'pickup') {
+        } else if (task.type === 'pickup') {
             let transaction = task.transaction;
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = BusState.transactionState;
             task.state = TaskState.waitingForTransaction;
-        }
-        else if (task.type === 'dropoff') {
+        } else if (task.type === 'dropoff') {
             if (task.transaction.ready) {
                 this.state = BusState.transactionState;
                 task.state = TaskState.executingTransaction;
-            }
-            else {
+            } else {
                 this.state = BusState.transactionState;
                 task.state = TaskState.waitingForTransaction;
             }
@@ -282,11 +280,10 @@ class Bus {
             simulator.publishFrom(`bus/${this.id}`, `mission/${this.mission.id}/complete`);
             this.mission = null;
             this.state = BusState.idle;
-        }
-        else {
+        } else {
             this.startTask(simulator);
         }
     }
 }
 
-module.exports = { Bus, BusState, TaskState };
+module.exports = {Bus, BusState, TaskState};

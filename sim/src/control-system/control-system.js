@@ -17,12 +17,12 @@ const topology = require('../../assets/topology');
 
 module.exports = class ControlSystem extends MQTTClient {
 
-    constructor(droneSimulator, carSimulator, hubSimulator, parcelSimulator) {
+    constructor(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator) {
         super('control-system', ['to/control-system/#', 'from/parcel/+/placed', 'from/parcel/+/delivered', 'from/visualization/#', 'from/order/+/placed']);
 
         this.droneSimulator = droneSimulator;
         this.carSimulator = carSimulator;
-        // this.busSimulator = busSimulator;
+        this.busSimulator = busSimulator;
         this.hubSimulator = hubSimulator;
         this.parcelSimulator = parcelSimulator;
 
@@ -379,151 +379,94 @@ module.exports = class ControlSystem extends MQTTClient {
     }
 
     test(message) {
-    //     this.hubSimulator.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07'), h02: new Hub('h02', 'n10') };
-    //     this.droneSimulator.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
-    //     this.carSimulator.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
-    //
-    //     // this.busSimulator.buses= { v00: new Bus ('v00', { x: 50, y: 50, z: 0 }, []) };
-    //
-    //     this.parcelSimulator.parcels = { p00: new Parcel('p00', { type: 'hub', id: 'h00' }, { type: 'hub', id: 'h01' }) };
-    //
-    //     let transactions = {
-    //         t00: {
-    //             id: 't00',
-    //             from: { type: 'hub', id: 'h00' },
-    //             to: { type: 'drone', id: 'd00' },
-    //             parcel: 'p00'
-    //         },
-    //         t01: {
-    //             id: 't01',
-    //             from: { type: 'drone', id: 'd00' },
-    //             to: { type: 'car', id: 'v00' },
-    //             parcel: 'p00'
-    //         },
-    //         t02: {
-    //             id: 't02',
-    //             from: { type: 'car', id: 'v00' },
-    //             to: { type: 'drone', id: 'd01' },
-    //             parcel: 'p00'
-    //         },
-    //         t03: {
-    //             id: 't03',
-    //             from: { type: 'drone', id: 'd01' },
-    //             to: { type: 'hub', id: 'h01' },
-    //             parcel: 'p00'
-    //         }
-    //     };
-    //     let missions = {
-    //         m00: {
-    //             id: 'm00',
-    //             tasks: [
-    //                 { type: 'give', transaction: _.clone(transactions.t00) }
-    //             ]
-    //         },
-    //         m01: {
-    //             id: 'm01',
-    //             tasks: [
-    //                 { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: 60, z: 0}, minimumDuration: 10 },
-    //                 { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t00) },
-    //                 { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: 50, z: 0}, minimumDuration: 10 },
-    //                 { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: 50, z: 0}, minimumDuration: 10 },
-    //                 { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t01) },
-    //                 { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: 60, z: 0}, minimumDuration: 10 }
-    //             ]
-    //         },
-    //         m02: {
-    //             id: 'm02',
-    //             tasks: [
-    //                 { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
-    //                 { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t02) },
-    //                 { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: -60, z: 0}, minimumDuration: 10 },
-    //                 { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t03) }
-    //             ]
-    //         },
-    //         m03: {
-    //             id: 'm03',
-    //             tasks: [
-    //                 {type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t01)},
-    //                 { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: -50, z: 0}, minimumDuration: 10 },
-    //                 { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t02) }
-    //             ]
-    //         },
-    //         m04: {
-    //             id: 'm04',
-    //             tasks: [
-    //                 { type: 'take', state: TaskState.notStarted, transaction: _.clone(transactions.t03) }
-    //             ]
-    //         }
-    //     };
-    //
-    //     // let transactions = {
-    //     //     t00: {
-    //     //         id: 't00',
-    //     //         from: { type: 'hub', id: 'h00' },
-    //     //         to: { type: 'drone', id: 'd00' },
-    //     //         parcel: 'p00'
-    //     //     },
-    //     //     t01: {
-    //     //         id: 't01',
-    //     //         from: { type: 'drone', id: 'd00' },
-    //     //         to: { type: 'drone', id: 'd01' },
-    //     //         parcel: 'p00'
-    //     //     },
-    //     //     t02: {
-    //     //         id: 't02',
-    //     //         from: { type: 'drone', id: 'd01' },
-    //     //         to: { type: 'hub', id: 'h01' },
-    //     //         parcel: 'p00'
-    //     //     }
-    //     // };
-    //     //
-    //     // let missions = {
-    //     //     m00: {
-    //     //         id: 'm00',
-    //     //         tasks: [
-    //     //             { type: 'give', transaction: _.clone(transactions.t00) }
-    //     //         ]
-    //     //     },
-    //     //     m01: {
-    //     //         id: 'm01',
-    //     //         tasks: [
-    //     //             { type: 'move', state: TaskState.notStarted, destination: { x: -60, y: 60, z: 0 }, minimumDuration: 10 },
-    //     //             { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t00) },
-    //     //             { type: 'move', state: TaskState.notStarted, destination: { x: -60, y: 50, z: 0 }, minimumDuration: 10 },
-    //     //             { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: 50, z: 0 }, minimumDuration: 10 },
-    //     //             { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
-    //     //             { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t01) },
-    //     //             { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: 60, z: 0 }, minimumDuration: 10 }
-    //     //         ]
-    //     //     },
-    //     //     m02: {
-    //     //         id: 'm02',
-    //     //         tasks: [
-    //     //             { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
-    //     //             { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t01) },
-    //     //             { type: 'move', state: TaskState.notStarted, destination: { x: -60, y: -60, z: 0 }, minimumDuration: 10 },
-    //     //             { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t02) }
-    //     //         ]
-    //     //     },
-    //     //     m03: {
-    //     //         id: 'm03',
-    //     //         tasks: [
-    //     //             { type: 'take', state: TaskState.notStarted, transaction: _.clone(transactions.t02) }
-    //     //         ]
-    //     //     }
-    //     // };
-    //
-    //     this.hubSimulator.resume();
-    //     this.droneSimulator.resume();
-    //     this.carSimulator.resume();
-    //     // this.busSimulator.resume();
-    //     this.parcelSimulator.resume();
-    //
-    //     this.publishTo('hub/h00', 'mission', missions.m00);
-    //     this.publishTo('drone/d00', 'mission', missions.m01);
-    //     this.publishTo('drone/d01', 'mission', missions.m02);
-    //     this.publishTo('car/v00', 'mission', missions.m03);
-    //     this.publishTo('hub/h01', 'mission', missions.m04);
+        this.hubSimulator.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07'), h02: new Hub('h02', 'n10') };
+        this.droneSimulator.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
+        this.carSimulator.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
+
+        // this.busSimulator.buses= { v00: new Bus ('v00', { x: 50, y: 50, z: 0 }, []) };
+
+        this.parcelSimulator.parcels = { p00: new Parcel('p00', { type: 'hub', id: 'h00' }, { type: 'hub', id: 'h01' }) };
+
+        let transactions = {
+            t00: {
+                id: 't00',
+                from: { type: 'hub', id: 'h00' },
+                to: { type: 'drone', id: 'd00' },
+                parcel: 'p00'
+            },
+            t01: {
+                id: 't01',
+                from: { type: 'drone', id: 'd00' },
+                to: { type: 'car', id: 'v00' },
+                parcel: 'p00'
+            },
+            t02: {
+                id: 't02',
+                from: { type: 'car', id: 'v00' },
+                to: { type: 'drone', id: 'd01' },
+                parcel: 'p00'
+            },
+            t03: {
+                id: 't03',
+                from: { type: 'drone', id: 'd01' },
+                to: { type: 'hub', id: 'h01' },
+                parcel: 'p00'
+            }
+        };
+        let missions = {
+            m00: {
+                id: 'm00',
+                tasks: [
+                    { type: 'give', transaction: _.clone(transactions.t00) }
+                ]
+            },
+            m01: {
+                id: 'm01',
+                tasks: [
+                    { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: 60, z: 0}, minimumDuration: 10 },
+                    { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t00) },
+                    { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: 50, z: 0}, minimumDuration: 10 },
+                    { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: 50, z: 0}, minimumDuration: 10 },
+                    { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t01) },
+                    { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: 60, z: 0}, minimumDuration: 10 }
+                ]
+            },
+            m02: {
+                id: 'm02',
+                tasks: [
+                    { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
+                    { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t02) },
+                    { type: 'move', state: TaskState.notStarted, destination: {x: -60, y: -60, z: 0}, minimumDuration: 10 },
+                    { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t03) }
+                ]
+            },
+            m03: {
+                id: 'm03',
+                tasks: [
+                    {type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t01)},
+                    { type: 'move', state: TaskState.notStarted, destination: {x: -50, y: -50, z: 0}, minimumDuration: 10 },
+                    { type: 'dropoff', state: TaskState.notStarted, transaction: _.clone(transactions.t02) }
+                ]
+            },
+            m04: {
+                id: 'm04',
+                tasks: [
+                    { type: 'take', state: TaskState.notStarted, transaction: _.clone(transactions.t03) }
+                ]
+            }
+        };
+
+        this.hubSimulator.resume();
+        this.droneSimulator.resume();
+        this.carSimulator.resume();
+        // this.busSimulator.resume();
+        this.parcelSimulator.resume();
+
+        this.publishTo('hub/h00', 'mission', missions.m00);
+        this.publishTo('drone/d00', 'mission', missions.m01);
+        this.publishTo('drone/d01', 'mission', missions.m02);
+        this.publishTo('car/v00', 'mission', missions.m03);
+        this.publishTo('hub/h01', 'mission', missions.m04);
     }
 };
 

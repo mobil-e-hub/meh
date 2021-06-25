@@ -40,8 +40,8 @@ export default new Vuex.Store({
                 displaySize: {
                     hub: 10,
                     drone: 5,
-                    car: 20,
-                    bus: 10,
+                    car: 10,
+                    bus: 20,
                     parcel: 12,
                     node: 2,
                     edge: 1,

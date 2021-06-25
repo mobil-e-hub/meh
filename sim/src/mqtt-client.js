@@ -23,7 +23,7 @@ module.exports = class MQTTClient {
 
         this.mqtt.client.on('connect', () => {
             this.mqtt.client.subscribe(subscriptionTopics.map(topic => `${this.mqtt.root}/${topic}`));
-            this.publish(`${this.type}/${this.mqtt.id}: connected`);
+            this.publish('connected');
         });
 
         this.mqtt.client.on('message', (topic, message) => {
