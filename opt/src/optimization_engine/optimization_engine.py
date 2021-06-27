@@ -1,3 +1,4 @@
+import time
 from typing import List
 from uuid import uuid4
 import json
@@ -403,9 +404,20 @@ class OptimizationEngine(MQTTClient):
         self.parcels['p00'] = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
                                      destination={'type': 'hub', 'id': 'h01'})
 
+    def test_send_init(self):
+        self.publish_to('hub/h00', 'test_init', {})
+        self.publish_to('drone/d00', 'test_init', {})
+        self.publish_to('drone/d01', 'test_init', {})
+        self.publish_to('car/v00', 'test_init', {})
+        self.publish_to('hub/h01', 'test_init', {})
+        self.publish_to('parcel/p00', 'test_init', {})
+
     def test(self):
         """ temporary function for testing durign development process. """
+        self.test_send_init()
         self.test_init()
+
+        # time.sleep(500)
 
         transactions = {
             't00': {
@@ -490,11 +502,11 @@ class OptimizationEngine(MQTTClient):
             }
         }
 
-        self.publish('mission', missions['m00'])
-        self.publish('mission', missions['m01'])
-        self.publish('mission', missions['m02'])
-        self.publish('mission', missions['m03'])
-        self.publish('mission', missions['m04'])
+        self.publish_to('hub/h00', 'mission', missions['m00'])
+        self.publish_to('drone/d00', 'mission', missions['m01'])
+        self.publish_to('drone/d01', 'mission', missions['m02'])
+        self.publish_to('car/v00', 'mission', missions['m03'])
+        self.publish_to('hub/h01', 'mission', missions['m04'])
 
     # Find idle / suitable entities for a new mission
     def get_idle_drones(self):
@@ -537,8 +549,9 @@ class OptimizationEngine(MQTTClient):
 
     # TODO remove
     def on_message_test(self, client, userdata, msg):
-        logging.warn(f"!!!!!!!!! RECEIVED MESSAGE on {msg.topic}: {msg.payload} !!!!!")
-        self.publish_to("vue", "foo/bar", {"foo": "bar"})
+        logging.warn(f"!!! OPT: TEST MSG received -> {msg.topic}: {msg.payload} !!!") #TODO remove
+        # self.test_init()
+        self.test()
 
     def on_message_state(self, client, userdata, msg):
         # TODO add to the respective dict

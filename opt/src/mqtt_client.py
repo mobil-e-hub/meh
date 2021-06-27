@@ -27,7 +27,7 @@ class MQTTClient:
         self.MQTT_PORT = int(os.environ.get("BROKER_PORT_test"))
 
         self.topic = "mobil-e-hub/v0/from/opt"  # TODO macht default topic überhaupt sinn?? --> als fallback
-        self.root = "mobil-e-hub/v0/"    # TODO weg --> überschreibt das hier den in opt_engine gesetzten root??
+        self.root = "mobil-e-hub/v0"    # TODO weg --> überschreibt das hier den in opt_engine gesetzten root??
         self.client_name = os.environ.get("CLIENT_ID")  # Root & id?
 
         self.subscriptions = {'mobil-e-hub/v0/#'}  # TODO remove

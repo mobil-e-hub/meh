@@ -65,6 +65,16 @@ module.exports = class CarSimulator extends MQTTClient {
         }
     }
 
+    reset() {
+        this.stop();
+        this.start();
+    }
+
+    //TODO remove function & remove topic from receive
+    test_init() {
+        this.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
+    }
+
     moveCars = () => {
         for (const [id, car] of Object.entries(this.cars)) {
             if (car.move(this.interval / 1000, this)) {
@@ -77,9 +87,13 @@ module.exports = class CarSimulator extends MQTTClient {
         super.receive(topic, message);
 
         if (topic.direction === 'from' && topic.entity === 'visualization') {
-            if (['start', 'pause', 'resume', 'stop'].includes(topic.rest)) {
+            if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
+        }
+        //TODO remove
+        else if (this.matchTopic(topic, '+/+/+/test_init')) {
+            this.test_init();
         }
         else if (this.matchTopic(topic, 'to/car/+/mission')) {
             this.cars[topic.id].setMission(message, this);

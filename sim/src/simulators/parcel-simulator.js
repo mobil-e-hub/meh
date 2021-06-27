@@ -21,13 +21,23 @@ module.exports = class ParcelSimulator extends MQTTClient {
     }
 
     stop() {
-        this.parcels = {};
+        this.parcels = { p00: new Parcel('p00', { type: 'hub', id: 'h00' }, { type: 'hub', id: 'h01' }) };
+    }
+
+    //TODO remove function & remove topic from receive
+    test_init() {
+        this.parcels = { p00: new Parcel('p00', { type: 'hub', id: 'h00' }, { type: 'hub', id: 'h01' }) };
     }
 
     receive(topic, message) {
         super.receive(topic, message);
 
-        if (topic.direction === 'from') {
+        //TODO remove
+        if (this.matchTopic(topic, '+/+/+/test_init')) {
+            this.test_init();
+        }
+
+        else if (topic.direction === 'from') {
             if (topic.entity === 'visualization') {
                 if (topic.rest === 'stop') {
                     this.stop();

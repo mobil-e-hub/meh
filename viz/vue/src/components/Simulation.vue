@@ -192,7 +192,7 @@
             publishStop: function() {
               this.isPaused = true;
               this.isStarted = false;
-              this.$mqtt.publish('reset');  // TODO unterschied stopp / reset? --> löscht auch alle entitäten und pausiert auch?
+              this.$mqtt.publish('stop');  // TODO unterschied stopp / reset? --> löscht auch alle entitäten und pausiert auch?
             },
             publishReset: function() {
               this.isPaused = true;
@@ -203,7 +203,7 @@
               this.$mqtt.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
             },
             clickTestButton: function() {
-              this.$mqtt.publish('test', { "bla" : "hello"});
+              this.$mqtt.publish('test', {} );
             },
             clickPlaceOrderButton: function() {
               this.$mqtt.publish('place-order', {

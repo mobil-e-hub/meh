@@ -34,7 +34,7 @@ module.exports = class BusSimulator extends MQTTClient {
             clearInterval(this.timer);
         }
 
-        this.reset();
+        this.init();
         this.timer = setInterval(this.moveBuses, this.interval);
     }
 
@@ -63,7 +63,7 @@ module.exports = class BusSimulator extends MQTTClient {
         this.buses = {};
     }
 
-    reset() { //TODO change to fixed route along the Rectangle for testing
+    init() { //TODO change to fixed route along the Rectangle for testing
         this.buses = Object.assign({}, ...Array.from({length: this.numberOfBuses}).map(() => {
             let id = uuid();
             let start = random.key(_.pickBy(topology.nodes, n => ['parking', 'road-junction'].includes(n.type)));
@@ -82,11 +82,16 @@ module.exports = class BusSimulator extends MQTTClient {
         }
     }
 
+    reset() {
+        this.stop();
+        this.start();
+    }
+
     receive(topic, message) {
         super.receive(topic, message);
 
         if (this.matchTopic(topic, 'from/visualization/#')) {
-            if (['start', 'pause', 'resume', 'stop'].includes(topic.rest)) {
+            if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
         } else if (this.matchTopic(topic, 'to/bus/+/mission')) {

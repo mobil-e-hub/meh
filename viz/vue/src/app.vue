@@ -266,6 +266,7 @@ export default {
         this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
         this.$mqtt.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
         this.$mqtt.subscribe('from/+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
+        this.$mqtt.subscribe('from/+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
         this.$mqtt.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
         this.$mqtt.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
         this.$mqtt.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));

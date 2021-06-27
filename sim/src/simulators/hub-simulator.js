@@ -40,14 +40,29 @@ module.exports = class HubSimulator extends MQTTClient {
         }));
     }
 
+    reset() {
+        this.stop();
+        this.start();
+    }
+
+    //TODO remove function & remove topic from receive
+    test_init() {
+        this.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07'), h02: new Hub('h02', 'n10') };
+    }
+
     receive(topic, message) {
         super.receive(topic, message);
 
         if (this.matchTopic(topic, 'from/visualization/#')) {
-            if (['start', 'stop'].includes(topic.rest)) {
+            if (['start', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
-        } else if (this.matchTopic(topic, 'to/hub/+/mission')) {
+        }
+        //TODO remove
+        else if (this.matchTopic(topic, '+/+/+/test_init')) {
+            this.test_init();
+        }
+        else if (this.matchTopic(topic, 'to/hub/+/mission')) {
             let hub = this.hubs[topic.id];
             let transaction = message.tasks[0].transaction;
 

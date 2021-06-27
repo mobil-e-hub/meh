@@ -38,7 +38,7 @@ module.exports = class ControlSystem extends MQTTClient {
             // this.createDeliveryRoute(message);
         }
         if (this.matchTopic(topic, 'from/visualization/+/test')) {
-            this.test(message);
+            //this.test(message);
             // this.findRoute(new Parcel('p00', 'h00', 'h01'));
         }
         if (this.matchTopic(topic, 'from/order/+/placed')) {

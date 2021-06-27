@@ -18,7 +18,7 @@ const plural = {
     address: 'addresses'
 };
 
-const getDefaultEntityStates = () => {
+const resetEntityStates = () => {
     return {
         drones: {},
         cars: {},
@@ -31,7 +31,7 @@ const getDefaultEntityStates = () => {
 
 export default new Vuex.Store({
     state: {
-        entities: getDefaultEntityStates(),
+        entities: resetEntityStates(),
         topology: topology,
         settings: {
             map: {
@@ -63,7 +63,11 @@ export default new Vuex.Store({
             Vue.set(state.entities[plural[type]], id, payload);
         },
         resetEntityState(state) {
-            Object.assign(state.entities, getDefaultEntityStates())
+            Object.assign(state.entities, resetEntityStates())
+            // state.entities = Object.assign({}, state.entities, defaultEntityStates)
+        },
+        stopEntityState(state) {
+            Object.assign(state.entities, resetEntityStates())
             // state.entities = Object.assign({}, state.entities, defaultEntityStates)
         },
         mapZoom(state, { factor }) {

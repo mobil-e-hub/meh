@@ -55,10 +55,6 @@ module.exports = class DroneSimulator extends MQTTClient {
         this.drones = { };
     }
 
-    handleCommand(topic, message) {
-        console.log('worked');
-    }
-
     init() {
         this.drones = Object.assign({}, ...Array.from({ length: this.numberOfDrones }).map(() => {
             let id = uuid();
@@ -70,6 +66,16 @@ module.exports = class DroneSimulator extends MQTTClient {
         for (const [id, drone] of Object.entries(this.drones)) {
             this.publishFrom(`drone/${id}`, 'state', drone);
         }
+    }
+
+    reset() {
+        this.stop();
+        this.start();
+    }
+
+    //TODO remove function & remove topic from receive
+    test_init() {
+        this.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
     }
 
     moveDrones = () => {
@@ -84,9 +90,13 @@ module.exports = class DroneSimulator extends MQTTClient {
         super.receive(topic, message);
 
         if (this.matchTopic(topic, 'from/visualization/#')) {
-            if (['start', 'pause', 'resume', 'stop'].includes(topic.rest)) {
+            if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
+        }
+        //TODO remove
+        else if (this.matchTopic(topic, '+/+/+/test_init')) {
+            this.test_init();
         }
         else if (this.matchTopic(topic, 'to/drone/+/mission')) {
             this.drones[topic.id].setMission(message, this);
