@@ -161,6 +161,7 @@
         name: 'Simulation',
         data: function () {
             return {
+              isStarted: false,
               isPaused: true,
               command: {
                 message: {
@@ -183,15 +184,19 @@
         },
         methods: {
             publishStart: function() {
+              let topic = (!this.isStarted)? 'start': this.isPaused? 'resume': 'pause';
               this.isPaused = !this.isPaused;
-              //TODO wie schaut Pausiermechanismus aus??
-              this.$mqtt.publish('start');
+              this.isStarted = true;
+              this.$mqtt.publish(topic);
             },
             publishStop: function() {
               this.isPaused = true;
-              this.$mqtt.publish('stop');
+              this.isStarted = false;
+              this.$mqtt.publish('reset');  // TODO unterschied stopp / reset? --> löscht auch alle entitäten und pausiert auch?
             },
             publishReset: function() {
+              this.isPaused = true;
+               this.isStarted = false;
               this.$mqtt.publish('reset');
             },
             clickSendButton: function() {

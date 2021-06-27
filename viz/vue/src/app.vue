@@ -86,7 +86,7 @@
                                           <title>Bus {{id}}</title>
                                         </bus>
 
-
+                                        <!--TODO replace with component??-->
                                         <use v-for="(parcel, id) in lodash.pickBy(entities.parcels, (p, key) => p.cx !== null)"
                                              :key="id"
                                              :x="parcel.cx - parcel.width / 2"
@@ -265,6 +265,7 @@ export default {
         console.log("Subscribing to topics - VUE_CREATED ")
         this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
         this.$mqtt.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
+        this.$mqtt.subscribe('from/+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
         this.$mqtt.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
         this.$mqtt.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
         this.$mqtt.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
