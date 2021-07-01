@@ -35,6 +35,7 @@
     }
   },
   "devDependencies": {
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "vue-material-icon": "^1.0.1"
   }
 }

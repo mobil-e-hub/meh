@@ -19,11 +19,18 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
-// Icons
-// TODO: Include Material Design Icons
+// Icons - Material Design
+// import VueMaterial from 'vue-material';
+// import * as VueMaterial from 'vue-material/dist/vue-material.js';
+// import 'vue-material/dist/vue-material.min.css';
+// import 'vue-material/dist/theme/default.css';
+// Vue.use(VueMaterial)
+
+import VueMaterialIcon from 'vue-material-icon'
 
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
+Vue.component(VueMaterialIcon.name, VueMaterialIcon)
 
 // Setup
 Vue.config.productionTip = false;

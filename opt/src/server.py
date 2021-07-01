@@ -22,6 +22,14 @@ opt = OptimizationEngine(event_grid)
 
 
 # Endpoints
+@app.route('/')
+def base():
+    return '''This is the base url of the optimization engine.
+              <br>
+              <br> <b>/ping:</b> Health-Check
+              <br> <b>/ping/eventgrid:</b> Eventgrid Health-Check
+              <br> <b>/eventgrid:</b> Eventgrid interface'''
+
 @app.route('/ping')
 def ping():
     return { 'opt': 'pong' }
@@ -50,4 +58,4 @@ def eventgrid():
     finally:
         return ''
 
-app.run(port=port)
+app.run(port=port, use_reloader=True)

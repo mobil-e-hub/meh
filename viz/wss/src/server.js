@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
 
 
 // EventGrid client
-const eventGridClient = new EventGridPublisherClient(eventGridEndpoint, 'EventGrid', new AzureKeyCredential(eventGridKey));
+const eventGridClient = new EventGridPublisherClient(eventGridEndpoint, 'EventGrid', new AzureKeyCredential(String(eventGridKey)));
 
 
 // Receive events from EventGrid
