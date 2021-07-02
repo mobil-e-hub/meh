@@ -23,7 +23,7 @@
     "setup:opt:windows": "cd opt && npm run setup:windows",
     "setup:wss:windows": "cd viz\\wss && npm run setup:windows",
     "setup:vue:windows": "cd viz\\vue && npm run setup:windows",
-    "start:mqtt:windows": "npm run start:windows --prefix sim",
+    "start:mqtt:windows": "npm run start:windows --prefix mqtt",
     "start:sim:windows": "npm run start:windows --prefix sim",
     "start:opt:windows": "npm run start:windows --prefix opt",
     "start:wss:windows": "npm run start:windows --prefix viz/wss",
