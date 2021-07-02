@@ -3,3 +3,5 @@
 **/.env
 **/package-lock.json
 **/__pycache__/
+**.DS_Store
+.github/.DS_Store
