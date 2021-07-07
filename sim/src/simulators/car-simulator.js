@@ -73,6 +73,7 @@ module.exports = class CarSimulator extends MQTTClient {
     //TODO remove function & remove topic from receive
     test_init() {
         this.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
+        this.resume();
     }
 
     moveCars = () => {

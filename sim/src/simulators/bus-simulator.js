@@ -10,6 +10,7 @@ const topology = require('../../assets/topology');
 
 // TODO s:  - add change route
 //          - add abort mission
+//          - add test_init
 
 module.exports = class BusSimulator extends MQTTClient {
     constructor(numberOfBuses) {

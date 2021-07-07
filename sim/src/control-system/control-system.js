@@ -38,7 +38,7 @@ module.exports = class ControlSystem extends MQTTClient {
             // this.createDeliveryRoute(message);
         }
         if (this.matchTopic(topic, 'from/visualization/+/test')) {
-            //this.test(message);
+            // this.test(message);
             // this.findRoute(new Parcel('p00', 'h00', 'h01'));
         }
         if (this.matchTopic(topic, 'from/order/+/placed')) {
@@ -379,6 +379,7 @@ module.exports = class ControlSystem extends MQTTClient {
     }
 
     test(message) {
+        // TODO  missions not published currently (opt_engine should publish them!) -> uncomment
         this.hubSimulator.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07'), h02: new Hub('h02', 'n10') };
         this.droneSimulator.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
         this.carSimulator.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
@@ -462,11 +463,12 @@ module.exports = class ControlSystem extends MQTTClient {
         // this.busSimulator.resume();
         this.parcelSimulator.resume();
 
-        this.publishTo('hub/h00', 'mission', missions.m00);
-        this.publishTo('drone/d00', 'mission', missions.m01);
-        this.publishTo('drone/d01', 'mission', missions.m02);
-        this.publishTo('car/v00', 'mission', missions.m03);
-        this.publishTo('hub/h01', 'mission', missions.m04);
+        // TODO uncomment again
+    //     this.publishTo('hub/h00', 'mission', missions.m00);
+    //     this.publishTo('drone/d00', 'mission', missions.m01);
+    //     this.publishTo('drone/d01', 'mission', missions.m02);
+    //     this.publishTo('car/v00', 'mission', missions.m03);
+    //     this.publishTo('hub/h01', 'mission', missions.m04);
     }
 };
 

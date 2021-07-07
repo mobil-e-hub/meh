@@ -31,13 +31,14 @@ class TaskState(enum.Enum):
 
 # #################### Namedtuples ######################
 
-Hub = namedtuple('Hub', 'id position')
+Hub = namedtuple('Hub', 'id position transactions parcels')
 
-Drone = namedtuple('Drone', 'id position state')
+Drone = namedtuple('Drone', 'id position speed parcel state')
 
-Car = namedtuple('Car', 'id position state')
+Car = namedtuple('Car', 'id position speed parcel state')
 
-Bus = namedtuple('Bus', 'id position route state')
+Bus = namedtuple('Bus', 'id position capacity route nextStop missions activeMissions speed parcels activeTasks '
+                        'tasksAtStop arrivalTimeAtStop state')  # TODO just state instead of all the other stuff??
 
 # TODO auch parcel?? updates --> several Carrier changes necessary , but
 Parcel = namedtuple('Parcel', 'id carrier destination')

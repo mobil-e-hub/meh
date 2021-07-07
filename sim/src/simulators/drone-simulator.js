@@ -76,6 +76,7 @@ module.exports = class DroneSimulator extends MQTTClient {
     //TODO remove function & remove topic from receive
     test_init() {
         this.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
+        this.resume(); //side-effect: also starts app -> sets timer!
     }
 
     moveDrones = () => {

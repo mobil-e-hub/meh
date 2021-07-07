@@ -44,7 +44,8 @@ class OptimizationEngine(MQTTClient):
             vehicle, v_type = self._assign_vehicle(route.road)  # v_type is 'car' or 'bus'
             drone2 = self._assign_drone(route.air2)
 
-            logging.debug(f"< [{self.client_name}] - Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
+            logging.debug(
+                f"< [{self.client_name}] - Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
             # TODO if 1 return is None send a failed mission to visualization instead of publishing missions...
             self.create_and_start_mission(parcel, drone1, vehicle, v_type, drone2, route)
 
@@ -147,7 +148,8 @@ class OptimizationEngine(MQTTClient):
             optimal_vehicle = optimal_bus
             vehicle_type = "bus"
 
-        logging.info(f"[{self.client_name}] - Assigned Ground vehicle to route: {route} -> {vehicle_type}/{optimal_vehicle}")
+        logging.info(
+            f"[{self.client_name}] - Assigned Ground vehicle to route: {route} -> {vehicle_type}/{optimal_vehicle}")
 
         return optimal_vehicle, vehicle_type
 
@@ -382,42 +384,46 @@ class OptimizationEngine(MQTTClient):
         """ inits several hubs, drones, vehicles and parcels to allow for some basic testing until
         data exchange with to control-system is ready (MQTT or AzureEG (?))"""
 
-        self.hubs['h00'] = Hub(id='h00', position='n05')
-        self.hubs['h01'] = Hub(id='h01', position='n07')
-        self.hubs['h02'] = Hub(id='h02', position='n11')
+        # tell other modules to load this init setup as well
+        self.test_send_init()
+
+        self.hubs['h00'] = Hub(id='h00', position='n05', transactions={}, parcels={})
+        self.hubs['h01'] = Hub(id='h01', position='n07', transactions={}, parcels={})
+        self.hubs['h02'] = Hub(id='h02', position='n11', transactions={}, parcels={})
 
         # TODO also position as named tuple?
-        self.drones['d00'] = Drone(id='d00', position={'x': -50, 'y': 60, 'z': 0}, state=DroneState.IDLE)
-        self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, state=DroneState.IDLE)
-        self.drones['d02'] = Drone(id='d02', position={'x': 60, 'y': 0, 'z': 0}, state=DroneState.IDLE)
+        self.drones['d00'] = Drone(id='d00', position={'x': -50, 'y': 60, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
+        self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
+        self.drones['d02'] = Drone(id='d02', position={'x': 60, 'y': 0, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
 
-        self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, state=VehicleState.IDLE)
+        self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
 
-        self.buses['v01'] = Bus(id='v00', position={'x': 50, 'y': 50, 'z': 0},
-                                # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
-                                #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
-                                route=[{'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},
-                                       {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2},
-                                       {'node': 'n03', 'time': 10}],
-                                state=VehicleState.MOVING)
+        # self.buses['v01'] = Bus(id='v00', position={'x': 50, 'y': 50, 'z': 0}, capacity=3,
+        #                         # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
+        #                         #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
+        #                         route=[{'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},
+        #                                {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2},
+        #                                {'node': 'n03', 'time': 10}],
+        #                         nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
+        #                         tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)
 
         self.parcels['p00'] = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
                                      destination={'type': 'hub', 'id': 'h01'})
 
+
     def test_send_init(self):
+        # TODO add bus, once enough per entitiy type --> triggers init for all
         self.publish_to('hub/h00', 'test_init', {})
         self.publish_to('drone/d00', 'test_init', {})
-        self.publish_to('drone/d01', 'test_init', {})
+        # self.publish_to('drone/d01', 'test_init', {})
         self.publish_to('car/v00', 'test_init', {})
-        self.publish_to('hub/h01', 'test_init', {})
+        # self.publish_to('hub/h01', 'test_init', {})
         self.publish_to('parcel/p00', 'test_init', {})
 
     def test(self):
         """ temporary function for testing durign development process. """
-        self.test_send_init()
-        self.test_init()
 
-        # time.sleep(500)
+        self.test_init()
 
         transactions = {
             't00': {
@@ -533,7 +539,7 @@ class OptimizationEngine(MQTTClient):
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/state/#", self.on_message_state)
 
         # entity: connect updates #difference to state update???
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/connected/#", self.on_message_state)
+        # self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/connected/#", self.on_message_state) # Sent from simulators, not the models
 
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/placed/#", self.on_message_placed)
 
@@ -549,14 +555,14 @@ class OptimizationEngine(MQTTClient):
 
     # TODO remove
     def on_message_test(self, client, userdata, msg):
-        logging.warn(f"!!! OPT: TEST MSG received -> {msg.topic}: {msg.payload} !!!") #TODO remove
-        # self.test_init()
+        print(f"!!! OPT: TEST MSG received -> {msg.topic}: {msg.payload} !!!")  # TODO remove
+        self.test_init()
         self.test()
 
     def on_message_state(self, client, userdata, msg):
         # TODO add to the respective dict
         [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
-        self.update_state(entity, id_, msg.payload)
+        self.update_state(entity, id_, json.loads(str(msg.payload.decode("utf-8", "ignore"))))
         logging.debug(f"[{self.client_name}] - Updated state of {entity}/{id_}: {msg.payload}")
 
     def on_message_parcel_delivered(self, client, userdata, msg):
@@ -596,18 +602,51 @@ class OptimizationEngine(MQTTClient):
         """ finds entity in corresponding dictionary and updates the named_tuple describing its state"""
         if entity == 'hub':
             new_state = state  # TODO parse json state / string
-            self.hubs.update({id_: new_state})
+            self.update_hub(id_, state)
         elif entity == 'drone':
             new_state = state  # TODO parse json state / string
-            self.drones.update({id_: new_state})
+            self.update_drone(id_, state)
         elif entity == 'car':
             new_state = state  # TODO parse json state / string
-            self.cars.update({id_: new_state})
+            self.update_car(id_, state)
         elif entity == 'bus':
             new_state = state  # TODO parse json state / string
-            self.buses.update({id_: new_state})
+            self.update_bus(id_, state)
         elif entity == 'parcel':
             new_state = state  # TODO parse json state / string
-            self.parcels.update({id_: new_state})
+            self.update_parcel(id_, state)
         else:
-            logging.info(f"< [{self.client_name}] - Could not match entity {entity}/{id_}:  {state}") #TODO change to warn
+            logging.info(
+                f"< [{self.client_name}] - Could not match entity {entity}/{id_}:  {state}")  # TODO change to warn
+
+    def update_hub(self, id_, state):
+        logging.warn(f"!!!!!!!!!! UPDATE HUB: --> id:{id_} --> {state} !!!")
+        hub = Hub(id=state['id'], position=state['position'], transactions=state['transactions'],
+                  parcels=state['parcels'])
+        self.hubs[id_] = hub
+        print(self.hubs)
+
+    def update_drone(self, id_, state):
+        logging.warn(f"!!!!!!!!!! UPDATE DRONE: --> id:{id_} --> {state} !!!")
+        drone = Drone(id=state['id'], position=state['position'], speed=state['speed'], parcel=state['parcel'],
+                      state=state['state'])
+        self.drones[id_] = drone
+
+    def update_car(self, id_, state):
+        logging.warn(f"!!!!!!!!!! UPDATE CAR: --> id:{id_} --> {state} !!!")
+        car = Car(id=state['id'], position=state['position'], speed=state['speed'], parcel=state['parcel'],
+                  state=state['state'])
+        self.cars[id_] = car
+
+    def update_bus(self, id_, state):
+        logging.warn(f"!!!!!!!!!! UPDATE BUS: --> id:{id_} --> {state} !!!")
+        bus = Bus(id=state['id'], position=state['position'], capacity=['capacity'], route=['route'],
+                  nextStop=['nextStop'], missions=['missions'], activeMissions=['activeMissions'], speed=['speed'],
+                  parcels=state["parcels"], activeTasks=['activeTasks'], tasksAtStop=['tasksAtStop'],
+                  arrivalTimeAtStop=['arrivalTimeAtStop'], state=[''])
+        self.buses[id_] = bus
+
+    def update_parcel(self, id_, state):
+        logging.warn(f"!!!!!!!!!! UPDATE PARCEL: --> id:{id_} --> {state} !!!")
+        parcel = Parcel(id=state['id'], carrier=state['carrier'], destination=state['destination'])
+        self.parcels[id_] = parcel

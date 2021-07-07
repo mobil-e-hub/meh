@@ -139,6 +139,11 @@ class Drone {
     }
 
     completeTask(simulator) {
+        // TODO: only called when parcel dropped off successfully?
+        if (this.mission.tasks[0].type === 'dropoff') {
+             this.parcel = null;
+        }
+
         this.mission.tasks.splice(0, 1);
 
         if (this.mission.tasks.length === 0) {

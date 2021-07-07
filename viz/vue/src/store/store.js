@@ -46,17 +46,24 @@ export default new Vuex.Store({
                     drone: 5,
                     car: 10,
                     bus: 20,
-                    parcel: 12,
+                    parcel: 4,
                     node: 2,
                     edge: 1,
                     address: 7
                 }
             },
             sideMenuVisible: false,
+        },
+        statistics: {
+            foo: "bar"  //TODO store stuff for stats here
         }
     },
     getters: {
-
+        numberOfHubs: state => Object.keys(state.entities.hubs).length,
+        numberOfDrones: state => Object.keys(state.entities.drones).length,
+        numberOfCars: state => Object.keys(state.entities.cars).length,
+        numberOfBuses: state => Object.keys(state.entities.buses).length,
+        numberOfParcels: state => Object.keys(state.entities.parcels).length,
     },
     mutations: {
         updateEntityState(state, { type, id, payload }) {
