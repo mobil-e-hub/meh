@@ -34,6 +34,7 @@
                             <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
+
                         <b-button variant="link" title="Zoom in" @click="$store.commit('mapZoom', { factor: 1.25 })">
                             <b-icon icon="zoom-in" aria-hidden="true"></b-icon>
                         </b-button>
@@ -53,7 +54,8 @@
             <b-row class="pt-4">
                 <!--Map view-->
                 <b-col :cols="view === 'none' ? 12 : 9" class="bg-white">
-<!--                    <div>-->
+
+
                         <!-- Sidebar Menu-->
                         <SideMenu v-if="$store.state.settings.sideMenuVisible"></SideMenu>
 
@@ -69,46 +71,20 @@
 
                                         <!--Content-->
                                         <!--Static content (hubs, addresses)-->
-                                        <hub v-for="(hub, id) in $store.state.entities.hubs" :key="id" :id="id"></hub>
-
+                                        <hub v-for="(hub, id) in this.$store.state.entities.hubs" :key="id" :id="id"></hub>
+                                        <address v-for="(address, id) in this.$store.state.entities.addresses" :key="id" :id="id"></address>
 <!--                                        <use v-for="(address, id) in map.topology.addresses" :key="id" :x="address.position.x - entitySize.car" :y="-address.position.y - entitySize.car" :width="2 * entitySize.car" :height="2 * entitySize.car" :href="require('../../assets/entities.svg') + '#address-symbol'" fill="purple" transform="scale(1, -1)">-->
 <!--                                            <title>Address {{ address.id }} ({{ address.name }})</title>-->
 <!--                                        </use>-->
 
                                         <!--Dynamic content (cars, drones, parcels-->
-                                        <use v-for="(car, id) in entities.cars"
-                                             :key="id"
-                                             :x="car.cx - car.width / 2"
-                                             :y="car.cy - car.height / 2"
-                                             :width="car.width"
-                                             :height="car.height"
-                                             :fill="car.fill"
-                                             :href="require('../assets/entities.svg') + '#car-symbol'"
-                                             transform="scale(1, -1)"
-                                        >
-                                            <title>Car {{ id }} ({{ car.state }})</title>
-                                        </use>
+                                        <drone v-for="(drone, id) in this.$store.state.entities.drones" :key="id" :id="id" />
 
+                                        <car v-for="(car, id) in this.$store.state.entities.cars" :key="id" :id="id" />
 
-                                        <use v-for="(bus, id) in entities.buss" :key="id" :x="bus.position.x -  entitySize.bus + 2" :y="-bus.position.y - entitySize.bus + 3" :width="2 * entitySize.bus" :height="2 * entitySize.bus" :href="require('../assets/entities.svg') + '#bus-symbol'" fill="blue" transform="scale(1, -1)">
-<!--                                                    TODO add loaded parcels / capacity?-->
-                                            <title>Bus {{ bus.id }} ({{ bus.state }})</title>
-                                        </use>
-
-                                        <drone v-for="(drone, id) in $store.state.entities.drones" :key="id" :id="id" />
-
-                                        <use v-for="(parcel, id) in lodash.pickBy(entities.parcels, (p, key) => p.cx !== null)"
-                                             :key="id"
-                                             :x="parcel.cx - parcel.width / 2"
-                                             :y="parcel.cy - parcel.height / 2"
-                                             :width="parcel.width"
-                                             :height="parcel.height"
-                                             :fill="parcel.fill"
-                                             :href="require('../assets/entities.svg') + '#parcel-symbol'"
-                                             transform="scale(1, -1)"
-                                             v-b-popover.hover.right="`Parcel ${id} (Source: ${parcel.carrier.id}, Destination: ${parcel.destination.id})`"
-                                             title="Parcel details">
-                                        </use>
+                                        <bus v-for="(bus, id) in this.$store.state.entities.buses" :key="id" :id="id" >
+                                          <title>Bus {{id}}</title>
+                                        </bus>
                                     </svg>
 <!--                                </b-col>-->
 
@@ -140,34 +116,35 @@
                 <b-nav-text v-if="listening" class="mx-3 pr-5" >{{incomingMessageCounter}}      </b-nav-text>
 
                 <b-nav-text class="mx-2 pl-2" title="Number of hubs">
-                  <vue-material-icon class="mt-4" name="home"  :size="24" :color="gray"/>
+                  <vue-material-icon class="mt-4" name="home"  :size="24" />
 <!--                    <font-awesome-icon icon="warehouse" style="color: gray" />:-->
-                   : {{Object.keys(entities.hubs).length }}
+                   : {{numberOfHubs}}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of drones">
-                    <vue-material-icon class="red-text" name="flight"  :size="24" style="color: red" :color="red"/>
+                    <vue-material-icon class="red-text" name="flight" :size="24" style="color: red" />
 <!--                    <font-awesome-icon icon="plane" style="color: red" />-->
-                  : {{Object.keys(entities.drones).length }}
+                  : {{numberOfDrones}}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of cars">
-                  <vue-material-icon name="directions_car"  :size="24" :color="blue"/>
+                  <vue-material-icon name="directions_car"  :size="24" />
 <!--                    <font-awesome-icon icon="car" style="color: blue" />-->
-                  : {{Object.keys(entities.cars).length }}
+                  : {{numberOfCars}}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of busses">
-                  <vue-material-icon name="directions_bus"  :size="24" :color="blue"/>
+
+                  <vue-material-icon name="directions_bus"  :size="24" />
 <!--                    <font-awesome-icon class="icon-red" icon="bus" style="color: blue" />-->
-                  : {{ Object.keys(entities.buss).length }}
+                  : {{numberOfBuses}}
                 </b-nav-text>
 
                 <b-nav-text class="mx-3" title="Number of parcels">
                   <!--                  // better: inventory_2 (parcel box)  &ndash;&gt; didn't  work-->
-                  <vue-material-icon name="mail"  :size="24" :color="green"/>
+                  <vue-material-icon name="mail"  :size="24" />
 <!--                    <font-awesome-icon icon="archive" style="color: green" />-->
-                  : {{Object.keys(entities.parcels).length }}
+                  : {{numberOfParcels}}
                 </b-nav-text>
             </b-navbar-nav>
 
@@ -197,6 +174,8 @@
 <script>
 const _ = require('lodash');
 
+import { mapGetters } from 'vuex'
+
 import Messages from './components/Messages';
 import Entities from './components/Entities';
 import Settings from './components/Settings';
@@ -217,23 +196,10 @@ export default {
         return {
             lodash: _,
             listening: true,
-            view: 'none',
+            view: 'simulation',
             messages: {
                 messages: [],
                 counterInterval: 10
-            },
-            entities: {
-                raw: {
-                    drones: { },
-                    cars: { },
-                    parcels: { },
-                    hubs: { }
-                },
-                drones: { },
-                cars: { },
-                buss: {},   //plural busses breaks mqtt topic matching TODO
-                parcels: { },
-                hubs: { }
             },
             map: {
                 drag: {
@@ -244,7 +210,7 @@ export default {
             },
             display: {
                 areToastsEnabled: true,
-                enabledToastTypes: ['status'],
+                enabledToastTypes: ['status', 'routing'],
             },
             stats: {
                 waitingDrones:0,
@@ -264,22 +230,25 @@ export default {
         Edge,
         Hub,
         Drone,
-        // Car,
-        // Bus,
+        Car,
+        Bus,
         // Address
     },
     created: function() {
         // Subscribe to all relevant topics
-        this.$eventGrid.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
-        this.$eventGrid.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
-        this.$eventGrid.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
-        this.$eventGrid.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
-        this.$eventGrid.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
-        this.$eventGrid.subscribe('from/car/+/arrived', (topic, message) => this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`));
-        this.$eventGrid.subscribe('from/+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
-        this.$eventGrid.subscribe('from/+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
-        this.$eventGrid.subscribe('from/parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
-        this.$eventGrid.subscribe('to/visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
+        console.log("Subscribing to topics - VUE_CREATED ")
+        this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
+        this.$mqtt.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
+        this.$mqtt.subscribe('from/+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
+        this.$mqtt.subscribe('from/+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
+        this.$mqtt.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
+        this.$mqtt.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
+        this.$mqtt.subscribe('from/car/+/arrived', (topic, message) => this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`));
+        this.$mqtt.subscribe('from/+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
+        this.$mqtt.subscribe('from/+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
+        this.$mqtt.subscribe('from/parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('to/visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },
     mounted: function() {
         // Update incoming message counter regularly
@@ -334,7 +303,15 @@ export default {
         incomingMessageCounter: function() {
             const count = this.messages.messages.reduce(((n, m) => n + (this.currentTime - m.timestamp <= this.messages.counterInterval * 1000 ? 1 : 0)), 0);
             return count > 0 ? `${count / this.messages.counterInterval} messages per second` : 'No messages incoming';
-        }
+        },
+        ...mapGetters([
+            'numberOfHubs',
+            'numberOfDrones',
+            'numberOfCars',
+            'numberOfBuses',
+            'numberOfParcels',
+            // TODO add
+        ])
     }
 }
 </script>

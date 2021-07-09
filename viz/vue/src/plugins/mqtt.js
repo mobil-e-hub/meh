@@ -12,13 +12,17 @@ export default {
         const id = uuid();
         const client = mqtt.connect(options.broker);
         const subscriptions = {};
+        console.log(`Vue-app: ATTEMPT: connected to broker ${options.broker} with root ${options.root}.`)
         client.on('connect', () => {
+            console.log(`Vue-app: connected to broker ${options.broker} with root ${options.root}.`)
             client.subscribe(`${options.root}/#`);
         });
         client.on('message', (topic, message) => {
             let [project, version, direction, entity, id, ...args] = topic.split('/');
             topic = { version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } };
             message = JSON.parse(message.toString());
+
+            console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short}.`)
 
             for (const [pattern, handler] of Object.entries(subscriptions)) {
                 if (mqttMatch(pattern, topic.string.short)) {

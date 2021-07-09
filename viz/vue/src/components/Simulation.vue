@@ -120,17 +120,17 @@
                         <tbody>
                         <tr>
                             <td>Drones</td>
-                              <td> _x / {{$store.state.entities.drones.length }}</td>
+                              <td> _x / {{numberOfDrones}}</td>
                             <td>_10 min</td>
                         </tr>
                         <tr>
                             <td>Cars</td>
-                              <td> _x / {{$store.state.entities.cars.length }}</td>
+                              <td> _x / {{numberOfCars}}</td>
                             <td>_20 min</td>
                         </tr>
                         <tr>
                             <td>Buses</td>
-                              <td> _x / {{$store.state.entities.buses.length }}</td>
+                              <td> _x / {{numberOfBuses}}</td>
                             <td>_50 min</td>
                         </tr>
                         <tr>
@@ -138,14 +138,14 @@
                                 Parcel
                                 <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
                             </td>
-                              <td> _{{$store.state.entities.parcels.length }} </td>
+                              <td> _{{numberOfParcels}} </td>
                             <td>_42 min</td>
                         </tr>
                         <tr>
                             <td>Parcel
                                 <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>
                             </td>
-                              <td> _{{$store.state.entities.parcels.length }} </td>
+                              <td> _{{numberOfParcels}} </td>
                             <td>_2 h</td>
                         </tr>
                         </tbody>
@@ -156,60 +156,77 @@
     </div>
 </template>
 
+
+
 <script>
-    export default {
-        name: 'Simulation',
-        data: function () {
-            return {
-              isPaused: true,
-              command: {
-                message: {
-                  topic: null,
-                  message: null,
-                  sender: null
-                },
-                order: {
-                  vendor: null,
-                  customer: null,
-                  pickup: null,
-                  dropoff: null
-                }
-              },
+import { mapGetters } from 'vuex'
 
+export default {
+    name: 'Simulation',
+    data: function () {
+        return {
+          isStarted: false,
+          isPaused: true,
+          command: {
+            message: {
+              topic: null,
+              message: null,
+              sender: null
+            },
+            order: {
+              vendor: null,
+              customer: null,
+              pickup: null,
+              dropoff: null
             }
-        },
-        computed: {
-
-        },
-        methods: {
-            publishStart: function() {
-              this.isPaused = !this.isPaused;
-              //TODO wie schaut Pausiermechanismus aus??
-              this.$eventGrid.publish('start');
-            },
-            publishStop: function() {
-              this.isPaused = true;
-              this.$eventGrid.publish('stop');
-            },
-            publishReset: function() {
-              this.$eventGrid.publish('reset');
-            },
-            clickSendButton: function() {
-              this.$eventGrid.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
-            },
-            clickTestButton: function() {
-              this.$eventGrid.publish('bla', 'hello');
-            },
-            clickPlaceOrderButton: function() {
-              this.$eventGrid.publish('place-order', {
-                id: this.$uuid(),
-                vendor: { type: 'customer', id: this.command.order.vendor },
-                customer: { type: 'customer', id: this.command.order.customer },
-                pickup: this.command.order.pickup,
-                dropoff: this.command.order.dropoff
-              });
           },
-        },
 
-    }
+        }
+    },
+    computed: {
+      ...mapGetters([
+            'numberOfHubs',
+            'numberOfDrones',
+            'numberOfCars',
+            'numberOfBuses',
+            'numberOfParcels',
+        ])
+    },
+    methods: {
+        publishStart: function() {
+          let topic = (!this.isStarted)? 'start': this.isPaused? 'resume': 'pause';
+          this.isPaused = !this.isPaused;
+          this.isStarted = true;
+          this.$mqtt.publish(topic);
+        },
+        publishStop: function() {
+          this.isPaused = true;
+          this.isStarted = false;
+          this.$mqtt.publish('stop');  // TODO unterschied stopp / reset? --> löscht auch alle entitäten und pausiert auch?
+        },
+        publishReset: function() {
+          this.isPaused = true;
+           this.isStarted = false;
+          this.$mqtt.publish('reset');
+        },
+        clickSendButton: function() {
+          this.$mqtt.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
+        },
+        clickTestButton: function() {
+          // this.publishStop();
+
+          this.$mqtt.publish('test', {} );
+        },
+        clickPlaceOrderButton: function() {
+          this.$mqtt.publish('place-order', {
+            id: this.$uuid(),
+            vendor: { type: 'customer', id: this.command.order.vendor },
+            customer: { type: 'customer', id: this.command.order.customer },
+            pickup: this.command.order.pickup,
+            dropoff: this.command.order.dropoff
+          });
+      },
+    },
+
+}
 </script>

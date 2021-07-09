@@ -20,11 +20,11 @@ class EventGrid:
         self.client = EventGridPublisherClient(event_grid_endpoint, AzureKeyCredential(event_grid_key))
 
     def publish(self, topic, message=''):
-       try:
+        try:
             print(f'event_grid.publish({topic}, {message})')
             event = EventGridEvent(data=message, subject=topic, event_type="mobil-e-hub", data_version="1.0")
             self.client.send(event)
-       except Error as err:
+        except Exception as err:
             print(err)
 
     def receive(self, event):
@@ -32,7 +32,7 @@ class EventGrid:
         topic = event['subject']
         message = event['data']
         entity, id, *args = topic.split('/')
-        topic = { 'entity': entity, 'id': id, 'args': args, 'rest': '/'.join(args), 'string': topic }
+        topic = {'entity': entity, 'id': id, 'args': args, 'rest': '/'.join(args), 'string': topic}
 
         print(f'> (opt) {topic["string"]}: {message}')
 
@@ -63,6 +63,6 @@ def match_topic(pattern, topic):
         if left == '#':
             return len(topic_list) >= len(pattern_list) - 1
         elif left != '+' and left != right:
-            return false
+            return False
 
     return len(pattern_list) == len(topic_list)
