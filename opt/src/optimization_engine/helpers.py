@@ -20,8 +20,6 @@ def load_topology(path):
 
     for node in nodes:  # add attribute values
         g.nodes[node]["id"] = nodes[node]["id"]
-        # g.nodes[node]["position"] = (nodes[node]["position"]["x"], nodes[node]["position"]["y"],
-        #                              nodes[node]["position"]["z"])  # TODO position as tuple ??
         g.nodes[node]["position"] = nodes[node]["position"]
         g.nodes[node]["type"] = nodes[node]["type"]
 
@@ -43,11 +41,6 @@ def load_mapping(path):
                    key for key, value in nodes.items()}
 
     return mapping
-
-
-# TODO not needed?
-# def position_dict2tuple(pos_dict):
-#     return (pos_dict['x'], pos_dict['y'], pos_dict['z'])
 
 
 def backtrack_shortest_path(predecessors, start, end, distance):

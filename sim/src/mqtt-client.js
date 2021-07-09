@@ -9,8 +9,6 @@ const mqttBrokerURL = process.env.MQTT_BROKER_test;
 const mqttPort = process.env.BROKER_PORT_test;
 const mqttRoot = process.env.MQTT_ROOT;
 
-// TODO used in the simulators, but not on the server??
-
 module.exports = class MQTTClient {
     constructor(type, subscriptionTopics) {
         this.type = type;

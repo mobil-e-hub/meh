@@ -46,18 +46,7 @@ class MQTTClient:
         print(f" > {self.client_name}: Setting up connection - broker: {self.MQTT_BROKER} on port: {self.MQTT_PORT}.")
         self.client.connect(self.MQTT_BROKER, self.MQTT_PORT)
 
-        # TODO how to do this?
-        # self.client.loop_forever()  # on this thread -> blocked -> problem??
-        self.client.loop_start()  # starts new thread -> while loop necessary to keep running -> TODO seems to work!!
-        # # or:
-        # while True:
-        #     pass                      # server could do stuff here...
-        # time.sleep(20)
-        # print("LOOP started")     # option if many clients need to run in parallel -> call loop() often by hand
-        # rc = 0
-        # while rc == 0:
-        #     rc = self.client.loop()
-        # return rc
+        self.client.loop_start()  # starts new thread
 
     def terminate(self):  # TODO when to call this one??
         time.sleep(1)
@@ -131,9 +120,3 @@ class MQTTClient:
     def on_unsubscribe(self):
         logging.debug(f"[{self.client_name}] - Unsubscription successful")
 
-    # TODO remove
-    def change_client_name(self, name):
-        """ONLY used for testing in development: allows to start second parallel MQTT client on machine
-        for testing pub/rec. To avoid conflict with loaded client name from .dotenv --> use this function"""
-        self.client_name = name
-        self.client = mqtt.Client(self.client_name, transport='websockets')

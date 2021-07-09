@@ -8,7 +8,6 @@ const {v4: uuid} = require('uuid');
 // Own modules
 import store from './store/store';
 import uuidPlugin from './plugins/uuid';
-// import eventGridPlugin from './plugins/eventgrid';
 import mqttPlugin from './plugins/mqtt';
 
 // Environment variables
@@ -22,13 +21,6 @@ const mqttRoot = process.env.MQTT_ROOT;
 import {BootstrapVue, IconsPlugin} from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
-
-// Icons - Material Design
-// import VueMaterial from 'vue-material';
-// import * as VueMaterial from 'vue-material/dist/vue-material.js';
-// import 'vue-material/dist/vue-material.min.css';
-// import 'vue-material/dist/theme/default.css';
-// Vue.use(VueMaterial)
 
 import VueMaterialIcon from 'vue-material-icon'
 

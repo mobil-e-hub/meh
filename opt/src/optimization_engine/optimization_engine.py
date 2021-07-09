@@ -421,7 +421,8 @@ class OptimizationEngine(MQTTClient):
         self.publish_to('parcel/p00', 'test_init', {})
 
     def test(self):
-        """ temporary function for testing durign development process. """
+        """ temporary function for testing during development process.
+            --> hard coded missions to check execution by simulated entities"""
 
         self.test_init()
 
@@ -557,7 +558,8 @@ class OptimizationEngine(MQTTClient):
     def on_message_test(self, client, userdata, msg):
         print(f"!!! OPT: TEST MSG received -> {msg.topic}: {msg.payload} !!!")  # TODO remove
         self.test_init()
-        self.test()
+        self.test()  # hard coded missions to check if execution works
+        # self.find_route(self.parcels['p00'])
 
     def on_message_state(self, client, userdata, msg):
         # TODO add to the respective dict
@@ -581,14 +583,6 @@ class OptimizationEngine(MQTTClient):
         else:
             logging.warn(f"[{self.client_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
-
-    # def on_message_split(self, client, userdata, msg):
-    #     split = self.split_topic(msg.topic)
-    #     print("Splitting test LETS GOO!!!")
-    #     for s in split:
-    #         print(s)
-    #     print("MESSAGE: ")
-    #     print(msg.payload)
 
     def split_topic(self, topic: str) -> List[str]:
         """splits received MQTT topic into several string values for further processing"""

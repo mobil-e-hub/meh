@@ -40,7 +40,6 @@ Car = namedtuple('Car', 'id position speed parcel state')
 Bus = namedtuple('Bus', 'id position capacity route nextStop missions activeMissions speed parcels activeTasks '
                         'tasksAtStop arrivalTimeAtStop state')  # TODO just state instead of all the other stuff??
 
-# TODO auch parcel?? updates --> several Carrier changes necessary , but
 Parcel = namedtuple('Parcel', 'id carrier destination')
 
 Route = namedtuple('Route', 'distance path')
