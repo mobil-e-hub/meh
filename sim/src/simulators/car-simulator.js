@@ -117,4 +117,9 @@ module.exports = class CarSimulator extends MQTTClient {
     getIdleCars() {
         return Object.fromEntries(Object.entries(this.cars).filter(d => d[1]['state'] === 0))
     }
+
+    updateCarState(id) {
+        let car = this.cars[id];
+        this.publishFrom(`car/${id}`, 'state', car);
+    }
 };

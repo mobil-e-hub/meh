@@ -620,26 +620,26 @@ class OptimizationEngine(MQTTClient):
                 f"< [{self.client_name}] - Could not match entity {entity}/{id_}:  {state}")  # TODO change to warn
 
     def update_hub(self, id_, state):
-        logging.warn(f"!!!!!!!!!! UPDATE HUB: --> id:{id_} --> {state} !!!")
+        # logging.warn(f"!!!!!!!!!! UPDATE HUB: --> id:{id_} --> {state} !!!")
         hub = Hub(id=state['id'], position=state['position'], transactions=state['transactions'],
                   parcels=state['parcels'])
         self.hubs[id_] = hub
         print(self.hubs)
 
     def update_drone(self, id_, state):
-        logging.warn(f"!!!!!!!!!! UPDATE DRONE: --> id:{id_} --> {state} !!!")
+        # logging.warn(f"!!!!!!!!!! UPDATE DRONE: --> id:{id_} --> {state} !!!")
         drone = Drone(id=state['id'], position=state['position'], speed=state['speed'], parcel=state['parcel'],
                       state=state['state'])
         self.drones[id_] = drone
 
     def update_car(self, id_, state):
-        logging.warn(f"!!!!!!!!!! UPDATE CAR: --> id:{id_} --> {state} !!!")
+        # logging.warn(f"!!!!!!!!!! UPDATE CAR: --> id:{id_} --> {state} !!!")
         car = Car(id=state['id'], position=state['position'], speed=state['speed'], parcel=state['parcel'],
                   state=state['state'])
         self.cars[id_] = car
 
     def update_bus(self, id_, state):
-        logging.warn(f"!!!!!!!!!! UPDATE BUS: --> id:{id_} --> {state} !!!")
+        # logging.warn(f"!!!!!!!!!! UPDATE BUS: --> id:{id_} --> {state} !!!")
         bus = Bus(id=state['id'], position=state['position'], capacity=['capacity'], route=['route'],
                   nextStop=['nextStop'], missions=['missions'], activeMissions=['activeMissions'], speed=['speed'],
                   parcels=state["parcels"], activeTasks=['activeTasks'], tasksAtStop=['tasksAtStop'],
@@ -647,6 +647,6 @@ class OptimizationEngine(MQTTClient):
         self.buses[id_] = bus
 
     def update_parcel(self, id_, state):
-        logging.warn(f"!!!!!!!!!! UPDATE PARCEL: --> id:{id_} --> {state} !!!")
+        # logging.warn(f"!!!!!!!!!! UPDATE PARCEL: --> id:{id_} --> {state} !!!")
         parcel = Parcel(id=state['id'], carrier=state['carrier'], destination=state['destination'])
         self.parcels[id_] = parcel

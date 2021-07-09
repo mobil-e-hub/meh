@@ -81,14 +81,14 @@ module.exports = class HubSimulator extends MQTTClient {
         } else if (this.matchTopic(topic, 'to/hub/+/transaction/+/execute')) {
             // This message is only received if the hub is the transaction's "to" instance and has already sent the "ready" message
             let hub = this.hubs[topic.id];
-            let transaction = hub.transactions[topic.args[1]];  // TODO rename back to transaction
-            console.log(transaction);
-            console.log("topic: " +  topic.args[1]);
-            hub.parcels[transaction.parcel] = transaction.parcel;
+            let transaction = hub.transactions[topic.args[1]];
+            // console.log(transaction);
+            // console.log("topic: " +  topic.args[1]);
+            hub.parcels[transaction.parcel] = transaction.parcel; // TODO sometimes: execute received again before complete send to the giving entity -> nullpointer...
             this.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
             delete hub.transactions[topic.args[1]];
 
-            this.publishFrom(`hub/${hub.id}`, 'state', hub);        // TODO check if transaction is removed!!
+            this.publishFrom(`hub/${hub.id}`, 'state', hub);
         } else if (this.matchTopic(topic, 'to/hub/+/transaction/+/complete')) {
             // This message is only received if the hub is the transaction's "from" instance and has already sent the "execute" message
             let hub = this.hubs[topic.id];

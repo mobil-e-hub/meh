@@ -154,6 +154,7 @@ class Car {
         else {
             this.startTask(simulator);
         }
+        simulator.updateCarState(this.id);
     }
 }
 

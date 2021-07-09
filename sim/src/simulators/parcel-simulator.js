@@ -3,7 +3,7 @@ const _ = require('lodash');
 
 // Internal modules
 const MQTTClient = require('../mqtt-client');
-const { random, uuid } = require('../helpers');
+const {random, uuid} = require('../helpers');
 const Parcel = require('../models/parcel');
 
 module.exports = class ParcelSimulator extends MQTTClient {
@@ -21,12 +21,12 @@ module.exports = class ParcelSimulator extends MQTTClient {
     }
 
     stop() {
-        this.parcels = { p00: new Parcel('p00', { type: 'hub', id: 'h00' }, { type: 'hub', id: 'h01' }) };
+        this.parcels = {p00: new Parcel('p00', {type: 'hub', id: 'h00'}, {type: 'hub', id: 'h01'})};
     }
 
     //TODO remove function & remove topic from receive
     test_init() {
-        this.parcels = { p00: new Parcel('p00', { type: 'hub', id: 'h00' }, { type: 'hub', id: 'h01' }) };
+        this.parcels = {p00: new Parcel('p00', {type: 'hub', id: 'h00'}, {type: 'hub', id: 'h01'})};
     }
 
     receive(topic, message) {
@@ -35,18 +35,14 @@ module.exports = class ParcelSimulator extends MQTTClient {
         //TODO remove
         if (this.matchTopic(topic, '+/+/+/test_init')) {
             this.test_init();
-        }
-
-        else if (topic.direction === 'from') {
+        } else if (topic.direction === 'from') {
             if (topic.entity === 'visualization') {
                 if (topic.rest === 'stop') {
                     this.stop();
-                }
-                else if (topic.rest === 'place-order') {
+                } else if (topic.rest === 'place-order') {
                     let id = uuid();
                     this.publishFrom(`order/${id}`, 'placed');
-                }
-                else if (topic.rest === 'place-parcel') {
+                } else if (topic.rest === 'place-parcel') {
                     // let orderId = uuid();
                     let id = uuid();
                     // let [source, destination] = random.keys(this.hubSimulator.hubs, 2);
@@ -58,15 +54,13 @@ module.exports = class ParcelSimulator extends MQTTClient {
                     this.publishFrom(`parcel/${id}`, 'state', this.parcels[id]);
                 }
             }
-        }
-        else {
+        } else {
             if (topic.entity === 'parcel') {
                 if (topic.rest === 'pickup') {
                     let parcel = this.parcels[topic.id];
                     parcel.carrier = message;
                     this.publishFrom(`parcel/${parcel.id}`, 'state', parcel);
-                }
-                else if (topic.rest === 'dropoff') {
+                } else if (topic.rest === 'dropoff') {
                     let parcel = this.parcels[topic.id];
                     parcel.carrier = message;
                     this.publishFrom(`parcel/${parcel.id}`, 'state', parcel);

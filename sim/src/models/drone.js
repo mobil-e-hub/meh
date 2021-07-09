@@ -154,6 +154,7 @@ class Drone {
         else {
             this.startTask(simulator);
         }
+        simulator.updateDroneState(this.id);
     }
 }
 
