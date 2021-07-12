@@ -1,21 +1,27 @@
 // External modules
 const MQTT = require('mqtt');
 const mqttMatch = require('mqtt-match');
+const dotenv = require('dotenv');
 
 // Internal modules
 const {random, uuid} = require('./helpers');
 
-const mqttBrokerURL = process.env.MQTT_BROKER_test;
-const mqttPort = process.env.BROKER_PORT_test;
+dotenv.config()
+const mqttBrokerURL = process.env.MQTT_BROKER_URL;
+const mqttBrokerUsername = process.env.MQTT_BROKER_USERNAME;
+const mqttBrokerPassword = process.env.MQTT_BROKER_PASSWORD;
+const mqttPort = process.env.MQTT_BROKER_PORT;
 const mqttRoot = process.env.MQTT_ROOT;
 
 module.exports = class MQTTClient {
     constructor(type, subscriptionTopics) {
         this.type = type;
-
         this.mqtt = {
-            client: MQTT.connect('ws://broker.hivemq.com:8000/mqtt'), // TODO use from env: mqttBrokerURL
-            root: 'mobil-e-hub/v0', // TODO use from env: mqttRoot,
+            client: MQTT.connect(mqttBrokerURL, {
+                username: mqttBrokerUsername,
+                password: mqttBrokerPassword
+            }),
+            root: mqttRoot,
             id: uuid()
         };
 

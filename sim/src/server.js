@@ -26,8 +26,8 @@ dotenv.config();
 const port = process.env.SIM_PORT || 3000;
 
 // TODO replace with prod broker
-const mqttBrokerURL = process.env.MQTT_BROKER_test;
-const mqttPort = process.env.BROKER_PORT_test;
+const mqttBrokerURL = process.env.MQTT_BROKER_URL;
+const mqttPort = process.env.MQTT_BROKER_PORT;
 const mqttRoot = process.env.MQTT_ROOT;
 
 // Server
