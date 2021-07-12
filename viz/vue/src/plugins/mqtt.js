@@ -10,7 +10,10 @@ const { v4: UUID } = require('uuid');
 export default {
     install: (app, options) => {
         const id = uuid();
-        const client = mqtt.connect(options.broker);
+        const client = mqtt.connect(options.broker, {
+                username: options.username,
+                password: options.password
+            });
         const subscriptions = {};
         console.log(`Vue-app: ATTEMPT: connected to broker ${options.broker} with root ${options.root}.`)
         client.on('connect', () => {
