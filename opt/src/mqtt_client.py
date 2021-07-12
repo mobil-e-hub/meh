@@ -23,8 +23,11 @@ class MQTTClient:
         logging.basicConfig(level=os.environ.get("LOGGING_LVL", 'WARNING').upper())
         print(f"LOGGING_LEVEL SET TO: {logging.root.level}")
 
-        self.MQTT_BROKER = os.environ.get("MQTT_BROKER_test")
-        self.MQTT_PORT = int(os.environ.get("BROKER_PORT_test"))
+        self.MQTT_BROKER = os.environ.get("MQTT_BROKER")
+        self.MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT"))
+        self.MQTT_PATH = os.environ.get("MQTT_BROKER_PATH")
+        self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME")
+        self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD")
 
         self.topic = "mobil-e-hub/v0/from/opt"  # TODO macht default topic überhaupt sinn?? --> als fallback
         self.root = "mobil-e-hub/v0"    # TODO weg --> überschreibt das hier den in opt_engine gesetzten root??
@@ -33,6 +36,9 @@ class MQTTClient:
         self.subscriptions = {'mobil-e-hub/v0/#'}  # TODO remove
 
         self.client = mqtt.Client(self.client_name, transport='websockets')  # TODO bleibt websockets?
+        self.client.ws_set_options(path=self.MQTT_PATH)
+        self.client.tls_set()
+        self.client.username_pw_set(username=self.MQTT_USERNAME, password=self.MQTT_PASSWORD)
         logger = logging.getLogger(__name__)
         self.client.enable_logger(logger)
 

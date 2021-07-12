@@ -19,8 +19,9 @@ port = int(os.environ.get('OPT_PORT', 3001))
 # Setup
 app = Flask(__name__)
 
-opt = OptimizationEngine()  # inherits from MQTTClient
-opt.begin_client()
+if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    opt = OptimizationEngine()  # inherits from MQTTClient
+    opt.begin_client()
 
 # Endpoints
 @app.route('/ping')
