@@ -142,11 +142,11 @@ class OptimizationEngine(MQTTClient):
         except ValueError as e:
             logging.error(f"[{self.client_name}] - Failed to assign car: " + str(e))
 
-        optimal_bus, bus_time = self._assign_bus(route)
+        # optimal_bus, bus_time = self._assign_bus(route) # TODO debug bus -> handle no bus available
 
-        if vehicle_time > bus_time:  # Bus preferred if equal time
-            optimal_vehicle = optimal_bus
-            vehicle_type = "bus"
+        # if vehicle_time > bus_time:  # Bus preferred if equal time
+        #     optimal_vehicle = optimal_bus
+        #     vehicle_type = "bus"
 
         logging.info(
             f"[{self.client_name}] - Assigned Ground vehicle to route: {route} -> {vehicle_type}/{optimal_vehicle}")
@@ -253,7 +253,6 @@ class OptimizationEngine(MQTTClient):
         for (idx, bus) in self.buses.items():
             bus_route = bus.route
             route_nodes = list(map(lambda stop: stop['node'], bus_route))
-            # print(route_nodes)
             if node_start in route_nodes and node_end in route_nodes:
                 passing.append((idx, bus))
 
@@ -287,35 +286,49 @@ class OptimizationEngine(MQTTClient):
 
         # TODO Enums (TaskState) not serializable (to json) -> HotFix: encode as String / better: extra parser
         drone_pos = self.drones[drone1_id].position
+
+        # handle multiple nodes on route
+        tasks_route_d1 = [{'type': 'move', 'state': 'TaskState.notStarted',
+                 'destination': self.g_topo.nodes[n]['position'], 'minimumDuration': 10} for n in route.air1.path]
+
+        node_hub = self.hubs[parcel.carrier['id']].position  # nodeID
         # TODO currently naive approach -> always send 'move'-task: regardless of entity position
         m01 = {
             'id': 'm01',
             'tasks': [
                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination':
-                    self.hubs[parcel.carrier['id']].position, 'minimumDuration': 10},
+                    self.g_topo.nodes[node_hub]['position'], 'minimumDuration': 10},
                 {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t00)},
-                {'type': 'move', 'state': 'TaskState.notStarted',
-                 'destination': route.air1.path[-1], 'minimumDuration': 10},
+                *tasks_route_d1,
                 {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t01)},
-                # TODO should drone move back afterwards?
+                # TODO should drone move back afterwards? --> *tasks_route[::-1] --> deep_copy necessary??
                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': drone_pos, 'minimumDuration': 10}
             ]
         }
 
         drone_pos = self.drones[drone2_id].position
+        node_hub = self.hubs[parcel.destination['id']].position  # nodeID
+
+        tasks_route_d2 = [{'type': 'move', 'state': 'TaskState.notStarted',
+                        'destination': self.g_topo.nodes[n]['position'], 'minimumDuration': 10} for n in route.air2.path]
         m02 = {
             'id': 'm02',
             'tasks': [
-                {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.air2.path[0],
+                {'type': 'move', 'state': 'TaskState.notStarted', 'destination': self.g_topo.nodes[route.air2.path[0]]['position'],
                  'minimumDuration': 10},
                 {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
-                {'type': 'move', 'state': 'TaskState.notStarted',
-                 'destination': self.hubs[parcel.destination['id']].position, 'minimumDuration': 10},
+                # {'type': 'move', 'state': 'TaskState.notStarted',
+                #  'destination': self.g_topo.nodes[node_hub]['position'], 'minimumDuration': 10},
+                *tasks_route_d2,
                 {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t03)},
                 # TODO should drone move back afterwards?
                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': drone_pos, 'minimumDuration': 10}
             ]
         }
+
+        tasks_route_v = [{'type': 'move', 'state': 'TaskState.notStarted',
+                          'destination': self.g_topo.nodes[n]['position'], 'minimumDuration': 10} for n in
+                         route.road.path]
 
         m03 = {}
         if vehicle_type == 'car':
@@ -323,14 +336,15 @@ class OptimizationEngine(MQTTClient):
             m03 = {
                 'id': 'm03',
                 'tasks': [
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.road.path[0],
+                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': self.g_topo.nodes[route.road.path[0]]['position'],
                      'minimumDuration': 10},
                     {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t01)},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': route.road.path[-1],
-                     'minimumDuration': 10},
+                    # {'type': 'move', 'state': 'TaskState.notStarted', 'destination': self.g_topo.nodes[route.road.path[-1]]['position'],
+                    #  'minimumDuration': 10},
+                    *tasks_route_v,
                     {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
                     # TODO should car move back afterwards?
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': car_pos, 'minimumDuration': 10}
+                    # {'type': 'move', 'state': 'TaskState.notStarted', 'destination': car_pos, 'minimumDuration': 10}
                 ]
             }
 
@@ -348,6 +362,8 @@ class OptimizationEngine(MQTTClient):
                     {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
                 ]
             }
+        else:
+            logging.error("Vehicle not Car or Bus.")
 
         m04 = {
             'id': 'm04',
@@ -556,10 +572,10 @@ class OptimizationEngine(MQTTClient):
 
     # TODO remove
     def on_message_test(self, client, userdata, msg):
-        print(f"!!! OPT: TEST MSG received -> {msg.topic}: {msg.payload} !!!")  # TODO remove
         self.test_init()
-        self.test()  # hard coded missions to check if execution works
-        # self.find_route(self.parcels['p00'])
+        time.sleep(2)
+        # self.test()  # hard coded missions to check if execution works
+        self.create_delivery_route(self.parcels['p00'])
 
     def on_message_state(self, client, userdata, msg):
         # TODO add to the respective dict
@@ -618,7 +634,6 @@ class OptimizationEngine(MQTTClient):
         hub = Hub(id=state['id'], position=state['position'], transactions=state['transactions'],
                   parcels=state['parcels'])
         self.hubs[id_] = hub
-        print(self.hubs)
 
     def update_drone(self, id_, state):
         # logging.warn(f"!!!!!!!!!! UPDATE DRONE: --> id:{id_} --> {state} !!!")
