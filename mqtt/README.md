@@ -16,7 +16,7 @@ An MQTT message consists of a topic and a message, both of which are strings.
 The format of the topic is `[root]/[version]/[entity]/[id]/[...args]`, where the root is always `mobil-e-hub`.
 
 #### Message
-TODO
+The message can be arbitrary JSON data, serialized as a string. It is parsed back to JSON before forwarding, which means that an invalid format will cause an error in `JSON.parse()` and therefore prevent forwarding.
 
 
 ### EventGrid message
