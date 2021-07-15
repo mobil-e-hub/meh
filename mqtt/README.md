@@ -7,7 +7,7 @@ Authors:
 ## Description
 This module simply connects Azure EventGrid and MQTT broker by forwarding messages to the other component. 
 
-**Note that topics received from EventGrid cannot be subscribed to (otherwise, there will be an infinite forwarding loop)!**
+**Note that topics received from EventGrid must not be subscribed to (otherwise, there will be an infinite forwarding loop)!**
 
 ## Message formats
 ### MQTT messages
