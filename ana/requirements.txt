@@ -1,0 +1,5 @@
+flask==1.1.2
+python-dotenv==0.17.0
+paho-mqtt==1.5.1
+sqlalchemy==1.4.20
+psycopg2-binary==2.9.1

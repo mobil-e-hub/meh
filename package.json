@@ -11,11 +11,13 @@
     "setup:opt:mac": "npm run setup:mac --prefix opt",
     "setup:wss:mac": "npm run setup:mac --prefix viz/wss",
     "setup:vue:mac": "npm run setup:mac --prefix viz/vue",
+    "setup:ana:mac": "npm run setup:mac --prefix ana",
     "start:mqtt:mac": "npm run start:mac --prefix mqtt",
     "start:sim:mac": "npm run start:mac --prefix sim",
     "start:opt:mac": "npm run start:mac --prefix opt",
     "start:wss:mac": "npm run start:mac --prefix viz/wss",
     "start:vue:mac": "npm run start:mac --prefix viz/vue",
+    "start:ana:mac": "npm run start:mac --prefix ana",
     "setup:windows": "npm-run-all -s setup:*:windows",
     "start:windows": "npm-run-all -p start:*:windows",
     "setup:mqtt:windows": "cd mqtt && npm run setup:windows",
@@ -23,11 +25,13 @@
     "setup:opt:windows": "cd opt && npm run setup:windows",
     "setup:wss:windows": "cd viz\\wss && npm run setup:windows",
     "setup:vue:windows": "cd viz\\vue && npm run setup:windows",
+    "setup:ana:windows": "cd ana && npm run setup:windows",
     "start:mqtt:windows": "npm run start:windows --prefix mqtt",
     "start:sim:windows": "npm run start:windows --prefix sim",
     "start:opt:windows": "npm run start:windows --prefix opt",
     "start:wss:windows": "npm run start:windows --prefix viz/wss",
-    "start:vue:windows": "npm run start:windows --prefix viz/vue"
+    "start:vue:windows": "npm run start:windows --prefix viz/vue",
+    "start:ana:windows": "npm run start:windows --prefix ana"
   },
   "dependencies": {
     "npm-run-all": "^4.1.5"
