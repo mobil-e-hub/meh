@@ -90,6 +90,12 @@ class Drone {
 
     completeTransaction(simulator) {
         let task = this.mission.tasks[0];
+
+        if (task.type === undefined) {
+            console.error(`Transaction failed! - Could not find transaction in tasks of Drone.`)
+            return;
+        }
+
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
         }

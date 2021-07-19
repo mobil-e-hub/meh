@@ -67,7 +67,7 @@ class Bus {
         // this.activeMissions = {}; --> TODO better performance if active ones stored here? -> better: lookup for state.Ongoing --> how many missions for bus are realistic
 
         this.speed = 10;
-        this.parcels = {};
+        this.parcels = [];
         this.state = BusState.idle;
 
         // TODO double check bus states!!! --> hasRoute() => state not idle but moving?
@@ -90,6 +90,12 @@ class Bus {
         if (!this.route) {     // this.state != BusState.moving; --> also handle BusState.waitingForTransaction
             return false;
         } else {
+            if (this.arrivalTimeAtStop !== null && (this.state === BusState.plannedStop || this.state === BusState.transactionState)) {
+                if (Date.now() - this.arrivalTimeAtStop >= this.nextStop.time * 1000) {
+                    this.driveToNextStop(simulator);
+                    return false;
+                }
+            }
             switch (this.state) {
                 case BusState.idle:
                     if (this.route.length >= 1) {
@@ -147,13 +153,6 @@ class Bus {
                             }
                         }
                         return false; // drive;
-                    }
-                    // TODO das else hier weg? --> solange taskAtStop nicht leer?
-                    else {
-                        if (Date.now() - this.arrivalTimeAtStop >= this.nextStop.time * 1000) {
-                            this.driveToNextStop(simulator);
-                        }
-                        return false;
                     }
             }
         }
@@ -233,16 +232,22 @@ class Bus {
         // TODO search for this mission and switch to corresponding dropoff task
         let mID = this.matchTransactionToMission(tID)
 
+        if (mID === undefined) {
+            console.error(`Transaction ${tID} failed!`)
+            return;
+        }
+
         let task = this.activeTasks[mID]
 
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
         } else {
-            console.assert(Object.keys(this.parcels).length < this.capacity,
+            console.assert(this.parcels.length < this.capacity,
                 `Transaction Error: Bus/${this.id} has no free capacity for transaction/${tID}`);
             let transaction = task.transaction;
 
-            this.parcels = Object.assign(this.parcels, transaction.parcel);   // TODO key parcelID needed here?
+            // TODO debug format of transcation / t.parcel
+            this.parcels.push(transaction.parcel);   // TODO key parcelID needed here?
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
 
             this.completeTask(simulator, tID, mID);
@@ -270,10 +275,19 @@ class Bus {
             mID = this.matchTransactionToMission(tID);
         }
 
+        // ist das wirlich nötig --> zumindest logischer!
+        // TODO check if any active task != move
+        //      --> no: busState = plannedStop
+
         // TODO debug this.missions[mID] is undefined
         let oldTask = this.missions[mID].tasks.splice(0, 1);
         if (oldTask[0].type === 'dropoff') {
-            delete this.parcels[mID];
+            this.parcels = this.parcels.filter(p => p !== oldTask.transaction.parcel);
+        }
+
+        delete this.activeTasks[mID];
+        if(! (Object.values(this.activeTasks).find(t => t.type !== 'move'))) {
+            this.state = BusState.plannedStop;
         }
 
         if (this.missions[mID].tasks.length === 0) {
@@ -291,7 +305,6 @@ class Bus {
         // TODO: set Mission State to Complete (OR Failed ???)
 
         delete this.missions[mID];
-        delete this.activeTasks[mID];
         simulator.publishFrom(`bus/${this.id}`, `mission/${mID}/complete`);
 
         this.startTask(simulator)
@@ -335,7 +348,7 @@ class Bus {
         if (mID === undefined) {
             mID = Object.keys(this.missions).find(m => m.state === MissionState.notStarted)
             if (mID === undefined) {
-                console.log("No waiting missions")
+                console.log("No unstarted missions.")
                 return;
             }
         }

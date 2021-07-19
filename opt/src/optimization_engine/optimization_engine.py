@@ -418,8 +418,8 @@ class OptimizationEngine(MQTTClient):
                                 # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
                                 #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
                                 route=[{'node': 'n03', 'time': 10},
-                                        {'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},  # TODO in sim: Bus Route stops with node, POSITION, time
-                                       {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2}
+                                        {'node': 'n00', 'time': 18}, {'node': 'n01', 'time': 12},  # TODO in sim: Bus Route stops with node, POSITION, time
+                                       {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12}
                                        ],
                                 nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
                                 tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)

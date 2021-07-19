@@ -11,8 +11,8 @@
       </use>
 
       <use v-if="hasParcel"
-           :x="displayPosition.x +5"
-           :y="displayPosition.y +5"
+           :x="displayPosition.x +2"
+           :y="displayPosition.y +8"
            :width="sizeParcel"
            :height="sizeParcel"
            :href="require('../../assets/entities.svg') + '#parcel-symbol'"

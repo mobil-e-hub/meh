@@ -44,8 +44,7 @@ class Car {
     move(interval, simulator) {
         if (!this.mission) {
             return false;
-        }
-        else {
+        } else {
             let task = this.mission.tasks[0];
             switch (task.type) {
                 case 'move':
@@ -78,8 +77,7 @@ class Car {
                 case 'dropoff':
                     if (this.state === CarState.waitingForTransaction) {
                         return false;
-                    }
-                    else {
+                    } else {
                         // this.state === CarState.executingTransaction
                         simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
                         simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
@@ -92,10 +90,15 @@ class Car {
 
     completeTransaction(simulator) {
         let task = this.mission.tasks[0];
+
+        if (task.type === undefined) {
+            console.error(`Transaction failed! - Could not find transaction in tasks of Car.`)
+            return;
+        }
+
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
-        }
-        else {
+        } else {
             let transaction = task.transaction;
             this.parcel = transaction.parcel;
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
@@ -108,8 +111,7 @@ class Car {
         this.mission = mission;
         if (mission === null) {
             this.state = CarState.idle;
-        }
-        else {
+        } else {
             this.startTask(simulator);
 
         }
@@ -121,19 +123,16 @@ class Car {
         if (task.type === 'move') {
             this.state = CarState.moving;
             task.state = TaskState.ongoing;
-        }
-        else if (task.type === 'pickup') {
+        } else if (task.type === 'pickup') {
             let transaction = task.transaction;
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
-        }
-        else if (task.type === 'dropoff') {
+        } else if (task.type === 'dropoff') {
             if (task.transaction.ready) {
                 this.state = CarState.executingTransaction;
                 task.state = TaskState.executingTransaction;
-            }
-            else {
+            } else {
                 this.state = CarState.waitingForTransaction;
                 task.state = TaskState.waitingForTransaction;
             }
@@ -142,7 +141,7 @@ class Car {
 
     completeTask(simulator) {
         if (this.mission.tasks[0].type === 'dropoff') {
-             this.parcel = null;
+            this.parcel = null;
         }
         this.mission.tasks.splice(0, 1);
 
@@ -150,12 +149,11 @@ class Car {
             simulator.publishFrom(`car/${this.id}`, `mission/${this.mission.id}/complete`);
             this.mission = null;
             this.state = CarState.idle;
-        }
-        else {
+        } else {
             this.startTask(simulator);
         }
         simulator.updateCarState(this.id);
     }
 }
 
-module.exports = { Car, CarState, TaskState };
+module.exports = {Car, CarState, TaskState};
