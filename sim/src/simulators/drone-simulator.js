@@ -117,9 +117,9 @@ module.exports = class DroneSimulator extends MQTTClient {
         }
     }
 
-    getIdleDrones() {
-        return Object.fromEntries(Object.entries(this.drones).filter(d => d[1]['state'] === 0))
-    }
+    // getIdleDrones() {
+    //     return Object.fromEntries(Object.entries(this.drones).filter(d => d[1]['state'] === 0))
+    // }
 
     updateDroneState(id) {
         let drone = this.drones[id];

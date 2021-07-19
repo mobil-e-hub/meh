@@ -43,7 +43,7 @@ const server = app.listen(port, () => {
 
 // Simulators
 const droneSimulator = new DroneSimulator(3);
-const carSimulator = new CarSimulator(1);
+const carSimulator = new CarSimulator(0);
 const busSimulator = new BusSimulator(0);
 const hubSimulator = new HubSimulator(3);
 const parcelSimulator = new ParcelSimulator(hubSimulator);

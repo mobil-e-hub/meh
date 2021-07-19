@@ -16,8 +16,8 @@
               :height="sizeParcel"
               :href="require('../../assets/entities.svg') + '#parcel-symbol'"
               fill="green"
-              fill-opacity="0.8">
-
+              fill-opacity="0.8"
+      >
       </use>
   </svg>
 </template>

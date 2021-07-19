@@ -140,13 +140,14 @@ class OptimizationEngine(MQTTClient):
         try:
             optimal_vehicle, vehicle_time = self._assign_entity(route, idle_cars, car_speed)
         except ValueError as e:
-            logging.error(f"[{self.client_name}] - Failed to assign car: " + str(e))
+            vehicle_time = float('inf')
+            logging.warn(f"[{self.client_name}] - Failed to assign car: " + str(e))
 
-        # optimal_bus, bus_time = self._assign_bus(route) # TODO debug bus -> handle no bus available
+        optimal_bus, bus_time = self._assign_bus(route)  # TODO debug bus -> handle no bus available
 
-        # if vehicle_time > bus_time:  # Bus preferred if equal time
-        #     optimal_vehicle = optimal_bus
-        #     vehicle_type = "bus"
+        if vehicle_time > bus_time:  # Bus preferred if equal time # TODO undefined if no car was found (value error)
+            optimal_vehicle = optimal_bus
+            vehicle_type = "bus"
 
         logging.info(
             f"[{self.client_name}] - Assigned Ground vehicle to route: {route} -> {vehicle_type}/{optimal_vehicle}")
@@ -343,8 +344,7 @@ class OptimizationEngine(MQTTClient):
                     #  'minimumDuration': 10},
                     *tasks_route_v,
                     {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
-                    # TODO should car move back afterwards?
-                    # {'type': 'move', 'state': 'TaskState.notStarted', 'destination': car_pos, 'minimumDuration': 10}
+                    {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
                 ]
             }
 
@@ -412,16 +412,17 @@ class OptimizationEngine(MQTTClient):
         self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
         self.drones['d02'] = Drone(id='d02', position={'x': 60, 'y': 0, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
 
-        self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
+        # self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
 
-        # self.buses['v01'] = Bus(id='v00', position={'x': 50, 'y': 50, 'z': 0}, capacity=3,
-        #                         # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
-        #                         #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
-        #                         route=[{'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},
-        #                                {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2},
-        #                                {'node': 'n03', 'time': 10}],
-        #                         nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
-        #                         tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)
+        self.buses['v01'] = Bus(id='v01', position={'x': 50, 'y': 50, 'z': 0}, capacity=3,
+                                # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
+                                #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
+                                route=[{'node': 'n03', 'time': 10},
+                                        {'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 6},  # TODO in sim: Bus Route stops with node, POSITION, time
+                                       {'node': 'n02', 'time': 3}, {'node': 'n09', 'time': 2}
+                                       ],
+                                nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
+                                tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)
 
         self.parcels['p00'] = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
                                      destination={'type': 'hub', 'id': 'h01'})
@@ -432,104 +433,105 @@ class OptimizationEngine(MQTTClient):
         self.publish_to('hub/h00', 'test_init', {})
         self.publish_to('drone/d00', 'test_init', {})
         # self.publish_to('drone/d01', 'test_init', {})
-        self.publish_to('car/v00', 'test_init', {})
+        # self.publish_to('car/v00', 'test_init', {})
+        self.publish_to('bus/v01', 'test_init', {})
         # self.publish_to('hub/h01', 'test_init', {})
         self.publish_to('parcel/p00', 'test_init', {})
 
-    def test(self):
-        """ temporary function for testing during development process.
-            --> hard coded missions to check execution by simulated entities"""
-
-        self.test_init()
-
-        transactions = {
-            't00': {
-                'id': 't00',
-                'from': {'type': 'hub', 'id': 'h00'},
-                'to': {'type': 'drone', 'id': 'd00'},
-                'parcel': 'p00'
-            },
-            't01': {
-                'id': 't01',
-                'from': {'type': 'drone', 'id': 'd00'},
-                'to': {'type': 'car', 'id': 'v00'},
-                'parcel': 'p00'
-            },
-            't02': {
-                'id': 't02',
-                'from': {'type': 'car', 'id': 'v00'},
-                'to': {'type': 'drone', 'id': 'd01'},
-                'parcel': 'p00'
-            },
-            't03': {
-                'id': 't03',
-                'from': {'type': 'drone', 'id': 'd01'},
-                'to': {'type': 'hub', 'id': 'h01'},
-                'parcel': 'p00'
-            }
-        }
-
-        missions = {
-            'm00': {
-                'id': 'm00',
-                'tasks': [
-                    {'type': 'give', 'transaction': copy.deepcopy(transactions['t00'])}
-                ]
-            },
-            'm01': {
-                'id': 'm01',
-                'tasks': [
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 60, 'z': 0},
-                     'minimumDuration': 10},
-                    {'type': 'pickup', 'state': 'TaskState.notStarted',
-                     'transaction': copy.deepcopy(transactions['t00'])},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 50, 'z': 0},
-                     'minimumDuration': 10},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': 50, 'z': 0},
-                     'minimumDuration': 10},
-                    {'type': 'dropoff', 'state': 'TaskState.notStarted',
-                     'transaction': copy.deepcopy(transactions['t01'])},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': 60, 'z': 0},
-                     'minimumDuration': 10}
-                ]
-            },
-            'm02': {
-                'id': 'm02',
-                'tasks': [
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': -50, 'z': 0},
-                     'minimumDuration': 10},
-                    {'type': 'pickup', 'state': 'TaskState.notStarted',
-                     'transaction': copy.deepcopy(transactions['t02'])},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': -60, 'z': 0},
-                     'minimumDuration': 10},
-                    {'type': 'dropoff', 'state': 'TaskState.notStarted',
-                     'transaction': copy.deepcopy(transactions['t03'])}
-                ]
-            },
-            'm03': {
-                'id': 'm03',
-                'tasks': [
-                    {'type': 'pickup', 'state': 'TaskState.notStarted',
-                     'transaction': copy.deepcopy(transactions['t01'])},
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': -50, 'z': 0},
-                     'minimumDuration': 10},
-                    {'type': 'dropoff', 'state': 'TaskState.notStarted',
-                     'transaction': copy.deepcopy(transactions['t02'])}
-                ]
-            },
-            'm04': {
-                'id': 'm04',
-                'tasks': [
-                    {'type': 'take', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(transactions['t03'])}
-                ]
-            }
-        }
-
-        self.publish_to('hub/h00', 'mission', missions['m00'])
-        self.publish_to('drone/d00', 'mission', missions['m01'])
-        self.publish_to('drone/d01', 'mission', missions['m02'])
-        self.publish_to('car/v00', 'mission', missions['m03'])
-        self.publish_to('hub/h01', 'mission', missions['m04'])
+    # def test(self):
+    #     """ temporary function for testing during development process.
+    #         --> hard coded missions to check execution by simulated entities"""
+    #
+    #     self.test_init()
+    #
+    #     transactions = {
+    #         't00': {
+    #             'id': 't00',
+    #             'from': {'type': 'hub', 'id': 'h00'},
+    #             'to': {'type': 'drone', 'id': 'd00'},
+    #             'parcel': 'p00'
+    #         },
+    #         't01': {
+    #             'id': 't01',
+    #             'from': {'type': 'drone', 'id': 'd00'},
+    #             'to': {'type': 'car', 'id': 'v00'},
+    #             'parcel': 'p00'
+    #         },
+    #         't02': {
+    #             'id': 't02',
+    #             'from': {'type': 'car', 'id': 'v00'},
+    #             'to': {'type': 'drone', 'id': 'd01'},
+    #             'parcel': 'p00'
+    #         },
+    #         't03': {
+    #             'id': 't03',
+    #             'from': {'type': 'drone', 'id': 'd01'},
+    #             'to': {'type': 'hub', 'id': 'h01'},
+    #             'parcel': 'p00'
+    #         }
+    #     }
+    #
+    #     missions = {
+    #         'm00': {
+    #             'id': 'm00',
+    #             'tasks': [
+    #                 {'type': 'give', 'transaction': copy.deepcopy(transactions['t00'])}
+    #             ]
+    #         },
+    #         'm01': {
+    #             'id': 'm01',
+    #             'tasks': [
+    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 60, 'z': 0},
+    #                  'minimumDuration': 10},
+    #                 {'type': 'pickup', 'state': 'TaskState.notStarted',
+    #                  'transaction': copy.deepcopy(transactions['t00'])},
+    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 50, 'z': 0},
+    #                  'minimumDuration': 10},
+    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': 50, 'z': 0},
+    #                  'minimumDuration': 10},
+    #                 {'type': 'dropoff', 'state': 'TaskState.notStarted',
+    #                  'transaction': copy.deepcopy(transactions['t01'])},
+    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': 60, 'z': 0},
+    #                  'minimumDuration': 10}
+    #             ]
+    #         },
+    #         'm02': {
+    #             'id': 'm02',
+    #             'tasks': [
+    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': -50, 'z': 0},
+    #                  'minimumDuration': 10},
+    #                 {'type': 'pickup', 'state': 'TaskState.notStarted',
+    #                  'transaction': copy.deepcopy(transactions['t02'])},
+    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': -60, 'z': 0},
+    #                  'minimumDuration': 10},
+    #                 {'type': 'dropoff', 'state': 'TaskState.notStarted',
+    #                  'transaction': copy.deepcopy(transactions['t03'])}
+    #             ]
+    #         },
+    #         'm03': {
+    #             'id': 'm03',
+    #             'tasks': [
+    #                 {'type': 'pickup', 'state': 'TaskState.notStarted',
+    #                  'transaction': copy.deepcopy(transactions['t01'])},
+    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': -50, 'z': 0},
+    #                  'minimumDuration': 10},
+    #                 {'type': 'dropoff', 'state': 'TaskState.notStarted',
+    #                  'transaction': copy.deepcopy(transactions['t02'])}
+    #             ]
+    #         },
+    #         'm04': {
+    #             'id': 'm04',
+    #             'tasks': [
+    #                 {'type': 'take', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(transactions['t03'])}
+    #             ]
+    #         }
+    #     }
+    #
+    #     self.publish_to('hub/h00', 'mission', missions['m00'])
+    #     self.publish_to('drone/d00', 'mission', missions['m01'])
+    #     self.publish_to('drone/d01', 'mission', missions['m02'])
+    #     self.publish_to('car/v00', 'mission', missions['m03'])
+    #     self.publish_to('hub/h01', 'mission', missions['m04'])
 
     # Find idle / suitable entities for a new mission
     def get_idle_drones(self):
