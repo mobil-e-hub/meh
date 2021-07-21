@@ -104,6 +104,11 @@ module.exports = class CarSimulator extends MQTTClient {
             let transaction = this.cars[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
             transaction.ready = true;
         }
+        else if (this.matchTopic(topic, 'to/car/+/transaction/+/unready')) {
+            // This message is only received if the car is the transaction's "from" instance
+            let transaction = this.cars[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
+            transaction.ready = false;
+        }
         else if (this.matchTopic(topic, 'to/car/+/transaction/+/execute')) {
             // This message is only received if the car is the transaction's "to" instance and has already sent the "ready" message
             this.cars[topic.id].completeTransaction(this);

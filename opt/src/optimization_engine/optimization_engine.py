@@ -11,6 +11,8 @@ from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Rou
     TaskState, Route
 from mqtt_client import MQTTClient
 
+# TODO handle stop and pause from vueApp also here --> do not send stuff out!
+
 
 class OptimizationEngine(MQTTClient):
     """TODO add docstring"""
@@ -20,7 +22,7 @@ class OptimizationEngine(MQTTClient):
 
         self.id = str(uuid4())[0:8]  # TODO necessary for opt_engine? there should be only one --> self.root
         self.project = 'mobil-e-hub'
-        self.version = 'v0'
+        self.version = 'vX'
 
         self.g_topo = load_topology('assets/topology.json')
         self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
@@ -218,7 +220,7 @@ class OptimizationEngine(MQTTClient):
         """Computes and returns driving time of bus between two nodes given its route.
         Also considers waiting time at stops."""
 
-        time = 0
+        t = 0
         started = False
         ended = False
 
@@ -236,13 +238,11 @@ class OptimizationEngine(MQTTClient):
                     ended = True
 
                 distance = self.dist[current_node][next_node]
-                time = time + (distance / speed)  # TODO assumption: not multiple edges between two nodes
-                #         => shortest path = bus_route
-                time = time + waiting_time
+                t = t + (distance / speed)  # TODO assumption: not multiple edges between two nodes
+                t = t + waiting_time        #     => shortest path = bus_route
 
             bus_route.append(bus_route.pop(0))
-
-        return time
+        return t
 
     def get_busses_passing_node(self, node_start, node_end):
         """ returns list with tuples (id, bus) that pass the first and the final node of the delivery route on their
@@ -414,13 +414,17 @@ class OptimizationEngine(MQTTClient):
 
         # self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
 
-        self.buses['v01'] = Bus(id='v01', position={'x': 50, 'y': 50, 'z': 0}, capacity=3,
-                                # 'route': [{'node': 'n02', 'time': 8}, {'node': 'n03', 'time': 6},
-                                #           {'node': 'n01', 'time': 3}, {'node': 'n00', 'time': 10}],
-                                route=[{'node': 'n03', 'time': 10},
-                                        {'node': 'n00', 'time': 18}, {'node': 'n01', 'time': 12},  # TODO in sim: Bus Route stops with node, POSITION, time
-                                       {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12}
-                                       ],
+        self.buses['v01'] = Bus(id='v01', position={'x': -50, 'y': 50, 'z': 0}, capacity=3,
+                                # Start in top right corner (50,50,0) node0
+                                # route=[{'node': 'n03', 'time': 10},
+                                #     {'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 12},
+                                #     {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12}
+                                #     ],
+                                # Start in top left corner (-50,50,0) node3
+                                route=[
+                                        {'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 12},
+                                       {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12},
+                                       {'node': 'n03', 'time': 10}],
                                 nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
                                 tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)
 
@@ -482,7 +486,7 @@ class OptimizationEngine(MQTTClient):
     #             'id': 'm01',
     #             'tasks': [
     #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 60, 'z': 0},
-    #                  'minimumDuration': 10},
+    #     #                  'minimumDuration': 10},
     #                 {'type': 'pickup', 'state': 'TaskState.notStarted',
     #                  'transaction': copy.deepcopy(transactions['t00'])},
     #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 50, 'z': 0},

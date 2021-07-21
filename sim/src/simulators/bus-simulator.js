@@ -134,14 +134,15 @@ module.exports = class BusSimulator extends MQTTClient {
     test_init() {
 
         let route = [
-            {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 10},
-            {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 18},
+            // {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 10},
+            {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 8},
             {node: 'n01', position: {x: -50, y: -50, z: 0}, time: 12},
             {node: 'n02', position: {x: 50, y: -50, z: 0}, time: 6},
             {node: 'n09', position: {x: 50, y: 0, z: 0}, time: 12},
+            {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 10}
             ]// erstmal fixe route nehmen... // TODO replace with better init -> random /
 
-        this.buses = {v01: new Bus('v01', {x: 50, y: 50, z: 0}, route, 2)};
+        this.buses = {v01: new Bus('v01', {x: -50, y: 50, z: 0}, route, 2)};
         this.resume();
     }
 
@@ -152,6 +153,11 @@ module.exports = class BusSimulator extends MQTTClient {
             }
         }
     };
+
+    updateBusState(id) {
+        let bus = this.buses[id];
+        this.publishFrom(`bus/${id}`, 'state', bus);
+    }
 
     // TODO use these methods again in the if/ elif receives
     // //TODO alex enable multiple missions

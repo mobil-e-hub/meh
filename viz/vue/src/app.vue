@@ -142,7 +142,7 @@
 
                 <b-nav-text class="mx-3" title="Number of parcels">
                   <!--                  // better: inventory_2 (parcel box)  &ndash;&gt; didn't  work-->
-                  <vue-material-icon name="mail"  :size="24" />
+                  <vue-material-icon name="crop_square"  :size="24" />
 <!--                    <font-awesome-icon icon="archive" style="color: green" />-->
                   : {{numberOfParcels}}
                 </b-nav-text>

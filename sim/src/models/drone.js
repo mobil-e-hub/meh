@@ -74,6 +74,7 @@ class Drone {
                     // this.state === DroneState.waitingForTransaction
                     return false;
                 case 'dropoff':
+                    this.checkTransactionReady(this.mission.tasks[0]);
                     if (this.state === DroneState.waitingForTransaction) {
                         return false;
                     }
@@ -133,7 +134,12 @@ class Drone {
             task.state = TaskState.waitingForTransaction;
         }
         else if (task.type === 'dropoff') {
-            if (task.transaction.ready) {
+            this.checkTransactionReady(task);
+        }
+    }
+
+    checkTransactionReady(task) {
+        if (task.transaction.ready) {
                 this.state = DroneState.executingTransaction;
                 task.state = TaskState.executingTransaction;
             }
@@ -141,7 +147,6 @@ class Drone {
                 this.state = DroneState.waitingForTransaction;
                 task.state = TaskState.waitingForTransaction;
             }
-        }
     }
 
     completeTask(simulator) {

@@ -82,7 +82,6 @@ class Bus {
         // Tasks should be: => { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
         // Transactions "":  t01: {id: 't01', from: { type: 'drone', id: 'd00' }, to: { type: 'car', id: 'v00' }, parcel: 'p00'}, // TODO should include stop node where t happens
 
-        // this.tasksAtStop = [];  //to-do list of bus for the next waiting time at a stop   --> { m0: t1, m2: t4}
         this.arrivalTimeAtStop = null;
     }
 
@@ -91,16 +90,22 @@ class Bus {
             return false;
         } else {
             if (this.arrivalTimeAtStop !== null && (this.state === BusState.plannedStop || this.state === BusState.transactionState)) {
-                if (Date.now() - this.arrivalTimeAtStop >= this.nextStop.time * 1000) {
+                let stop_time = Date.now() - this.arrivalTimeAtStop;
+                if (stop_time >= this.nextStop.time * 1000) {
                     this.driveToNextStop(simulator);
                     return false;
                 }
+                // TODO abklären intervall --> 1 sek vor abfahrt keine transcations mehr ok? oder erst bei Weiterfahrt?
+                // else if (stop_time >= (this.nextStop.time - 1)* 1000) {
+                //     this.unreadyTransaction(simulator);
+                //     return false;
+                // }
             }
             switch (this.state) {
                 case BusState.idle:
                     if (this.route.length >= 1) {
                         this.state = BusState.moving;
-                        this.driveToNextStop()
+                        this.driveToNextStop(simulator)
                     }
                     return false;
 
@@ -196,10 +201,8 @@ class Bus {
     }
 
     driveToNextStop(simulator) {
-        // TODO check if 'move' mission arrived at goal -> then move to next task for this mission
-
-        let pending = Object.values(this.activeTasks).filter(t => t.type !== 'move');
-        pending.forEach(t => this.unreadyTransaction(simulator, t.transaction.id));
+        // TODO call unready at start of next section of route or 1 (?) sec before departure?
+        this.unreadyTransactions(simulator);
 
         if (this.route == null) {
             this.state = BusState.idle;
@@ -218,12 +221,29 @@ class Bus {
         this.state = BusState.moving;
     }
 
-    unreadyTransaction(simulator, tID) {
+
+
+    unreadyTransactions(simulator) {
+
+        let pending = Object.keys(this.activeTasks).filter(t => this.activeTasks[t].type !== 'move');
+
+        pending.forEach(m => this.unreadyTransaction(simulator, m, this.activeTasks[m]));
+
+        //pass
+    }
+
+    unreadyTransaction(simulator, mID, task) {
         // TODO:  - inform entitites / opt_engine
         //          - reset transaction state
         //          - respective mission: add move to node tasks again in the beginning before further instructions...
 
-        //pass
+        let transaction = task.transaction;
+        simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/unready`);
+        task.state = TaskState.ongoing;    // TODO or use new state??
+
+        this.missions[mID].tasks.unshift({type: 'move', state: 'TaskState.notStarted', destination: this.position,
+                                                  minimumDuration: 10});
+        this.activeTasks[mID] = this.missions[mID].tasks[0];
     }
 
     completeTransaction(simulator, tID) {
@@ -289,6 +309,8 @@ class Bus {
         if(! (Object.values(this.activeTasks).find(t => t.type !== 'move'))) {
             this.state = BusState.plannedStop;
         }
+
+        simulator.updateBusState();
 
         if (this.missions[mID].tasks.length === 0) {
             this.completeMission();
@@ -364,6 +386,8 @@ class Bus {
         } else if (task.type === 'pickup') {
 
             // this.tasksAtStop.push(task);
+
+            console.log("BUS --> PICKUP started --> publish ready")
 
             let transaction = task.transaction;
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);

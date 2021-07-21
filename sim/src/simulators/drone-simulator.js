@@ -107,6 +107,11 @@ module.exports = class DroneSimulator extends MQTTClient {
             let transaction = this.drones[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
             transaction.ready = true;
         }
+        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/unready')) {
+            // This message is only received if the drone is the transaction's "from" instance
+            let transaction = this.drones[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
+            transaction.ready = false;
+        }
         else if (this.matchTopic(topic, 'to/drone/+/transaction/+/execute')) {
             // This message is only received if the drone is the transaction's "to" instance and has already sent the "ready" message
             this.drones[topic.id].completeTransaction(this);
@@ -116,10 +121,6 @@ module.exports = class DroneSimulator extends MQTTClient {
             this.drones[topic.id].completeTask(this);
         }
     }
-
-    // getIdleDrones() {
-    //     return Object.fromEntries(Object.entries(this.drones).filter(d => d[1]['state'] === 0))
-    // }
 
     updateDroneState(id) {
         let drone = this.drones[id];
