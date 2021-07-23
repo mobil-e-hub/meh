@@ -78,7 +78,4 @@ module.exports = class ParcelSimulator extends MQTTClient {
         }
     }
 
-    addParcel() {
-
-    }
 };

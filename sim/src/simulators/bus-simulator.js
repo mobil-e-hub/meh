@@ -10,18 +10,10 @@ const topology = require('../../assets/topology');
 
 // TODO s:  - add change route
 //          - add abort mission
-//          - add test_init
 
 module.exports = class BusSimulator extends MQTTClient {
     constructor(numberOfBuses) {
         super('bus-simulator', ['to/bus/#', 'from/visualization/#']);
-
-        // TODO create and adapt these functions...
-        // this.subscribe('visualization/#', this.handleCommand.bind(this));
-        // this.subscribe('bus/+/mission', this.handleMission.bind(this));
-        // this.subscribe('bus/+/transaction/+/ready', this.handleTransactionReady.bind(this));
-        // this.subscribe('bus/+/transaction/+/execute', this.handleTransactionExecute.bind(this));
-        // this.subscribe('bus/+/transaction/+/complete', this.handleTransactionComplete.bind(this));
 
         this.numberOfBuses = numberOfBuses;
         this.buses = {};

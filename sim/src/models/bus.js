@@ -7,7 +7,7 @@ const random = require('../helpers').random;
 const BusState = {
     idle: 0,
     moving: 1,
-    plannedStop: 2,       // TODO multiple parallel transactions at one stop possible...
+    plannedStop: 2,
     transactionState: 3,
     charging: 4,
 };
@@ -34,21 +34,13 @@ const TaskState = {
 //      - refactor to manage transactions with explicit timing (?) --> necessary to allow
 //      - mechanism to handle abort other mission if dropoff failed --> done by control-system
 
-//TODO: - mechanism: accept mission if # missions < capacity allows for it  --> accepts limit by parcel capacity needs timer
-//          - after: pickup success: --> dropoff task becomes active
-//          - after dropoff success: --> send transaction/task/mission complete +
+//TODO:
 //          - compute time frames to see availability --> do this in optimization engine, just needed fir decentralised approach...
-// TODO .............................................................................................................................
-//       - handle complete transaction  --> after pickup
-//       -  handle complete mission      --> after dropoff
 //       - TimeOut - Buffer -> change state
 //
 // TODO .............................................................................................................................
 //       July_21:
 //          - new mission started if old one is finished??
-//
-//
-//  ..................................................................................................................................
 
 class Bus {
     constructor(id, position, route, capacity = 2) {
@@ -62,7 +54,7 @@ class Bus {
         this.nextStop = null;
 
         //difference to car/drones: Bus can have several Missions -> won't move differently:
-        this.missions = {};  // TODO use array (or Map?) to guarantee order --> opt_engine can insert missions at optimial index = priority order
+        this.missions = {};  // TODO use array (or Map?) to guarantee order --> opt_engine can insert missions at optimal index = priority order
                              //  --> alternative: maintain array for sequence of keys ordered by priority --> look up which to start next
         // this.activeMissions = {}; --> TODO better performance if active ones stored here? -> better: lookup for state.Ongoing --> how many missions for bus are realistic
 
@@ -70,23 +62,14 @@ class Bus {
         this.parcels = [];
         this.state = BusState.idle;
 
-        // TODO double check bus states!!! --> hasRoute() => state not idle but moving?
-
         // active tasks are added here --> no dropoff before pickup of parcel etc...
-        this.activeTasks = {};   // k: missionID, value: task: {type: 'dropoff', node: n00, from: bus00, to: drone02, parcel: p00}}            // TODO save as object of Missions with 2 tasks each (transactions)
-        //                            k                                                     --> alternative: add clock?
-        //      }
-
-        // TODO refactor to use this task format (from control-system)
-        // Tasks currently: { type: 'pickup', state: TaskState.notStarted, transaction: _.clone(transactions.t00) },
-        // Tasks should be: => { type: 'move', state: TaskState.notStarted, destination: { x: -50, y: -50, z: 0 }, minimumDuration: 10 },
-        // Transactions "":  t01: {id: 't01', from: { type: 'drone', id: 'd00' }, to: { type: 'car', id: 'v00' }, parcel: 'p00'}, // TODO should include stop node where t happens
+        this.activeTasks = {};   // k: missionID, value: task: {type: 'dropoff', node: n00, from: bus00, to: drone02, parcel: p00}}
 
         this.arrivalTimeAtStop = null;
     }
 
     move(interval, simulator) {
-        if (!this.route) {     // this.state != BusState.moving; --> also handle BusState.waitingForTransaction
+        if (!this.route) {
             return false;
         } else {
             if (this.arrivalTimeAtStop !== null && (this.state === BusState.plannedStop || this.state === BusState.transactionState)) {
@@ -143,7 +126,7 @@ class Bus {
                     if (tasksAtStop.length > 0) {  // TODO replace with activeTasks filter for dropoff
                         // TODO remove task from tasksAtStop after they are done
                         // let drive = false;
-                       tasksAtStop.forEach(function(task) {
+                        tasksAtStop.forEach(function (task) {
                             if (task.type === 'pickup') {
                                 //wait for execute message
 
@@ -163,45 +146,18 @@ class Bus {
         }
     }
 
-    stopAtBusStop(simulator) { // TODO remove simulator parameter -> needed?
+    stopAtBusStop(simulator) {
         // called only once at arrival at stop
         this.state = BusState.plannedStop;
         this.arrivalTimeAtStop = Date.now();
 
-        // TODO does not send transaction ready message
-        // TODO debug filter & for each! --> filter does not find move tasks that are done
-        // TasksAtStop: Iterate over activeMissions --> if move task ends here --> close task and do proceed to next one
-
         let _m = Object.keys(this.activeTasks).filter(t => this.activeTasks[t].type === 'move' && this.activeTasks[t].destination === this.nextStop.node);
         _m.forEach(mID => this.completeTask(simulator, null, mID));     // TODO check --> does this only close the move task???
-        // TODO alex
-        // - remove task from activeTasks / tasksAtStop / mission / activeMissions
-        // - add next task to tasksAtStop and activeTasks? --> oder active Tasks immer nur die vom type: 'move'
 
-        // TODO wieso doppelt?
-        // if (this.tasksAtStop.length > 0) { // use keys / _m instead
-        //
-        //     for (let task in this.tasksAtStop) {
-        //         if (task.type === 'pickup') {
-        //             simulator.publishTo(`${task.from.type}/${task.from.id}`, `transaction/${task.id}/ready`);
-        //             this.state = BusState.transactionState;
-        //         }
-        //         //dropoff gets active after ready message received          TODO check can happen from the move method (continuous calls)
-        //         else if (task.type === 'dropoff') {
-        //             if (task.transaction.ready) {
-        //                 this.state = BusState.transactionState;
-        //                 task.state = TaskState.executingTransaction;
-        //             } else {
-        //                 this.state = BusState.transactionState;
-        //                 task.state = TaskState.waitingForTransaction;
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     driveToNextStop(simulator) {
-        // TODO call unready at start of next section of route or 1 (?) sec before departure?
+        // TODO call unready at start of next section of route (=here) or 1(?) sec before departure?
         this.unreadyTransactions(simulator);
 
         if (this.route == null) {
@@ -213,15 +169,8 @@ class Bus {
 
         this.arrivalTimeAtStop = null;
 
-        // check for transactions at next stop   TODO alex: refactor -> done at stopAtBusstop
-        // this.tasksAtStop = Object.values(this.activeTasks).filter(t => t.node === this.nextStop.node)
-        //
-        // this.tasksAtStop.forEach(t => delete this.activeTasks[t]) // move current transactions from to future do list
-
         this.state = BusState.moving;
     }
-
-
 
     unreadyTransactions(simulator) {
 
@@ -233,23 +182,19 @@ class Bus {
     }
 
     unreadyTransaction(simulator, mID, task) {
-        // TODO:  - inform entitites / opt_engine
-        //          - reset transaction state
-        //          - respective mission: add move to node tasks again in the beginning before further instructions...
 
         let transaction = task.transaction;
         simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/unready`);
         task.state = TaskState.ongoing;    // TODO or use new state??
 
-        this.missions[mID].tasks.unshift({type: 'move', state: 'TaskState.notStarted', destination: this.position,
-                                                  minimumDuration: 10});
+        this.missions[mID].tasks.unshift({
+            type: 'move', state: 'TaskState.notStarted', destination: this.position,
+            minimumDuration: 10
+        });
         this.activeTasks[mID] = this.missions[mID].tasks[0];
     }
 
     completeTransaction(simulator, tID) {
-
-        // TODO adapt to several missions
-        // TODO search for this mission and switch to corresponding dropoff task
         let mID = this.matchTransactionToMission(tID)
 
         if (mID === undefined) {
@@ -266,8 +211,7 @@ class Bus {
                 `Transaction Error: Bus/${this.id} has no free capacity for transaction/${tID}`);
             let transaction = task.transaction;
 
-            // TODO debug format of transcation / t.parcel
-            this.parcels.push(transaction.parcel);   // TODO key parcelID needed here?
+            this.parcels.push(transaction.parcel);
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
 
             this.completeTask(simulator, tID, mID);
@@ -275,8 +219,7 @@ class Bus {
     }
 
     matchTransactionToMission(tId) {
-        // TODO debug -> mission m03 not found here!!!
-        let mID = Object.keys(this.activeTasks).find(t => this.activeTasks[t].transaction && this.activeTasks[t].transaction.id === tId); //TODO change to keys!!!
+        let mID = Object.keys(this.activeTasks).find(t => this.activeTasks[t].transaction && this.activeTasks[t].transaction.id === tId);
 
         if (mID === undefined) {
             // TODO handle Error --> raise Exception and publish error to VUE
@@ -286,8 +229,6 @@ class Bus {
         return mID;
     }
 
-    // TODO change --> missions / task id or index as parameter --> continue for the given mission / task
-    //             --> refactor to make this also change activeTasks / tasksAtStop
     completeTask(simulator, tID = null, mID = null) {
 
         if (mID === null) {
@@ -295,9 +236,9 @@ class Bus {
             mID = this.matchTransactionToMission(tID);
         }
 
-        // ist das wirlich nötig --> zumindest logischer!
-        // TODO check if any active task != move
-        //      --> no: busState = plannedStop
+
+        // TODO here? :  check if any active task != move
+        //              --> no: busState = plannedStop
 
         // TODO debug this.missions[mID] is undefined
         let oldTask = this.missions[mID].tasks.splice(0, 1)[0];
@@ -308,7 +249,7 @@ class Bus {
 
         // TODO IN DebUG: check if parcels are correct
         delete this.activeTasks[mID];
-        if(! (Object.values(this.activeTasks).find(t => t.type !== 'move'))) {  // TODO overthink... --> reset BusState before new task is even started???
+        if (!(Object.values(this.activeTasks).find(t => t.type !== 'move'))) {  // TODO overthink... --> reset BusState before new task is even started???
             this.state = BusState.plannedStop;
         }
 
@@ -362,7 +303,7 @@ class Bus {
         if (route === null) {
             this.state = BusState.idle;
         } else {
-            this.driveToNextStop();
+            this.driveToNextStop(simulator);
         }
     }
 
@@ -382,7 +323,7 @@ class Bus {
         this.activeTasks[mID] = task;
 
         if (task.type === 'move') {
-            // movement handled separately
+            // movement handled separately --> here: only indicates where to start next task
             // this.state = BusState.moving;
             // task.state = TaskState.ongoing;
         } else if (task.type === 'pickup') {

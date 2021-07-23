@@ -27,7 +27,7 @@ const TaskState = {
     completed: 4
 };
 
-// TODO add timeout mechanism / abort transaction mechanism
+// TODO add timeout mechanism / abort transaction mechanism --> is unready message already sufficient?
 
 class Drone {
     constructor(id, position) {
@@ -150,7 +150,6 @@ class Drone {
     }
 
     completeTask(simulator) {
-        // TODO: only called when parcel dropped off successfully?
         if (this.mission.tasks[0].type === 'dropoff') {
              this.parcel = null;
         }

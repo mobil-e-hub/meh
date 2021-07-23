@@ -84,7 +84,7 @@ module.exports = class HubSimulator extends MQTTClient {
             let transaction = hub.transactions[topic.args[1]];
             // console.log(transaction);
             // console.log("topic: " +  topic.args[1]);
-            hub.parcels[transaction.parcel] = transaction.parcel; // TODO sometimes: execute received again before complete send to the giving entity -> nullpointer...
+            hub.parcels[transaction.parcel] = transaction.parcel;
             this.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
             delete hub.transactions[topic.args[1]];
 

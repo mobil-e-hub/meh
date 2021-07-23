@@ -285,7 +285,6 @@ class OptimizationEngine(MQTTClient):
             ]
         }
 
-        # TODO Enums (TaskState) not serializable (to json) -> HotFix: encode as String / better: extra parser
         drone_pos = self.drones[drone1_id].position
 
         # handle multiple nodes on route
@@ -302,7 +301,6 @@ class OptimizationEngine(MQTTClient):
                 {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t00)},
                 *tasks_route_d1,
                 {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t01)},
-                # TODO should drone move back afterwards? --> *tasks_route[::-1] --> deep_copy necessary??
                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': drone_pos, 'minimumDuration': 10}
             ]
         }
@@ -433,7 +431,6 @@ class OptimizationEngine(MQTTClient):
 
 
     def test_send_init(self):
-        # TODO add bus, once enough per entitiy type --> triggers init for all
         self.publish_to('hub/h00', 'test_init', {})
         self.publish_to('drone/d00', 'test_init', {})
         # self.publish_to('drone/d01', 'test_init', {})
@@ -442,100 +439,6 @@ class OptimizationEngine(MQTTClient):
         # self.publish_to('hub/h01', 'test_init', {})
         self.publish_to('parcel/p00', 'test_init', {})
 
-    # def test(self):
-    #     """ temporary function for testing during development process.
-    #         --> hard coded missions to check execution by simulated entities"""
-    #
-    #     self.test_init()
-    #
-    #     transactions = {
-    #         't00': {
-    #             'id': 't00',
-    #             'from': {'type': 'hub', 'id': 'h00'},
-    #             'to': {'type': 'drone', 'id': 'd00'},
-    #             'parcel': 'p00'
-    #         },
-    #         't01': {
-    #             'id': 't01',
-    #             'from': {'type': 'drone', 'id': 'd00'},
-    #             'to': {'type': 'car', 'id': 'v00'},
-    #             'parcel': 'p00'
-    #         },
-    #         't02': {
-    #             'id': 't02',
-    #             'from': {'type': 'car', 'id': 'v00'},
-    #             'to': {'type': 'drone', 'id': 'd01'},
-    #             'parcel': 'p00'
-    #         },
-    #         't03': {
-    #             'id': 't03',
-    #             'from': {'type': 'drone', 'id': 'd01'},
-    #             'to': {'type': 'hub', 'id': 'h01'},
-    #             'parcel': 'p00'
-    #         }
-    #     }
-    #
-    #     missions = {
-    #         'm00': {
-    #             'id': 'm00',
-    #             'tasks': [
-    #                 {'type': 'give', 'transaction': copy.deepcopy(transactions['t00'])}
-    #             ]
-    #         },
-    #         'm01': {
-    #             'id': 'm01',
-    #             'tasks': [
-    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 60, 'z': 0},
-    #     #                  'minimumDuration': 10},
-    #                 {'type': 'pickup', 'state': 'TaskState.notStarted',
-    #                  'transaction': copy.deepcopy(transactions['t00'])},
-    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': 50, 'z': 0},
-    #                  'minimumDuration': 10},
-    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': 50, 'z': 0},
-    #                  'minimumDuration': 10},
-    #                 {'type': 'dropoff', 'state': 'TaskState.notStarted',
-    #                  'transaction': copy.deepcopy(transactions['t01'])},
-    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': 60, 'z': 0},
-    #                  'minimumDuration': 10}
-    #             ]
-    #         },
-    #         'm02': {
-    #             'id': 'm02',
-    #             'tasks': [
-    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': -50, 'z': 0},
-    #                  'minimumDuration': 10},
-    #                 {'type': 'pickup', 'state': 'TaskState.notStarted',
-    #                  'transaction': copy.deepcopy(transactions['t02'])},
-    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -60, 'y': -60, 'z': 0},
-    #                  'minimumDuration': 10},
-    #                 {'type': 'dropoff', 'state': 'TaskState.notStarted',
-    #                  'transaction': copy.deepcopy(transactions['t03'])}
-    #             ]
-    #         },
-    #         'm03': {
-    #             'id': 'm03',
-    #             'tasks': [
-    #                 {'type': 'pickup', 'state': 'TaskState.notStarted',
-    #                  'transaction': copy.deepcopy(transactions['t01'])},
-    #                 {'type': 'move', 'state': 'TaskState.notStarted', 'destination': {'x': -50, 'y': -50, 'z': 0},
-    #                  'minimumDuration': 10},
-    #                 {'type': 'dropoff', 'state': 'TaskState.notStarted',
-    #                  'transaction': copy.deepcopy(transactions['t02'])}
-    #             ]
-    #         },
-    #         'm04': {
-    #             'id': 'm04',
-    #             'tasks': [
-    #                 {'type': 'take', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(transactions['t03'])}
-    #             ]
-    #         }
-    #     }
-    #
-    #     self.publish_to('hub/h00', 'mission', missions['m00'])
-    #     self.publish_to('drone/d00', 'mission', missions['m01'])
-    #     self.publish_to('drone/d01', 'mission', missions['m02'])
-    #     self.publish_to('car/v00', 'mission', missions['m03'])
-    #     self.publish_to('hub/h01', 'mission', missions['m04'])
 
     # Find idle / suitable entities for a new mission
     def get_idle_drones(self):
