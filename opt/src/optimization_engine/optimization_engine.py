@@ -414,17 +414,17 @@ class OptimizationEngine(MQTTClient):
 
         # self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
 
-        self.buses['v01'] = Bus(id='v01', position={'x': -50, 'y': 50, 'z': 0}, capacity=3,
+        self.buses['v01'] = Bus(id='v01', position={'x': 50, 'y': 50, 'z': 0}, capacity=3,
                                 # Start in top right corner (50,50,0) node0
-                                # route=[{'node': 'n03', 'time': 10},
-                                #     {'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 12},
-                                #     {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12}
-                                #     ],
+                                route=[{'node': 'n03', 'time': 10},
+                                    {'node': 'n00', 'time': 18}, {'node': 'n01', 'time': 12},
+                                    {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12}
+                                    ],
                                 # Start in top left corner (-50,50,0) node3
-                                route=[
-                                        {'node': 'n00', 'time': 8}, {'node': 'n01', 'time': 12},
-                                       {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12},
-                                       {'node': 'n03', 'time': 10}],
+                                # route=[
+                                #         {'node': 'n00', 'time': 20}, {'node': 'n01', 'time': 12},
+                                #        {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12},
+                                #        {'node': 'n03', 'time': 10}],
                                 nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
                                 tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)
 

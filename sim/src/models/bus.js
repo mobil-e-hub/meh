@@ -137,12 +137,13 @@ class Bus {
                     return true;
 
                 case BusState.plannedStop:
+                case BusState.transactionState:
                     // move to separate function??
-                    let tasksAtStop = Object.values(this.activeTasks).filter(t => t.type === 'dropoff' || t.type === 'pickup');
+                    let tasksAtStop = Object.values(this.activeTasks).filter(t => t.type === 'dropoff' || t.type === 'pickup');  // TODO move this to startTask / stop at Busstop? -> dont filter at every iteration
                     if (tasksAtStop.length > 0) {  // TODO replace with activeTasks filter for dropoff
                         // TODO remove task from tasksAtStop after they are done
                         // let drive = false;
-                        for (let task in tasksAtStop) {
+                       tasksAtStop.forEach(function(task) {
                             if (task.type === 'pickup') {
                                 //wait for execute message
 
@@ -152,11 +153,10 @@ class Bus {
                                     simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
                                     simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
                                     // drive = false;
-                                    // TODO call Mission Complete? --> done from simulator
                                 }
                                 // drive = true;
                             }
-                        }
+                        });
                         return false; // drive;
                     }
             }
@@ -300,20 +300,22 @@ class Bus {
         //      --> no: busState = plannedStop
 
         // TODO debug this.missions[mID] is undefined
-        let oldTask = this.missions[mID].tasks.splice(0, 1);
-        if (oldTask[0].type === 'dropoff') {
-            this.parcels = this.parcels.filter(p => p !== oldTask.transaction.parcel);
+        let oldTask = this.missions[mID].tasks.splice(0, 1)[0];
+        if (oldTask.type === 'dropoff') {
+            this.parcels = this.parcels.filter(p => p !== oldTask.transaction.parcel);      // TODO debug: crashed ->    oldTask.transaction is undefined --> cannot read parcel
+
         }
 
+        // TODO IN DebUG: check if parcels are correct
         delete this.activeTasks[mID];
-        if(! (Object.values(this.activeTasks).find(t => t.type !== 'move'))) {
+        if(! (Object.values(this.activeTasks).find(t => t.type !== 'move'))) {  // TODO overthink... --> reset BusState before new task is even started???
             this.state = BusState.plannedStop;
         }
 
-        simulator.updateBusState();
+        simulator.updateBusState(this.id);
 
         if (this.missions[mID].tasks.length === 0) {
-            this.completeMission();
+            this.completeMission(simulator, mID);
 
         } else {
             this.startTask(simulator, mID);
@@ -385,17 +387,11 @@ class Bus {
             // task.state = TaskState.ongoing;
         } else if (task.type === 'pickup') {
 
-            // this.tasksAtStop.push(task);
-
-            console.log("BUS --> PICKUP started --> publish ready")
-
             let transaction = task.transaction;
             simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = BusState.transactionState;
             task.state = TaskState.waitingForTransaction;
         } else if (task.type === 'dropoff') {
-
-            // this.tasksAtStop.push(task);
 
             if (task.transaction.ready) {
                 this.state = BusState.transactionState;
