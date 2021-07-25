@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.schema import Table
 from datetime import datetime
+import pandas as pd
 
 from analysis_engine.utils import object_to_base_64, base_64_to_object, Timer
 
@@ -48,35 +49,205 @@ def try_with_session(commit: bool = False):
 
 Base = declarative_base()
 
-hub_parcel_table = Table('hub_parcel', Base.metadata,
-    Column('hub_id', Integer, ForeignKey('hubs.id')),
-    Column('parcel_id', Integer, ForeignKey('parcels.id'))
-)
+
+class HubParcelTable(Base):
+    __tablename__ = 'hub_parcel'
+
+    HybridType = Integer()
+    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
+
+    id = Column(HybridType, primary_key=True)
+    parcel_id = Column(Integer, ForeignKey('parcels.id'), primary_key=True)
+    hub_id = Column(Integer, ForeignKey('hubs.name'), primary_key=True)
+    time_received = Column(DateTime)
+    time_removed = Column(DateTime)
+
+    def __init__(self, id=None, parcel_id=None, hub_id=None, time_received=None, time_removed=None):
+        self.id = id
+        self.parcel_id = parcel_id
+        self.hub_id = hub_id
+        self.time_received = time_received
+        self.time_removed = time_removed
+
 
 bus_parcel_table = Table('bus_parcel', Base.metadata,
-    Column('bus_id', Integer, ForeignKey('busses.id')),
-    Column('parcel_id', Integer, ForeignKey('parcels.id'))
-)
+                         Column('bus_id', Integer, ForeignKey('bus_timestamps.id'), primary_key=True),
+                         Column('parcel_id', Integer, ForeignKey('parcels.id'))
+                         )
 
 bus_task_table = Table('bus_task', Base.metadata,
-    Column('bus_id', Integer, ForeignKey('busses.id')),
-    Column('task_id', Integer, ForeignKey('tasks.id'))
-)
+                       Column('bus_id', Integer, ForeignKey('bus_timestamps.id'), primary_key=True),
+                       Column('task_id', Integer, ForeignKey('tasks.id'))
+                       )
 
 bus_active_task_table = Table('bus_active_task', Base.metadata,
-    Column('bus_id', Integer, ForeignKey('busses.id')),
-    Column('task_id', Integer, ForeignKey('tasks.id'))
-)
+                              Column('bus_id', Integer, ForeignKey('bus_timestamps.id'), primary_key=True),
+                              Column('task_id', Integer, ForeignKey('tasks.id'))
+                              )
+
+
+class TransactionHubHubAssociation(Base):
+    __tablename__ = 'transaction_hub_hub'
+
+    from_id = Column(Integer, ForeignKey('hubs.name'))
+    to_id = Column(Integer, ForeignKey('hubs.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionHubCarAssociation(Base):
+    __tablename__ = 'transaction_hub_car'
+
+    from_id = Column(Integer, ForeignKey('hubs.name'))
+    to_id = Column(Integer, ForeignKey('cars.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionHubDroneAssociation(Base):
+    __tablename__ = 'transaction_hub_drone'
+
+    from_id = Column(Integer, ForeignKey('hubs.name'))
+    to_id = Column(Integer, ForeignKey('drones.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionHubBusAssociation(Base):
+    __tablename__ = 'transaction_hub_bus'
+
+    from_id = Column(Integer, ForeignKey('busses.name'))
+    to_id = Column(Integer, ForeignKey('drones.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionCarCarAssociation(Base):
+    __tablename__ = 'transaction_car_car'
+
+    from_id = Column(Integer, ForeignKey('cars.name'))
+    to_id = Column(Integer, ForeignKey('cars.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionCarDronesAssociation(Base):
+    __tablename__ = 'transaction_hub_drones'
+
+    from_id = Column(Integer, ForeignKey('cars.name'))
+    to_id = Column(Integer, ForeignKey('drones.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionCarBusAssociation(Base):
+    __tablename__ = 'transaction_car_bus'
+
+    from_id = Column(Integer, ForeignKey('cars.name'))
+    to_id = Column(Integer, ForeignKey('busses.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionDroneDroneAssociation(Base):
+    __tablename__ = 'transaction_drone_drone'
+
+    from_id = Column(Integer, ForeignKey('drones.name'))
+    to_id = Column(Integer, ForeignKey('drones.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionDroneBusAssociation(Base):
+    __tablename__ = 'transaction_drone_bus'
+
+    from_id = Column(Integer, ForeignKey('drones.name'))
+    to_id = Column(Integer, ForeignKey('busses.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class TransactionBusBusAssociation(Base):
+    __tablename__ = 'transaction_bus_bus'
+
+    from_id = Column(Integer, ForeignKey('busses.name'))
+    to_id = Column(Integer, ForeignKey('busses.name'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), primary_key=True)
+
+    def __init__(self, from_id=None, to_id=None, transaction_id=None):
+        self.from_id = from_id
+        self.to_id = to_id
+        self.transaction_id = transaction_id
+
+
+class MissionHubAssociation(Base):
+    __tablename__ = 'mission_hub'
+
+    mission_id = Column(Integer, ForeignKey('missions.name'), primary_key=True)
+    hub_id = Column(Integer, ForeignKey('hubs.name'))
+
+
+class MissionCarAssociation(Base):
+    __tablename__ = 'mission_car'
+
+    mission_id = Column(Integer, ForeignKey('missions.name'), primary_key=True)
+    hub_id = Column(Integer, ForeignKey('cars.name'))
+
+
+class MissionDroneAssociation(Base):
+    __tablename__ = 'mission_drone'
+
+    mission_id = Column(Integer, ForeignKey('missions.name'), primary_key=True)
+    hub_id = Column(Integer, ForeignKey('drones.name'))
+
+
+class MissionBusAssociation(Base):
+    __tablename__ = 'mission_bus'
+
+    mission_id = Column(Integer, ForeignKey('missions.name'), primary_key=True)
+    hub_id = Column(Integer, ForeignKey('busses.name'))
 
 
 class Experiment(Base):
     __tablename__ = 'experiments'
 
-    HybridType = Integer()
-    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
-
-    id = Column(HybridType, primary_key=True, autoincrement=True)
-    session = Column(String, nullable=False)
+    session = Column(String, nullable=False, primary_key=True)
     topology_64 = Column(Text)
     start_time = Column(DateTime)
     end_time = Column(DateTime)
@@ -95,8 +266,7 @@ class Experiment(Base):
 
         self.topology_64 = object_to_base_64(d)
 
-    def __init__(self, id=None, session=None, topology=None, start_time=None, end_time=None, duration=None):
-        self.id: Optional[int] = id
+    def __init__(self, session=None, topology=None, start_time=None, end_time=None, duration=None):
         self.session = session
         if topology is not None:
             self.topology = topology
@@ -120,7 +290,7 @@ class Parcel(Base):
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
     id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
     destination = Column(Text)
     time_placed = Column(DateTime)
     time_delivered = Column(DateTime)
@@ -143,7 +313,7 @@ class Order(Base):
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
     id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
     parcel_id = Column(HybridType, ForeignKey('parcels.id'), nullable=False)
     state = Column(String, nullable=False)
     time = Column(DateTime, nullable=False)
@@ -159,6 +329,96 @@ class Order(Base):
         return f'<{self.state}>'
 
 
+class Hub(Base):
+    __tablename__ = 'hubs'
+
+    HybridType = Integer()
+    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
+
+    name = Column(String, nullable=False, primary_key=True)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
+    position = Column(String, nullable=False)
+
+    missions = relationship('MissionHubAssociation')
+    parcels = relationship('HubParcelTable')
+
+    def __init__(self, experiment_id=None, name=None, position=None):
+        self.experiment_id: Optional[int] = experiment_id
+        self.name = name
+        self.position = position
+
+    def __repr__(self):
+        return f'<{self.name}: {self.position}>'
+
+
+class Car(Base):
+    __tablename__ = 'cars'
+
+    HybridType = Integer()
+    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
+
+    name = Column(String, nullable=False, primary_key=True)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
+    speed = Column(Integer, nullable=False)
+    missions = relationship('MissionCarAssociation')
+
+    timestamps = relationship('CarTimestamp')
+
+    def __init__(self, experiment_id=None, name=None, speed=None):
+        self.experiment_id: Optional[int] = experiment_id
+        self.name = name
+        self.speed = speed
+
+    def __repr__(self):
+        return f'<{self.name}: ({self.speed}>'
+
+
+class Drone(Base):
+    __tablename__ = 'drones'
+
+    HybridType = Integer()
+    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
+
+    name = Column(String, primary_key=True)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
+    speed = Column(Integer, nullable=False)
+    missions = relationship('MissionDroneAssociation')
+
+    timestamps = relationship('DroneTimestamp')
+
+    def __init__(self, name=None, experiment_id=None, speed=None):
+        self.name = name
+        self.experiment_id: Optional[int] = experiment_id
+        self.speed = speed
+
+    def __repr__(self):
+        return f'<{self.name}: ({self.speed}>'
+
+
+class Bus(Base):
+    __tablename__ = 'busses'
+
+    HybridType = Integer()
+    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
+
+    name = Column(String, primary_key=True)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
+    speed = Column(Integer, nullable=False)
+    capacity = Column(Integer, nullable=False)
+    route = Column(Text)
+    missions = relationship('MissionBusAssociation')
+
+    def __init__(self, experiment_id=None, name=None, speed=None, capacity=None, route=None):
+        self.experiment_id: Optional[int] = experiment_id
+        self.name = name
+        self.speed = speed
+        self.capacity = capacity
+        self.route = route
+
+    def __repr__(self):
+        return f'<{self.name}: ({self.speed}, {self.capacity})'
+
+
 class Transaction(Base):
     __tablename__ = 'transactions'
 
@@ -166,32 +426,14 @@ class Transaction(Base):
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
     id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
-    from_hub_id = Column(HybridType, ForeignKey('hubs.id'), nullable=True)
-    from_car_id = Column(HybridType, ForeignKey('cars.id'), nullable=True)
-    from_drone_id = Column(HybridType, ForeignKey('drones.id'), nullable=True)
-    from_bus_id = Column(HybridType, ForeignKey('busses.id'), nullable=True)
-    to_hub_id = Column(HybridType, ForeignKey('hubs.id'), nullable=True)
-    to_car_id = Column(HybridType, ForeignKey('cars.id'), nullable=True)
-    to_drone_id = Column(HybridType, ForeignKey('drones.id'), nullable=True)
-    to_bus_id = Column(HybridType, ForeignKey('busses.id'), nullable=True)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
     parcel_id = Column(HybridType, ForeignKey('parcels.id'), nullable=False)
     time_created = Column(DateTime, nullable=False)
     time_completed = Column(DateTime, nullable=False)
 
-    def __init__(self, id=None, experiment_id=None, from_hub_id=None, from_car_id=None, from_drone_id=None,
-                 from_bus_id=None, to_hub_id=None, to_car_id=None, to_drone_id=None, to_bus_id=None,
-                 parcel_id=None, time_created=None, time_completed=None):
+    def __init__(self, id=None, experiment_id=None, parcel_id=None, time_created=None, time_completed=None):
         self.id: Optional[int] = id
         self.experiment_id: Optional[int] = experiment_id
-        self.from_hub_id = from_hub_id
-        self.from_car_id = from_car_id
-        self.from_drone_id = from_drone_id
-        self.from_bus_id = from_bus_id
-        self.to_hub_id = to_hub_id
-        self.to_car_id = to_car_id
-        self.to_drone_id = to_drone_id
-        self.to_bus_id = to_bus_id
         self.parcel_id = parcel_id
         self.time_created = time_created
         self.time_completed = time_completed
@@ -206,14 +448,37 @@ class Mission(Base):
     HybridType = Integer()
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
-    id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
-    state = Column(String, nullable=False)
+    name = Column(String, primary_key=True)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
+
+    timestamps = relationship('MissionTimestamp')
+    hub = relationship('MissionHubAssociation')
+    drone = relationship('MissionDroneAssociation')
+    car = relationship('MissionCarAssociation')
+    bus = relationship('MissionBusAssociation')
+
+    def __init__(self, id=None, experiment_id=None, name=None, state=None, time=None):
+        self.name = name
+        self.experiment_id: Optional[int] = experiment_id
+
+    def __repr__(self):
+        return f'<{self.state}>'
+
+
+class MissionTimestamp(Base):
+    __tablename__ = 'mission_timestamps'
+
+    HybridType = Integer()
+    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
+
+    id = Column(HybridType, primary_key=True)
+    mission_id = Column(HybridType, ForeignKey('missions.name'))
+    state = Column(String)
     time = Column(DateTime, nullable=False)
 
-    def __init__(self, id=None, experiment_id=None, parcel_id=None, state=None, time=None):
+    def __init__(self, id=None, mission_id=None, state=None, time=None):
         self.id: Optional[int] = id
-        self.experiment_id: Optional[int] = experiment_id
+        self.mission_id = mission_id
         self.state = state
         self.time = time
 
@@ -228,17 +493,16 @@ class Task(Base):
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
     id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
-    mission_id = Column(HybridType, ForeignKey('missions.id'), nullable=False)
+    experiment_id = Column(HybridType, ForeignKey('experiments.session'), nullable=False)
+    mission_id = Column(HybridType, ForeignKey('missions.name'), nullable=False)
     type = Column(String, nullable=False)
-    state = Column(String, nullable=False)
-    destination_x = Column(Integer, nullable=False)
-    destination_y = Column(Integer, nullable=False)
-    transaction_id = Column(HybridType, ForeignKey('transactions.id'), nullable=False)
-    time = Column(DateTime, nullable=False)
+    state = Column(String)
+    destination_x = Column(Integer)
+    destination_y = Column(Integer)
+    transaction_id = Column(HybridType, ForeignKey('transactions.id'))
 
     def __init__(self, id=None, experiment_id=None, mission_id=None, type=None, state=None, destination_x=None,
-                 destination_y=None, transaction_id=None, time=None):
+                 destination_y=None, transaction_id=None):
         self.id: Optional[int] = id
         self.experiment_id: Optional[int] = experiment_id
         self.mission_id = mission_id
@@ -247,64 +511,54 @@ class Task(Base):
         self.destination_x = destination_x
         self.destination_y = destination_y
         self.transaction_id = transaction_id
+
+    def __repr__(self):
+        return f'<{self.type}, {self.state}, ({self.destination_x},{self.destination_y})>'
+
+
+class TaskTimestamp(Base):
+    __tablename__ = 'task_timestamps'
+
+    HybridType = Integer()
+    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
+
+    id = Column(HybridType, primary_key=True, autoincrement=True)
+    task_id = Column(HybridType, ForeignKey('tasks.id'), nullable=False)
+    state = Column(String, nullable=False)
+    time = Column(DateTime, nullable=False)
+
+    def __init__(self, id=None, task_id=None, state=None, time=None):
+        self.id: Optional[int] = id
+        self.task_id = task_id
+        self.state = state
         self.time = time
 
     def __repr__(self):
         return f'<{self.type}, {self.state}, ({self.destination_x},{self.destination_y})>'
 
 
-class Hub(Base):
-    __tablename__ = 'hubs'
+class CarTimestamp(Base):
+    __tablename__ = 'car_timestamps'
 
     HybridType = Integer()
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
     id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
-    name = Column(String, nullable=False)
-    position_x = Column(Integer, nullable=False)
-    position_y = Column(Integer, nullable=False)
-    parcels = relationship('Parcel', secondary=hub_parcel_table)
-    time = Column(DateTime)
-
-    def __init__(self, id=None, experiment_id=None, name=None, position_x=None, position_y=None,
-                 time=None):
-        self.id: Optional[int] = id
-        self.experiment_id: Optional[int] = experiment_id
-        self.name = name
-        self.position_x = position_x
-        self.position_y = position_y
-        self.time = time
-
-    def __repr__(self):
-        return f'<{self.name}: ({self.position_x}, {self.position_y})>'
-
-
-class Car(Base):
-    __tablename__ = 'cars'
-
-    HybridType = Integer()
-    HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
-
-    id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
-    name = Column(String, nullable=False)
+    car_id = Column(HybridType, ForeignKey('cars.name'), nullable=False)
     task_id = Column(Text)
     position_x = Column(Integer, nullable=False)
     position_y = Column(Integer, nullable=False)
-    speed = Column(Integer, nullable=False)
-    parcel_id = Column(HybridType, ForeignKey('parcels.id'), nullable=False)
-    state = Column(String, nullable=False)
+    parcel_id = Column(HybridType, ForeignKey('parcels.id'), nullable=True)
+    state = Column(String, nullable=True)
     time = Column(DateTime)
 
-    def __init__(self, id=None, experiment_id=None, name=None, position_x=None, position_y=None,
-                 speed=None, parcel_id=None, state=None, time=None):
+    def __init__(self, id=None, car_name=None, task_id=None, position_x=None,
+                 position_y=None, parcel_id=None, state=None, time=None):
         self.id: Optional[int] = id
-        self.experiment_id: Optional[int] = experiment_id
-        self.name = name
+        self.car_id = car_name
+        self.task_id = task_id
         self.position_x = position_x
         self.position_y = position_y
-        self.speed = speed
         self.parcel_id = parcel_id
         self.state = state
         self.time = time
@@ -313,31 +567,28 @@ class Car(Base):
         return f'<{self.name}: ({self.position_x}, {self.position_y}), {self.state}>'
 
 
-class Drone(Base):
-    __tablename__ = 'drones'
+class DroneTimestamp(Base):
+    __tablename__ = 'drone_timestamps'
 
     HybridType = Integer()
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
     id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
-    name = Column(String, nullable=False)
-    task_id = Column(Text)
+    drone_id = Column(HybridType, ForeignKey('drones.name'), nullable=False)
+    task_id = Column(Text, nullable=True)
     position_x = Column(Integer, nullable=False)
     position_y = Column(Integer, nullable=False)
-    speed = Column(Integer, nullable=False)
-    parcel_id = Column(HybridType, ForeignKey('parcels.id'), nullable=False)
-    state = Column(String, nullable=False)
+    parcel_id = Column(HybridType, ForeignKey('parcels.id'), nullable=True)
+    state = Column(String, nullable=True)
     time = Column(DateTime)
 
-    def __init__(self, id=None, experiment_id=None, name=None, position_x=None, position_y=None,
-                 speed=None, parcel_id=None, state=None, time=None):
+    def __init__(self, id=None, drone_name=None, task_id=None, position_x=None,
+                 position_y=None, parcel_id=None, state=None, time=None):
         self.id: Optional[int] = id
-        self.experiment_id: Optional[int] = experiment_id
-        self.name = name
+        self.drone_id = drone_name
+        self.task_id = task_id
         self.position_x = position_x
         self.position_y = position_y
-        self.speed = speed
         self.parcel_id = parcel_id
         self.state = state
         self.time = time
@@ -346,40 +597,31 @@ class Drone(Base):
         return f'<{self.name}: ({self.position_x}, {self.position_y}), {self.state}>'
 
 
-class Bus(Base):
-    __tablename__ = 'busses'
+class BusTimestamp(Base):
+    __tablename__ = 'bus_timestamps'
 
     HybridType = Integer()
     HybridType = HybridType.with_variant(BigInteger(), 'postgresql')
 
     id = Column(HybridType, primary_key=True, autoincrement=True)
-    experiment_id = Column(HybridType, ForeignKey('experiments.id'), nullable=False)
-    name = Column(String, nullable=False)
+    bus_id = Column(HybridType, ForeignKey('busses.name'), nullable=False)
     task_id = Column(Text)
     position_x = Column(Integer, nullable=False)
     position_y = Column(Integer, nullable=False)
-    speed = Column(Integer, nullable=False)
     state = Column(String, nullable=False)
-    capacity = Column(Integer, nullable=False)
-    route = Column(Text)
     next_stop = Column(String, nullable=False)
     parcels = relationship('Parcel', secondary=bus_parcel_table)
     tasks = relationship('Task', secondary=bus_task_table)
     active_tasks = relationship('Task', secondary=bus_active_task_table)
     time = Column(DateTime)
 
-    def __init__(self, id=None, experiment_id=None, name=None, position_x=None, position_y=None,
-                 speed=None, parcel_id=None, state=None, capacity=None, route=None, next_stop=None, time=None):
+    def __init__(self, id=None, position_x=None, position_y=None, parcel_id=None,
+                 state=None, next_stop=None, time=None):
         self.id: Optional[int] = id
-        self.experiment_id: Optional[int] = experiment_id
-        self.name = name
         self.position_x = position_x
         self.position_y = position_y
-        self.speed = speed
         self.parcel_id = parcel_id
         self.state = state
-        self.capacity = capacity
-        self.route = route
         self.next_stop = next_stop
         self.time = time
 
@@ -427,14 +669,102 @@ class Database(object):
         experiment.end_time = datetime.now()
         experiment.duration = self.timer.get()
 
+    @try_with_session()
+    def get_drone(self, drone_name):
+        return self.session.query(Drone).get(drone_name)
+
+    @try_with_session()
+    def get_car(self, car_name):
+        return self.session.query(Car).get(car_name)
+
     @try_with_session(commit=True)
-    def create_mission(self, **kwargs):
-        mission = Mission(**kwargs)
+    def create_hub(self, name: str, experiment_id: int, position: str):
+        hub = Hub(name=name, experiment_id=experiment_id, position=position)
+        self.session.add(hub)
+        return hub
+
+    @try_with_session(commit=True)
+    def create_drone(self, name: str, experiment_id: int, speed: int):
+        drone = Drone(name=name, experiment_id=experiment_id, speed=speed)
+        self.session.add(drone)
+        return drone
+
+    @try_with_session(commit=True)
+    def create_car(self, name: str, experiment_id: int, speed: int):
+        car = Car(name=name, experiment_id=experiment_id, speed=speed)
+        self.session.add(car)
+        return car
+
+    @try_with_session(commit=True)
+    def add_timestamp_to_drone(self, drone_name: str, position_x: int,
+                               position_y: int, state: str, parcel_id: int = None, task_id: int = None):
+        drone = self.session.query(Drone).get(drone_name)
+        timestamp = drone.timestamps.append(DroneTimestamp(drone_name=drone_name, parcel_id=parcel_id, task_id=task_id,
+                                                           position_x=position_x, position_y=position_y, state=state,
+                                                           time=datetime.now()))
+        return timestamp
+
+    @try_with_session(commit=True)
+    def add_timestamp_to_car(self, car_name: str, position_x: int,
+                             position_y: int, state: str, parcel_id: int = None, task_id: int = None):
+        car = self.session.query(Car).get(car_name)
+        timestamp = car.timestamps.append(CarTimestamp(car_name=car_name, parcel_id=parcel_id, task_id=task_id,
+                                                       position_x=position_x, position_y=position_y, state=state,
+                                                       time=datetime.now()))
+        return timestamp
+
+    @try_with_session(commit=True)
+    def add_parcel_to_hub(self, hub_name: str, parcel_id: int):
+        hub = self.session.query(Hub).get(hub_name)
+        parcel = hub.parcels.append(HubParcelTable(parcel_id=parcel_id, hub_id=hub_name,
+                                                   time_received=datetime.now()))
+        return parcel
+
+    @try_with_session(commit=True)
+    def mark_parcel_as_picked_up(self, parcel_id: int):
+        parcel = self.session.query(HubParcelTable).get(parcel_id)
+        parcel.time_completed = datetime.now()
+        return parcel
+
+    @try_with_session(commit=True)
+    def create_mission(self, name: str, vehicle_id: str, experiment_id: int, state: str, type: str):
+        assert type in ['hub', 'drone', 'car', 'bus'], 'Unknown vehicle type'
+
+        mission = Mission(name=name, experiment_id=experiment_id)
+        mission.timestamps.append(MissionTimestamp(mission_id=mission.name, state=state, time=datetime.now()))
+
+        if type == 'hub':
+            mission.hub.append(MissionHubAssociation(mission_id=mission.name, hub_id=hub_id))
+        elif type == 'drone':
+            mission.drone.append(MissionHubAssociation(mission_id=mission.name, hub_id=drone_id))
+        elif type == 'car':
+            mission.car.append(MissionHubAssociation(mission_id=mission.name, hub_id=car_id))
+        else:
+            mission.drone.append(MissionHubAssociation(mission_id=mission.name, hub_id=bus_id))
+
         self.session.add(mission)
         return mission
 
+    @try_with_session()
+    def get_task(self, id):
+        return self.session.query(Task).get(id)
+
     @try_with_session(commit=True)
-    def create_task_timestamp(self, **kwargs):
-        mission = Mission(**kwargs)
-        self.session.add(mission)
-        return mission
+    def create_task(self, mission_id: str, experiment_id: str, type: str, state,
+                    destination_x: int, destination_y: int, transaction_id: str):
+        task = Task(experiment_id=experiment_id, mission_id=mission_id,
+                    type=type, state=state, destination_x=destination_x,
+                    destination_y=destination_y, transaction_id=transaction_id)
+        self.session.add(task)
+        return car
+
+    def export_drone_data(self, experiment_id: str):
+        with self.engine.connect()  as con:
+            query = f"select  * " \
+                    f"from drone_timestamps " \
+                    f"inner join drones on drone_timestamps.drone_id=drones.name " \
+                    f"where experiment_id='{experiment_id}';"
+            result = con.execute(query)
+            df = pd.DataFrame(result.fetchall())
+            df.columns = result.keys()
+            return df
