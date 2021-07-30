@@ -5,14 +5,13 @@ const { random, uuid } = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const { Drone, DroneState, TaskState} = require('../models/drone');
 
-const topology = require('../../assets/topology');
-
 // Class
 module.exports = class DroneSimulator extends MQTTClient {
-    constructor(numberOfDrones) {
+
+    constructor(scenario) {
         super('drone-simulator', ['to/drone/#', 'from/visualization/#']);
 
-        this.numberOfDrones = numberOfDrones;
+        this.scenario = scenario;
         this.drones = { };
 
         this.timer = null;
@@ -56,12 +55,15 @@ module.exports = class DroneSimulator extends MQTTClient {
     }
 
     init() {
-        this.drones = Object.assign({}, ...Array.from({ length: this.numberOfDrones }).map(() => {
-            let id = uuid();
+        this.drones = Object.assign({}, ...Object.values(this.scenario.entities.drones).map(drone => {
+            let id = drone.id || uuid();
+            let position = drone.position || random.droneHub().position;
+
             // TODO changed position of new drones to be only spawned at hubs --> clarify again
             // return { [id]: new Drone(id, random.position())};
             // return { [id]: new Drone(id, random.position(), { id: uuid(), items: [{ type: 'fly', destination: random.position(), minimumDuration: 10 }] }) };
-            return { [id]: new Drone(id, random.value(random.droneHubs()).position, { id: uuid(), items: [{ type: 'fly', destination: random.value(random.droneHubs()).position, minimumDuration: 10 }] }) };
+            // TODO wieso direkt Task übergeben?
+            return { [id]: new Drone(id, position)};  //{ id: uuid(), items: [{ type: 'fly', destination: random.droneHub().position, minimumDuration: 10 }] }) };
         }));
         for (const [id, drone] of Object.entries(this.drones)) {
             this.publishFrom(`drone/${id}`, 'state', drone);
@@ -73,11 +75,11 @@ module.exports = class DroneSimulator extends MQTTClient {
         this.start();
     }
 
-    //TODO remove function & remove topic from receive
-    test_init() {
-        this.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
-        this.resume(); //side-effect: also starts app -> sets timer!
-    }
+    // //TODO remove function & remove topic from receive
+    // test_init() {
+    //     this.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
+    //     this.resume(); //side-effect: also starts app -> sets timer!
+    // }
 
     moveDrones = () => {
         for (const [id, drone] of Object.entries(this.drones)) {
@@ -95,10 +97,10 @@ module.exports = class DroneSimulator extends MQTTClient {
                 this[topic.rest]();
             }
         }
-        //TODO remove
-        else if (this.matchTopic(topic, '+/+/+/test_init')) {
-            this.test_init();
-        }
+        // //TODO remove
+        // else if (this.matchTopic(topic, '+/+/+/test_init')) {
+        //     this.test_init();
+        // }
         else if (this.matchTopic(topic, 'to/drone/+/mission')) {
             this.drones[topic.id].setMission(message, this);
         }

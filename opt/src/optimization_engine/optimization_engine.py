@@ -406,8 +406,10 @@ class OptimizationEngine(MQTTClient):
         self.hubs['h02'] = Hub(id='h02', position='n11', transactions={}, parcels={})
 
         # TODO also position as named tuple?
-        self.drones['d00'] = Drone(id='d00', position={'x': -50, 'y': 60, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
-        self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
+        self.drones['d00'] = Drone(id='d00', position={'x': -50, 'y': 60, 'z': 0}, speed=0, parcel=None,
+                                   state=DroneState.IDLE)
+        self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, speed=0, parcel=None,
+                                   state=DroneState.IDLE)
         self.drones['d02'] = Drone(id='d02', position={'x': 60, 'y': 0, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
 
         # self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
@@ -502,6 +504,8 @@ class OptimizationEngine(MQTTClient):
         [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
         # TODO handle parcel / order placed
         if entity == 'parcel':
+            logging.warn(f"[{self.client_name}] - Should Create Delivery Route for: {entity}/{id_} - {msg.payload} -  "
+                         f"Not yet Implemented")
             pass
         elif entity == 'order':
             pass

@@ -6,16 +6,14 @@ const {random, uuid} = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const {Bus} = require("../models/bus");
 
-const topology = require('../../assets/topology');
-
 // TODO s:  - add change route
 //          - add abort mission
 
 module.exports = class BusSimulator extends MQTTClient {
-    constructor(numberOfBuses) {
+    constructor(scenario) {
         super('bus-simulator', ['to/bus/#', 'from/visualization/#']);
 
-        this.numberOfBuses = numberOfBuses;
+        this.scenario = scenario;
         this.buses = {};
 
         this.timer = null;
@@ -56,20 +54,15 @@ module.exports = class BusSimulator extends MQTTClient {
         this.buses = {};
     }
 
-    init() { //TODO change to fixed route along the Rectangle for testing
-        this.buses = Object.assign({}, ...Array.from({length: this.numberOfBuses}).map(() => {
-            let id = uuid();
-            // let start = random.key(_.pickBy(topology.nodes, n => ['parking', 'road-junction'].includes(n.type)));
-            let route = [{node: 'n00', position: {x: -50, y: 50, z: 0}, time: 10},
-                {node: 'n01', position: {x: -50, y: -50, z: 0}, time: 18},
-                {node: 'n02', position: {x: 50, y: -50, z: 0}, time: 12},
-                {node: 'n09', position: {x: 50, y: 0, z: 0}, time: 6},
-                {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 12}]// erstmal fixe route nehmen... // TODO replace with better init -> random /
+    init() {
+        this.buses = Object.assign({}, ...Object.values(this.scenario.entities.buses).map(bus => {
+            let id = bus.id || uuid();
+            let position = bus.position || random.roadHub().position;
+            let route = bus.route || null;
 
-            return {[id]: new Bus(id, topology.nodes['n00'].position, route)};
-            // return { [id]: new Bus(id, topology.nodes[start].position, []) };
+            return {[id]: new Bus(id, position, route)};
         }));
-        // TODO weg??
+
         for (const [id, bus] of Object.entries(this.buses)) {
             this.publishFrom(`bus/${id}`, 'state', bus);
         }
@@ -87,10 +80,10 @@ module.exports = class BusSimulator extends MQTTClient {
             if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
-        }
-        //TODO remove
-        else if (this.matchTopic(topic, '+/+/+/test_init')) {
-            this.test_init();
+        // }
+        // //TODO remove
+        // else if (this.matchTopic(topic, '+/+/+/test_init')) {
+        //     this.test_init();
         } else if (this.matchTopic(topic, 'to/bus/+/mission')) {
             this.buses[topic.id].setMission(message, this);
         } else if (this.matchTopic(topic, 'to/bus/+/transaction/+/ready')) {
@@ -122,21 +115,21 @@ module.exports = class BusSimulator extends MQTTClient {
 
     }
 
-    //TODO remove function & remove topic from receive
-    test_init() {
-
-        let route = [
-            {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 10},
-            {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 18},
-            {node: 'n01', position: {x: -50, y: -50, z: 0}, time: 12},
-            {node: 'n02', position: {x: 50, y: -50, z: 0}, time: 6},
-            {node: 'n09', position: {x: 50, y: 0, z: 0}, time: 12}
-            // {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 10}
-            ]// erstmal fixe route nehmen... // TODO replace with better init -> random /
-
-        this.buses = {v01: new Bus('v01', {x: 50, y: 50, z: 0}, route, 2)};
-        this.resume();
-    }
+    // //TODO remove function & remove topic from receive
+    // test_init() {
+    //
+    //     let route = [
+    //         {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 10},
+    //         {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 18},
+    //         {node: 'n01', position: {x: -50, y: -50, z: 0}, time: 12},
+    //         {node: 'n02', position: {x: 50, y: -50, z: 0}, time: 6},
+    //         {node: 'n09', position: {x: 50, y: 0, z: 0}, time: 12}
+    //         // {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 10}
+    //         ]// erstmal fixe route nehmen... // TODO replace with better init -> random /
+    //
+    //     this.buses = {v01: new Bus('v01', {x: 50, y: 50, z: 0}, route, 2)};
+    //     this.resume();
+    // }
 
     moveBuses = () => {
         for (const [id, bus] of Object.entries(this.buses)) {
@@ -150,29 +143,4 @@ module.exports = class BusSimulator extends MQTTClient {
         let bus = this.buses[id];
         this.publishFrom(`bus/${id}`, 'state', bus);
     }
-
-    // TODO use these methods again in the if/ elif receives
-    // //TODO alex enable multiple missions
-    // handleMission(topic, message) {
-    //     this.buses[topic.id].setMission(message, this);
-    // }
-
-    // //TODO alex enable multiple missions
-    // handleTransactionReady(topic, message) {
-    //     // This message is only received if the bus is the transaction's "from" instance
-    //     let mission =
-    //     let transaction = this.buses[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
-    //     transaction.ready = true;
-    // }
-    //
-    // handleTransactionExecute(topic, message) {
-    //     // This message is only received if the bus is the transaction's "to" instance and has already sent the "ready" message
-    //     this.buses[topic.id].completeTransaction(this);
-    // }
-    //
-    // handleTransactionComplete(topic, message) {
-    //     // This message is only received if the bus is the transaction's "from" instance and has already sent the "execute" message
-    //     this.buses[topic.id].completeTask(this);
-    // }
-
 };

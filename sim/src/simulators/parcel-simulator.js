@@ -7,10 +7,11 @@ const {random, uuid} = require('../helpers');
 const Parcel = require('../models/parcel');
 
 module.exports = class ParcelSimulator extends MQTTClient {
-    constructor(hubSimulator) {
+    constructor(hubSimulator, scenario) {
         super('parcel-simulator', ['to/parcel/#', 'from/visualization/#']);
 
         this.parcels = {};
+        this.scenario = scenario;
         this.hubSimulator = hubSimulator;
     }
 
@@ -20,25 +21,37 @@ module.exports = class ParcelSimulator extends MQTTClient {
         }
     }
 
-    stop() {
-        this.parcels = {p00: new Parcel('p00', {type: 'hub', id: 'h00'}, {type: 'hub', id: 'h01'})};
+    start() {
+        this.init();
+        this.resume();
     }
 
-    //TODO remove function & remove topic from receive
-    test_init() {
-        this.parcels = {p00: new Parcel('p00', {type: 'hub', id: 'h00'}, {type: 'hub', id: 'h01'})};
+    reset() {
+        this.stop();
+        this.start();
+    }
+
+    init() {
+        this.parcels = Object.assign({}, ...Object.values(this.scenario.entities.parcels).map(p => {
+            let id = p.id || uuid();
+            let carrier = p.destination;
+            let destination = p.carrier;
+            let newParcel = new Parcel(id, carrier, destination);
+            //this.hubSimulator.addParcelToHub(carrier.id, newParcel);
+            return {[id]: newParcel};
+        }));
+    }
+
+    stop() {
+        this.parcels = {};
     }
 
     receive(topic, message) {
         super.receive(topic, message);
-
-        //TODO remove
-        if (this.matchTopic(topic, '+/+/+/test_init')) {
-            this.test_init();
-        } else if (topic.direction === 'from') {
+        if (topic.direction === 'from') {
             if (topic.entity === 'visualization') {
-                if (topic.rest === 'stop') {
-                    this.stop();
+                if (['start', 'stop', 'reset'].includes(topic.rest)) {
+                    this[topic.rest]();
                 } else if (topic.rest === 'place-order') {
                     let id = uuid();
                     this.publishFrom(`order/${id}`, 'placed');

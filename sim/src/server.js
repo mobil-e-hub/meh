@@ -15,10 +15,10 @@ const CarSimulator = require('./simulators/car-simulator');
 const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
 const ParcelSimulator = require('./simulators/parcel-simulator');
-const ControlSystem = require('./control-system/control-system');
+// const ControlSystem = require('./control-system/control-system');
 
 const {uuid} = require('./helpers');
-const topology = require('../assets/topology');
+const topology = require('../assets/scenario');
 
 
 // Environment variables
@@ -40,14 +40,16 @@ const server = app.listen(port, () => {
     console.log(`< Server listening at http://localhost:${port}.`)
 });
 
+// Map and initial entities
+const scenario = require('../assets/scenario');
 
 // Simulators
-const droneSimulator = new DroneSimulator(3);
-const carSimulator = new CarSimulator(0);
-const busSimulator = new BusSimulator(0);
-const hubSimulator = new HubSimulator(3);
-const parcelSimulator = new ParcelSimulator(hubSimulator);
-const controlSystem = new ControlSystem(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator);
+const hubSimulator = new HubSimulator(scenario);
+const droneSimulator = new DroneSimulator(scenario);
+const carSimulator = new CarSimulator(scenario);
+const busSimulator = new BusSimulator(scenario);
+const parcelSimulator = new ParcelSimulator(hubSimulator, scenario);
+// const controlSystem = new ControlSystem(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator);
 
 // Graceful shutdown
 process.on('SIGTERM', shutdown);

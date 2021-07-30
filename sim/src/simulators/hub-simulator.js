@@ -5,13 +5,11 @@ const {random, uuid} = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const Hub = require('../models/hub');
 
-const topology = require('../../assets/topology');
-
 module.exports = class HubSimulator extends MQTTClient {
-    constructor(numberOfHubs) {
+    constructor(scenario) {
         super('hub-simulator', ['to/hub/#', 'from/visualization/#']);
 
-        this.numberOfHubs = numberOfHubs;
+        this.scenario = scenario;
         this.hubs = {};
     }
 
@@ -34,21 +32,16 @@ module.exports = class HubSimulator extends MQTTClient {
     }
 
     init() {
-        this.hubs = Object.assign({}, ...Array.from({length: this.numberOfHubs}).map(() => {
-            let id = uuid();
-            return {[id]: new Hub(id, random.key(topology.nodes))};
+        this.hubs = Object.assign({}, ...Object.values(this.scenario.entities.hubs).map(hub => {
+            let id = hub.id || uuid();
+            let position = hub.position || random.key(this.scenario.topology.nodes);
+            return {[id]: new Hub(id, position)};
         }));
     }
 
     reset() {
         this.stop();
         this.start();
-    }
-
-    //TODO remove function & remove topic from receive
-    test_init() {
-        this.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07'), h02: new Hub('h02', 'n10') };
-        this.resume();
     }
 
     receive(topic, message) {
@@ -59,10 +52,10 @@ module.exports = class HubSimulator extends MQTTClient {
                 this[topic.rest]();
             }
         }
-        //TODO remove
-        else if (this.matchTopic(topic, '+/+/+/test_init')) {
-            this.test_init();
-        }
+            // //TODO remove
+            // else if (this.matchTopic(topic, '+/+/+/test_init')) {
+            //     this.test_init();
+        // }
         else if (this.matchTopic(topic, 'to/hub/+/mission')) {
             let hub = this.hubs[topic.id];
             let transaction = message.tasks[0].transaction;
@@ -82,11 +75,9 @@ module.exports = class HubSimulator extends MQTTClient {
             // This message is only received if the hub is the transaction's "to" instance and has already sent the "ready" message
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
-            // console.log(transaction);
-            // console.log("topic: " +  topic.args[1]);
-            hub.parcels[transaction.parcel] = transaction.parcel;
+            this.addParcelToHub(hub.id, transaction.parcel);
             this.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
-            delete hub.transactions[topic.args[1]];
+            delete this.hubs[topic.id].transactions[topic.args[1]];
 
             this.publishFrom(`hub/${hub.id}`, 'state', hub);
         } else if (this.matchTopic(topic, 'to/hub/+/transaction/+/complete')) {
@@ -103,5 +94,9 @@ module.exports = class HubSimulator extends MQTTClient {
             console.log(`<<<<< HUB-SIMULATOR: RECEIVED MESSAGE: ${message} <<<<<<<<`)
         }
 
+    }
+
+    addParcelToHub(hubID, parcel) {
+        this.hubs[hubID].parcels[parcel] = parcel;
     }
 };
