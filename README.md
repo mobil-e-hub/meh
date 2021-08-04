@@ -11,6 +11,7 @@ This project allows for the simulation, control and visualization of a Drone Log
 - Simulator (node.js server in `/sim`): This module simulates drones, vehicles, parcels, hubs and orders.
 - Optimization Engine (Flask server in `/opt`): This module controls the routing of drones and vehicles.
 - Visualization (Vue app in `/viz`): This module shows the current status of the DLN in the browser.
+- MQTT (node.js server in `/mqtt`): This module forwards messages between the MQTT broker and the Azure EventGrid. 
 
 Please refer to the `README.md` files in the respective sub-folders for instructions and documentation.
 

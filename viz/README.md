@@ -26,13 +26,41 @@ In the `created()` lifecycle function, subscribe to topics using
 this.$eventgrid.subscribe(pattern, handler);
 ```
 
-## Communication with MQTT - [Deprecated!]
-Communication between entities exclusively uses the public MQTT broker `broker.hivemq.com`.
+## Communication with MQTT -
+Communication between entities exclusively uses the private mosquitto MQTT broker `wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt`.
 
 All topics start with `mobil-e-hub/v1/[from|to]/[entity]/[id]/`, and all messages are string representations of JSON objects.
 Each entity publishes `{ topic: mobil-e-hub/v1/from/[entity]/[id]/connected, message: ''}` upon connection.
 
+The following table lists all currently used topics in this project with short explanations on their usage
 
+Entities comprise: Hub, Drone, Car, Bus, Parcel, (Order) - messages send by the corresponding simulators
+
+
+| Topic | Usage | Sender | Receiver |
+|---	|---	|--- |--- |
+|connected  	| upon connection  	|Entity | |
+|state 	| on state change 	| Entity  | |
+| | | | |
+|start	|  	| viz | all |
+|pause  	|  	| viz | all |
+|resume  	|  	| viz | all |
+|stop 	|  	| viz | all |
+|test*	| used during DEV | viz | viz |
+| | | | |
+|place  	| parcel added -> triggers delivery	| viz | Entity, Opt|
+|placed  	|  	| Parcel| Entity, Opt |
+|transfer  	|  	| Entity | Parcel |
+|delivered  |	| Parcel | Entity, Opt | 
+| | | | |
+|transaction/./ready 	| Receiving instance ready for transaction	| Entity | Entity|
+|"/./unready  	|  	Receiving instance no longer ready for transaction | Entity | Entity, (Opt) |
+|"/./execute  |	| Entity | Entity | 
+|"/./complete  |	| Entity | Entity |
+| | | | |
+|mission	| | opt_engine | Entity	|
+|"/./complete	| | Entity | 	|
+|("/./failed)	| not implemented yet | Entity | 	|
 ---
 ## Project Structure
 
