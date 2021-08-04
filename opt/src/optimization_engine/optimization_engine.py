@@ -11,6 +11,7 @@ from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Rou
     TaskState, Route
 from mqtt_client import MQTTClient
 
+
 # TODO handle stop and pause from vueApp also here --> do not send stuff out!
 
 
@@ -20,7 +21,7 @@ class OptimizationEngine(MQTTClient):
     def __init__(self):
         MQTTClient.__init__(self)
 
-        self.id = str(uuid4())[0:8]  # TODO necessary for opt_engine? there should be only one --> self.root
+        # self.id = str(uuid4())[0:8]  # TODO necessary for opt_engine? there should be only one --> self.root
         self.project = 'mobil-e-hub'
         self.version = 'vX'
 
@@ -47,13 +48,14 @@ class OptimizationEngine(MQTTClient):
             drone2 = self._assign_drone(route.air2)
 
             logging.debug(
-                f"< [{self.client_name}] - Create_delivery_route: Assigned entities to sub-routes  -> starting missions...")
+                f"< [{self.client_name}] - Create_delivery_route: Assigned entities to sub-routes  -> starting "
+                f"missions...")
             # TODO if 1 return is None send a failed mission to visualization instead of publishing missions...
             self.create_and_start_mission(parcel, drone1, vehicle, v_type, drone2, route)
 
             logging.info(f"< [{self.client_name}] - Started delivery mission for parcel: {parcel}")
         except ValueError as e:
-            logging.error(f"< [{self.client_name}] - Could not find route for parcel: {parcel}")
+            logging.error(f"< [{self.client_name}] - Could not find route for parcel: {parcel} - {str(e)}")
             self.reject_parcel(parcel)
 
         # self.publish("bar/test", "tested/bar")
@@ -121,12 +123,17 @@ class OptimizationEngine(MQTTClient):
         drone_speed = 2
         idle_drones = self.get_idle_drones()
 
+        # TODO return None if assignment fails?? -> backcheck mechanism for handling...
+        optimal_drone_id = None
+
         try:
             optimal_drone_id, drone_time = self._assign_entity(route, idle_drones, drone_speed)
+            logging.info(f"< [{self.client_name}] - Assigned Drone to route: {route} -> Drone/{optimal_drone_id}")
+
+
         except ValueError as e:
             logging.error("Failed to assign drone: " + str(e))
 
-        logging.info(f"< [{self.client_name}] - Assigned Drone to route: {route} -> Drone/{optimal_drone_id}")
         return optimal_drone_id
 
     def _assign_vehicle(self, route):
@@ -239,7 +246,7 @@ class OptimizationEngine(MQTTClient):
 
                 distance = self.dist[current_node][next_node]
                 t = t + (distance / speed)  # TODO assumption: not multiple edges between two nodes
-                t = t + waiting_time        #     => shortest path = bus_route
+                t = t + waiting_time  # => shortest path = bus_route
 
             bus_route.append(bus_route.pop(0))
         return t
@@ -252,7 +259,12 @@ class OptimizationEngine(MQTTClient):
         passing = []
 
         for (idx, bus) in self.buses.items():
+            print("-----------------------")
+            print(self.buses.items())
             bus_route = bus.route
+            print(bus_route)
+            print(type(bus_route))
+            # TODO DEBUG: --> TypeError: string indices must be integers
             route_nodes = list(map(lambda stop: stop['node'], bus_route))
             if node_start in route_nodes and node_end in route_nodes:
                 passing.append((idx, bus))
@@ -289,7 +301,8 @@ class OptimizationEngine(MQTTClient):
 
         # handle multiple nodes on route
         tasks_route_d1 = [{'type': 'move', 'state': 'TaskState.notStarted',
-                 'destination': self.g_topo.nodes[n]['position'], 'minimumDuration': 10} for n in route.air1.path]
+                           'destination': self.g_topo.nodes[n]['position'], 'minimumDuration': 10} for n in
+                          route.air1.path]
 
         node_hub = self.hubs[parcel.carrier['id']].position  # nodeID
         # TODO currently naive approach -> always send 'move'-task: regardless of entity position
@@ -309,11 +322,13 @@ class OptimizationEngine(MQTTClient):
         node_hub = self.hubs[parcel.destination['id']].position  # nodeID
 
         tasks_route_d2 = [{'type': 'move', 'state': 'TaskState.notStarted',
-                        'destination': self.g_topo.nodes[n]['position'], 'minimumDuration': 10} for n in route.air2.path]
+                           'destination': self.g_topo.nodes[n]['position'], 'minimumDuration': 10} for n in
+                          route.air2.path]
         m02 = {
             'id': 'm02',
             'tasks': [
-                {'type': 'move', 'state': 'TaskState.notStarted', 'destination': self.g_topo.nodes[route.air2.path[0]]['position'],
+                {'type': 'move', 'state': 'TaskState.notStarted',
+                 'destination': self.g_topo.nodes[route.air2.path[0]]['position'],
                  'minimumDuration': 10},
                 {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t02)},
                 # {'type': 'move', 'state': 'TaskState.notStarted',
@@ -335,7 +350,8 @@ class OptimizationEngine(MQTTClient):
             m03 = {
                 'id': 'm03',
                 'tasks': [
-                    {'type': 'move', 'state': 'TaskState.notStarted', 'destination': self.g_topo.nodes[route.road.path[0]]['position'],
+                    {'type': 'move', 'state': 'TaskState.notStarted',
+                     'destination': self.g_topo.nodes[route.road.path[0]]['position'],
                      'minimumDuration': 10},
                     {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(t01)},
                     # {'type': 'move', 'state': 'TaskState.notStarted', 'destination': self.g_topo.nodes[route.road.path[-1]]['position'],
@@ -394,53 +410,52 @@ class OptimizationEngine(MQTTClient):
         """generates and returns an uuid v4 for usage as transaction identifier"""
         return str(uuid4())[0:4]
 
-    def test_init(self):
-        """ inits several hubs, drones, vehicles and parcels to allow for some basic testing until
-        data exchange with to control-system is ready (MQTT or AzureEG (?))"""
-
-        # tell other modules to load this init setup as well
-        self.test_send_init()
-
-        self.hubs['h00'] = Hub(id='h00', position='n05', transactions={}, parcels={})
-        self.hubs['h01'] = Hub(id='h01', position='n07', transactions={}, parcels={})
-        self.hubs['h02'] = Hub(id='h02', position='n11', transactions={}, parcels={})
-
-        # TODO also position as named tuple?
-        self.drones['d00'] = Drone(id='d00', position={'x': -50, 'y': 60, 'z': 0}, speed=0, parcel=None,
-                                   state=DroneState.IDLE)
-        self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, speed=0, parcel=None,
-                                   state=DroneState.IDLE)
-        self.drones['d02'] = Drone(id='d02', position={'x': 60, 'y': 0, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
-
-        # self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
-
-        self.buses['v01'] = Bus(id='v01', position={'x': 50, 'y': 50, 'z': 0}, capacity=3,
-                                # Start in top right corner (50,50,0) node0
-                                route=[{'node': 'n03', 'time': 10},
-                                    {'node': 'n00', 'time': 18}, {'node': 'n01', 'time': 12},
-                                    {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12}
-                                    ],
-                                # Start in top left corner (-50,50,0) node3
-                                # route=[
-                                #         {'node': 'n00', 'time': 20}, {'node': 'n01', 'time': 12},
-                                #        {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12},
-                                #        {'node': 'n03', 'time': 10}],
-                                nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
-                                tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)
-
-        self.parcels['p00'] = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
-                                     destination={'type': 'hub', 'id': 'h01'})
-
-
-    def test_send_init(self):
-        self.publish_to('hub/h00', 'test_init', {})
-        self.publish_to('drone/d00', 'test_init', {})
-        # self.publish_to('drone/d01', 'test_init', {})
-        # self.publish_to('car/v00', 'test_init', {})
-        self.publish_to('bus/v01', 'test_init', {})
-        # self.publish_to('hub/h01', 'test_init', {})
-        self.publish_to('parcel/p00', 'test_init', {})
-
+    # def test_init(self):
+    #     """ inits several hubs, drones, vehicles and parcels to allow for some basic testing until
+    #     data exchange with to control-system is ready (MQTT or AzureEG (?))"""
+    #
+    #     # tell other modules to load this init setup as well
+    #     self.test_send_init()
+    #
+    #     self.hubs['h00'] = Hub(id='h00', position='n05', transactions={}, parcels={})
+    #     self.hubs['h01'] = Hub(id='h01', position='n07', transactions={}, parcels={})
+    #     self.hubs['h02'] = Hub(id='h02', position='n11', transactions={}, parcels={})
+    #
+    #     # TODO also position as named tuple?
+    #     self.drones['d00'] = Drone(id='d00', position={'x': -50, 'y': 60, 'z': 0}, speed=0, parcel=None,
+    #                                state=DroneState.IDLE)
+    #     self.drones['d01'] = Drone(id='d01', position={'x': -60, 'y': -60, 'z': 0}, speed=0, parcel=None,
+    #                                state=DroneState.IDLE)
+    #     self.drones['d02'] = Drone(id='d02', position={'x': 60, 'y': 0, 'z': 0}, speed=0, parcel=None, state=DroneState.IDLE)
+    #
+    #     # self.cars['v00'] = Car(id='v00', position={'x': -50, 'y': 50, 'z': 0}, speed=0, parcel=None, state=VehicleState.IDLE)
+    #
+    #     self.buses['v01'] = Bus(id='v01', position={'x': 50, 'y': 50, 'z': 0}, capacity=3,
+    #                             # Start in top right corner (50,50,0) node0
+    #                             route=[{'node': 'n03', 'time': 10},
+    #                                 {'node': 'n00', 'time': 18}, {'node': 'n01', 'time': 12},
+    #                                 {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12}
+    #                                 ],
+    #                             # Start in top left corner (-50,50,0) node3
+    #                             # route=[
+    #                             #         {'node': 'n00', 'time': 20}, {'node': 'n01', 'time': 12},
+    #                             #        {'node': 'n02', 'time': 6}, {'node': 'n09', 'time': 12},
+    #                             #        {'node': 'n03', 'time': 10}],
+    #                             nextStop=None, missions={}, activeMissions={}, speed=0, parcels={}, activeTasks={},
+    #                             tasksAtStop={}, arrivalTimeAtStop={}, state=VehicleState.MOVING)
+    #
+    #     self.parcels['p00'] = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
+    #                                  destination={'type': 'hub', 'id': 'h01'})
+    #
+    #
+    # def test_send_init(self):
+    #     self.publish_to('hub/h00', 'test_init', {})
+    #     self.publish_to('drone/d00', 'test_init', {})
+    #     # self.publish_to('drone/d01', 'test_init', {})
+    #     # self.publish_to('car/v00', 'test_init', {})
+    #     self.publish_to('bus/v01', 'test_init', {})
+    #     # self.publish_to('hub/h01', 'test_init', {})
+    #     self.publish_to('parcel/p00', 'test_init', {})
 
     # Find idle / suitable entities for a new mission
     def get_idle_drones(self):
@@ -461,7 +476,7 @@ class OptimizationEngine(MQTTClient):
     # TODO manage subscriptions here???
     def add_message_callbacks(self):
         """registers functions for handling different message topics to the MQTT client as callbacks"""
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/test", self.on_message_test)
+        # self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/test", self.on_message_test)
 
         # entities: state updates
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/state/#", self.on_message_state)
@@ -481,17 +496,17 @@ class OptimizationEngine(MQTTClient):
         self.subscribe(topic)
         self.client.message_callback_add(topic, callback_function)
 
-    # TODO remove
-    def on_message_test(self, client, userdata, msg):
-        self.test_init()
-        time.sleep(2)
-        # self.test()  # hard coded missions to check if execution works
-        self.create_delivery_route(self.parcels['p00'])
+    # # TODO remove
+    # def on_message_test(self, client, userdata, msg):
+    #     self.test_init()
+    #     time.sleep(2)
+    #     # self.test()  # hard coded missions to check if execution works
+    #     self.create_delivery_route(self.parcels['p00'])
 
     def on_message_state(self, client, userdata, msg):
         # TODO add to the respective dict
         [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
-        self.update_state(entity, id_, json.loads(str(msg.payload.decode("utf-8", "ignore"))))
+        self.update_state(entity, id_, msg.payload)
         logging.debug(f"[{self.client_name}] - Updated state of {entity}/{id_}: {msg.payload}")
 
     def on_message_parcel_delivered(self, client, userdata, msg):
@@ -506,7 +521,25 @@ class OptimizationEngine(MQTTClient):
         if entity == 'parcel':
             logging.warn(f"[{self.client_name}] - Should Create Delivery Route for: {entity}/{id_} - {msg.payload} -  "
                          f"Not yet Implemented")
-            pass
+            # TODO create delivery route for fresh parcel
+            #       --> success -> send missions
+            #       --> failure -> send error message to Vue
+            # parcel = Parcel(id='p00', carrier={'type': 'hub', 'id': 'h00'},
+            #                                         destination={'type': 'hub', 'id': 'h01'})
+            state = json.loads(msg.payload)
+
+            # TODO test!!!
+            parcel = Parcel(id=state['id'], carrier=state['carrier'],
+                            destination=state['destination'])
+
+            print(parcel)
+            print(self.hubs)
+
+            try:
+                self.create_delivery_route(parcel)
+            except ValueError as e:
+                self.publish_from('opt_engine', 'error', f"Could not deliver parcel: {msg.payload}. ")
+
         elif entity == 'order':
             pass
         else:
@@ -521,54 +554,51 @@ class OptimizationEngine(MQTTClient):
         return [project, version, direction, entity, id_, *args]
 
     # TODO handle unknown id? --> log?
-    def update_state(self, entity, id_, state):
+    def update_state(self, entity, id_, state_json):
         """ finds entity in corresponding dictionary and updates the named_tuple describing its state"""
+        state = json.loads(state_json)
         if entity == 'hub':
-            new_state = state  # TODO parse json state / string
             self.update_hub(id_, state)
         elif entity == 'drone':
-            new_state = state  # TODO parse json state / string
             self.update_drone(id_, state)
         elif entity == 'car':
-            new_state = state  # TODO parse json state / string
             self.update_car(id_, state)
         elif entity == 'bus':
-            new_state = state  # TODO parse json state / string
             self.update_bus(id_, state)
         elif entity == 'parcel':
-            new_state = state  # TODO parse json state / string
             self.update_parcel(id_, state)
         else:
             logging.info(
                 f"< [{self.client_name}] - Could not match entity {entity}/{id_}:  {state}")  # TODO change to warn
 
     def update_hub(self, id_, state):
-        # logging.warn(f"!!!!!!!!!! UPDATE HUB: --> id:{id_} --> {state} !!!")
+
         hub = Hub(id=state['id'], position=state['position'], transactions=state['transactions'],
                   parcels=state['parcels'])
         self.hubs[id_] = hub
 
     def update_drone(self, id_, state):
-        # logging.warn(f"!!!!!!!!!! UPDATE DRONE: --> id:{id_} --> {state} !!!")
+
         drone = Drone(id=state['id'], position=state['position'], speed=state['speed'], parcel=state['parcel'],
                       state=state['state'])
         self.drones[id_] = drone
 
     def update_car(self, id_, state):
-        # logging.warn(f"!!!!!!!!!! UPDATE CAR: --> id:{id_} --> {state} !!!")
+
         car = Car(id=state['id'], position=state['position'], speed=state['speed'], parcel=state['parcel'],
                   state=state['state'])
         self.cars[id_] = car
+        print(f"Cars: {self.cars}")
 
     def update_bus(self, id_, state):
-        # logging.warn(f"!!!!!!!!!! UPDATE BUS: --> id:{id_} --> {state} !!!")
-        bus = Bus(id=state['id'], position=state['position'], capacity=['capacity'], route=['route'],
-                  nextStop=['nextStop'], missions=['missions'], activeMissions=['activeMissions'], speed=['speed'],
-                  parcels=state["parcels"], activeTasks=['activeTasks'], tasksAtStop=['tasksAtStop'],
-                  arrivalTimeAtStop=['arrivalTimeAtStop'], state=[''])
+
+        bus = Bus(id=state['id'], position=state['position'], capacity=state['capacity'], route=state['route'],
+                  nextStop=state['nextStop'], missions=state['missions'], speed=state['speed'],
+                  parcels=state["parcels"], activeTasks=state['activeTasks'],
+                  arrivalTimeAtStop=state['arrivalTimeAtStop'], state=state['state'])
         self.buses[id_] = bus
 
     def update_parcel(self, id_, state):
-        # logging.warn(f"!!!!!!!!!! UPDATE PARCEL: --> id:{id_} --> {state} !!!")
+
         parcel = Parcel(id=state['id'], carrier=state['carrier'], destination=state['destination'])
         self.parcels[id_] = parcel

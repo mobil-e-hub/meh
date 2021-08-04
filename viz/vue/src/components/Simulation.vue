@@ -213,8 +213,6 @@ export default {
           this.$mqtt.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
         },
         clickTestButton: function() {
-          // this.publishStop();
-
           this.$mqtt.publish('test', {} );
         },
         clickPlaceOrderButton: function() {

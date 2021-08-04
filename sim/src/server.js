@@ -48,7 +48,7 @@ const hubSimulator = new HubSimulator(scenario);
 const droneSimulator = new DroneSimulator(scenario);
 const carSimulator = new CarSimulator(scenario);
 const busSimulator = new BusSimulator(scenario);
-const parcelSimulator = new ParcelSimulator(hubSimulator, scenario);
+const parcelSimulator = new ParcelSimulator(scenario);
 // const controlSystem = new ControlSystem(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator);
 
 // Graceful shutdown

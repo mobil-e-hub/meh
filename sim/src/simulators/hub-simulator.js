@@ -7,7 +7,7 @@ const Hub = require('../models/hub');
 
 module.exports = class HubSimulator extends MQTTClient {
     constructor(scenario) {
-        super('hub-simulator', ['to/hub/#', 'from/visualization/#']);
+        super('hub-simulator', ['to/hub/#', 'from/visualization/#', "from/parcel/+/placed"]);
 
         this.scenario = scenario;
         this.hubs = {};
@@ -90,6 +90,15 @@ module.exports = class HubSimulator extends MQTTClient {
 
             this.publishFrom(`hub/${hub.id}`, `transaction/${transaction.id}/complete`);
             this.publishFrom(`hub/${hub.id}`, 'state', hub);
+        } else if (this.matchTopic(topic, 'from/parcel/+/placed')) {
+            let hubID = message.carrier.id;
+            if (!this.hubs.hasOwnProperty(hubID)) {
+                console.error(`Could not find carrier entity hub/${hubID} of parcel/${topic.id}`);
+            }
+            else {
+                this.addParcelToHub(hubID, message);
+            }
+
         } else if (this.matchTopic(topic, 'to/hub/test')) {
             console.log(`<<<<< HUB-SIMULATOR: RECEIVED MESSAGE: ${message} <<<<<<<<`)
         }
@@ -98,5 +107,6 @@ module.exports = class HubSimulator extends MQTTClient {
 
     addParcelToHub(hubID, parcel) {
         this.hubs[hubID].parcels[parcel] = parcel;
+        this.publishFrom(`hub/${hubID}`, 'state',  this.hubs[hubID]);
     }
 };

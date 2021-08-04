@@ -37,8 +37,8 @@ Drone = namedtuple('Drone', 'id position speed parcel state')
 
 Car = namedtuple('Car', 'id position speed parcel state')
 
-Bus = namedtuple('Bus', 'id position capacity route nextStop missions activeMissions speed parcels activeTasks '
-                        'tasksAtStop arrivalTimeAtStop state')  # TODO just state instead of all the other stuff??
+Bus = namedtuple('Bus', 'id position capacity route nextStop missions speed parcels activeTasks '
+                        'arrivalTimeAtStop state')
 
 Parcel = namedtuple('Parcel', 'id carrier destination')
 

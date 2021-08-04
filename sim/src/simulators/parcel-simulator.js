@@ -7,12 +7,11 @@ const {random, uuid} = require('../helpers');
 const Parcel = require('../models/parcel');
 
 module.exports = class ParcelSimulator extends MQTTClient {
-    constructor(hubSimulator, scenario) {
+    constructor(scenario) {
         super('parcel-simulator', ['to/parcel/#', 'from/visualization/#']);
 
         this.parcels = {};
         this.scenario = scenario;
-        this.hubSimulator = hubSimulator;
     }
 
     resume() {
@@ -36,8 +35,8 @@ module.exports = class ParcelSimulator extends MQTTClient {
             let id = p.id || uuid();
             let carrier = p.destination;
             let destination = p.carrier;
-            let newParcel = new Parcel(id, carrier, destination);
-            //this.hubSimulator.addParcelToHub(carrier.id, newParcel);
+            let newParcel = new Parcel(id, carrier, destination)
+
             return {[id]: newParcel};
         }));
     }
@@ -46,11 +45,19 @@ module.exports = class ParcelSimulator extends MQTTClient {
         this.parcels = {};
     }
 
+    test() {
+        for (const [id, parcel] of Object.entries(this.parcels)) {
+            this.publishFrom(`parcel/${id}`, 'state', parcel),
+            this.publishFrom(`parcel/${id}`, 'placed', parcel)
+
+        }
+    }
+
     receive(topic, message) {
         super.receive(topic, message);
         if (topic.direction === 'from') {
             if (topic.entity === 'visualization') {
-                if (['start', 'stop', 'reset'].includes(topic.rest)) {
+                if (['start', 'stop', 'reset', 'test'].includes(topic.rest)) {
                     this[topic.rest]();
                 } else if (topic.rest === 'place-order') {
                     let id = uuid();
@@ -60,11 +67,9 @@ module.exports = class ParcelSimulator extends MQTTClient {
                     let id = uuid();
                     // let [source, destination] = random.keys(this.hubSimulator.hubs, 2);
                     // this.orders[orderId] = new Order(source, destination);
-                    this.parcels[id] = new Parcel(id, message.carrier, message.destination);
 
                     // this.publishFrom(`order/${id}`, 'state', this.orders[id]);
-                    this.publishFrom(`parcel/${id}`, 'placed', this.parcels[id]);
-                    this.publishFrom(`parcel/${id}`, 'state', this.parcels[id]);
+                    this.placeParcel(id, message.carrier, message.destination);
                 }
             }
         } else {
@@ -90,5 +95,15 @@ module.exports = class ParcelSimulator extends MQTTClient {
             }
         }
     }
+
+    placeParcel(id, carrier, destination) {
+        this.parcels[id] = new Parcel(id, carrier, destination);
+
+        this.publishFrom(`parcel/${id}`, 'placed', this.parcels[id]);
+        this.publishFrom(`parcel/${id}`, 'state', this.parcels[id]);
+
+        return {[id]: this.parcels[id]};
+    }
+
 
 };
