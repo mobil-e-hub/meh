@@ -15,7 +15,7 @@ The analysis engine collects all MQTT-messages, allows to investigate experiment
 Defines callbacks for the MQTT-messages. Can be seen as a bridge between the MQTT-Client and the Database.
 
 **database.py**  
-Defines the tables in the database as objects. Functions in the class Database can be used to insert new objects into their respective tables or to query existing ones.
+Defines the tables in the database as objects. Functions in the class Database can be used to insert new objects into their respective tables or to query existing ones. The ER-Diagram can be found on this [link](https://ibb.co/yqmJqMJ).
 
 **utils.py**  
 Provides the function to base64 encode the topology before it is inserted into the database.
