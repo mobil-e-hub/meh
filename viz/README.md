@@ -39,10 +39,10 @@ Entities comprise: Hub, Drone, Car, Bus, Parcel, (Order) - messages send by the 
 
 | Topic | Usage | Sender | Receiver |
 |---	|---	|--- |--- |
-|connected  	| upon connection  	|Entity | |
-|state 	| on state change 	| Entity  | |
+| `/from/[entity]/[id]/connected` | upon connection | Entity | |
+| `/from/[entity]/[id]/state` | on state change | Entity | |
 | | | | |
-|start	|  	| viz | all |
+| `/from/viz/[id]/start` | when Start button is pressed in Viz	| viz | all |
 |pause  	|  	| viz | all |
 |resume  	|  	| viz | all |
 |stop 	|  	| viz | all |
