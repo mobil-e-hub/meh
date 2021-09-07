@@ -25,7 +25,54 @@ The individual modules can also be started using the commands `npm run start:sim
 
 
 ## Interaction and Communication
-TODO: Describe Event Grid and interaction between modules
+Communication between the components is via MQTT.
+
+### Communication with MQTT -
+Communication between entities exclusively uses the private mosquitto MQTT broker `wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt`.
+
+All topics start with `mobil-e-hub/v1/[from|to]/[entity]/[id]/`, and all messages are string representations of JSON objects.
+Each entity publishes `{ topic: mobil-e-hub/v1/from/[entity]/[id]/connected, message: ''}` upon connection.
+
+The following table lists all currently used topics in this project with short explanations on their usage
+
+Entities comprise: *Hub, Drone, Car, Bus, Parcel, (Order)* - messages are sent by the corresponding simulators.
+Other registered clients are the Vue.app `'visualization'` and the Optimization engine `'opt'`.
+
+
+| Topic | Usage | Sender | Receiver | Payload (json) | Notes |
+|---	|---	|--- |--- |--- |--- |
+| `/from/[entity]/[id]/connected` | upon connection | Entity | all | | <!-- TODO double check: really used? or only state send? -->
+| `/from/[entity]/[id]/state` | on state change | Entity | all | Entity Object |
+| **Control:** | | | | |
+| `/from/visualization/[id]/start` | when Start button is pressed in Viz | viz | all | - |
+| `from/visualization/[id]/pause` | when Pause button is pressed in Viz	| viz | all | - | 
+| `from/visualization/[id]/resume`  	| when Resume button is pressed in Viz 	| viz | all | - | 
+| `from/visualization/[id]/stop`	| when Stop button is pressed in Viz 	| viz | all | - |
+| `from/visualization/[id]/reset`	| when Reset button is pressed in Viz 	| viz | all | - |
+| `from/visualization/[id]/test`*	| used during DEV (Test Btn in Viz) | viz | all | - |
+| **Orders / Parcels:**| | | | |
+| `from/visualization/[id]/place-order`  | WIP	| viz | ParcelSimulator | - | 
+| `from/order/[id]/placed`  | WIP	| ParcelSimulator | Entity, opt | - |
+| `from/?/[id]/place-parcel` | create new parcel  | TODO - viz? | ParcelSimulator | Parcel Object | 
+| `from/parcel/[id]/placed` | parcel added to carrier (hub)  | ParcelSimulator | Entity, opt | Parcel Object |
+| `to/parcel/[id]/transfer` | when entities agreed on transaction | Entity | Parcel | Entity (Receiver) | success triggers `from/parcel/[id]/delivered` | 
+| `from/parcel/[id]/delivered` | parcel transfer success | Parcel | (Entity), opt | Parcel Object |  | <!-- TODO currently: only used by opt_engine--> 
+| `from/[parcel]/[id]/pickup` | DEPRECATED?	| Entity | Parcel | Entity Object (Carrier) |
+| `from/[parcel]/[id]/dropoff` | DEPRECATED? | Entity | Parcel | Entity Object (Carrier)  |
+| **Transactions:** | | | | |
+| `to/[Entity]/[id]/transaction/[id]/ready`  	| Receiving Entity ready for transaction	| Entity (Receiver) | Entity (Giver)| - |
+| `to/[Entity]/[id]/transaction/[id]/unready`  	| Receiving Entity no longer ready for transaction | Entity (Receiver) | Entity (Giver), (Opt) | - |
+| `to/[Entity]/[id]/transaction/[id]/execute`  | Both ready, also sends `transfer` to parcel | Entity (Giver) | Entity (Receiver) | - | only send if `.../ready` was received |
+| `to/[Entity]/[id]/transaction/[id]/complete` | Transaction success | Entity (Receiver) | Entity (Giver) | - | |
+| **Missions:** | | | | |
+| `to/[Entity]/[id]/mission` | assign new mission | opt | Entity | Mission Object | |
+| `from/[Entity]/[id]/mission/[id]/complete` | on mission success | Entity | all, opt | - | |
+| `from/[Entity]/[id]/mission/[id]/failed`	| WIP | Entity | all, opt| -  |  *not implemented yet* |
+| **Error Handling:** | | | | |
+| `from/opt_engine/error` | WIP: no route for parcel found | opt | all | Parcel Object | |
+---
+
+
 
 ## Server Architecture
 The following figure gives an overview of the components used:

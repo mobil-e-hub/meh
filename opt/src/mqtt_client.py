@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+from uuid import uuid4
 import json
 
 from dotenv import load_dotenv
@@ -29,13 +30,14 @@ class MQTTClient:
         self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME")
         self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD")
 
-        self.topic = "mobil-e-hub/v0/from/opt"  # TODO macht default topic überhaupt sinn?? --> als fallback
-        self.root = "mobil-e-hub/v0"    # TODO weg --> überschreibt das hier den in opt_engine gesetzten root??
-        self.client_name = os.environ.get("CLIENT_ID")  # Root & id?
+        # self.topic = "mobil-e-hub/v0/from/opt"
+        self.root = "mobil-e-hub/vX"    # TODO weg --> überschreibt das hier den in opt_engine gesetzten root??
+        self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
+        self.id = str(uuid4())[0:8]
 
-        self.subscriptions = {'mobil-e-hub/v0/#'}  # TODO remove
+        self.subscriptions = {'mobil-e-hub/vX/#'}  # TODO remove
 
-        self.client = mqtt.Client(self.client_name, transport='websockets')  # TODO bleibt websockets?
+        self.client = mqtt.Client(self.client_name, transport='websockets')
         self.client.ws_set_options(path=self.MQTT_PATH)
         self.client.tls_set()
         self.client.username_pw_set(username=self.MQTT_USERNAME, password=self.MQTT_PASSWORD)
@@ -70,30 +72,15 @@ class MQTTClient:
         self.client.unsubscribe(topic)
         self.subscriptions.discard(topic)
 
-    # TODO are all published messages encoded to JSON? only missions? 2 different publish messages needed?
-    def publish_json(self, topic, message='', sender=''):
-        pass
-        # self.mqtt_client.publish(f'{sender}/{topic}', message)
-        # self.publish(f'{sender}/{topic}', message)
+    def publish(self, topic, message=''):
+        logging.debug(f"< [{self.client_name}] {self.root}/{topic}: {message}")
+        self.client.publish(f'{self.root}/{topic}', json.dumps(message))
 
-    # TODO ensure that project/version are beginning of topic
-    def publish(self, topic, message=''):  # topic, message = ''
-        # this.publishFrom(`${this.type}/${this.mqtt.id}`, topic, message);
-        # sender = sender or f'optimization-engine/{self.id}'
-        self.client.publish(topic, message)
-        logging.debug(f"{self.client_name}: published message")
-
-    def publish_from(self, sender, topic, message):
-        if topic is None:
-            topic = self.topic
-        logging.debug(f"< [{self.client_name}] {self.root}/from/{sender}/{topic}: {message}")
-        self.client.publish(f'{self.root}/from/{sender}/{topic}', json.dumps(message))
+    def publish_from(self, topic, message):
+        self.publish(f'from/opt/{self.id}/{topic}', message)
 
     def publish_to(self, receiver, topic, message):
-        if topic is None:
-            topic = self.topic
-        logging.debug(f"< [{self.client_name}] {self.root}/to/{receiver}/{topic}: {message}")
-        self.client.publish(f'{self.root}/to/{receiver}/{topic}', json.dumps(message))
+        self.publish(f'to/{receiver}/{topic}', message)
 
     def receive(self, topic, message):
         logging.debug(f"> {self.client_name}: Msg received - [{topic}]: {message}")
@@ -102,7 +89,7 @@ class MQTTClient:
         """default message callback, should only be triggered if topic is not matched by other callback
             --> only logs the incoming message"""
         topic = msg.topic
-        logging.info(f"DEFAULT MSG_CALLBACK: Message received! -> Topic: {topic}:  {msg.payload}")
+        logging.debug(f"DEFAULT MSG_CALLBACK: Message received! -> Topic: {topic}:  {msg.payload}")
         # m_decode = str(msg.payload.decode("utf-8", "ignore"))
         # m_in = json.loads(m_decode)
         # print(f"< [{self.client_name}] {topic.direction}/{topic.entity}/{topic.id}/"

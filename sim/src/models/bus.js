@@ -207,6 +207,7 @@ class Bus {
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
         } else {
+            //TODO handle differently --> send MQTT error message instead of just printing to console...
             console.assert(this.parcels.length < this.capacity,
                 `Transaction Error: Bus/${this.id} has no free capacity for transaction/${tID}`);
             let transaction = task.transaction;

@@ -210,7 +210,7 @@ export default {
             },
             display: {
                 areToastsEnabled: true,
-                enabledToastTypes: ['status', 'routing'],
+                enabledToastTypes: ['status', 'routing', 'errors'],
             },
             stats: {
                 waitingDrones:0,
@@ -248,6 +248,7 @@ export default {
         this.$mqtt.subscribe('from/+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
         this.$mqtt.subscribe('from/+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
         this.$mqtt.subscribe('from/parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('from/+/+/error', (topic, message) => this.showToastError(`Error ${topic.string.short}`, `${JSON.stringify(message)}`));
         this.$mqtt.subscribe('to/visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },
     mounted: function() {
@@ -285,14 +286,19 @@ export default {
                 this.showToast(title, message)
             }
         },
+        showToastError: function(title, message) {
+            if (this.display.enabledToastTypes.includes('errors')){
+                this.showToast(title, `ERROR: ${message}`, 'danger')
+            }
+        },
         showToastRouting: function(title, message) {
             if (this.display.enabledToastTypes.includes('routing')){
                 this.showToast(title, message)
             }
         },
-        showToast: function(title, message) {
+        showToast: function(title, message, variant='default') {
             if (this.display.areToastsEnabled) {
-                this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});
+                this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left', variant: variant});
             }
         },
         toggleSidebar: function() {

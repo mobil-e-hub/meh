@@ -92,35 +92,38 @@ module.exports = class DroneSimulator extends MQTTClient {
     receive(topic, message) {
         super.receive(topic, message);
 
-        if (this.matchTopic(topic, 'from/visualization/#')) {
-            if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
-                this[topic.rest]();
+        try {
+            if (this.matchTopic(topic, 'from/visualization/#')) {
+                if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
+                    this[topic.rest]();
+                }
+            }
+            else if (this.matchTopic(topic, 'to/drone/+/mission')) {
+                try {
+                    this.drones[topic.id].setMission(message, this);
+                } catch (err) {
+                    console.log(`-- Could not assign missions to Drone ${topic.id}`)
+                    this.publishFrom(`drone/${topic.id}`, 'error', err.message)
+                }
+            } else if (this.matchTopic(topic, 'to/drone/+/transaction/+/ready')) {
+                // This message is only received if the drone is the transaction's "from" instance
+                let transaction = this.drones[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
+                transaction.ready = true;
+            } else if (this.matchTopic(topic, 'to/drone/+/transaction/+/unready')) {
+                // This message is only received if the drone is the transaction's "from" instance
+                let transaction = this.drones[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
+                transaction.ready = false;
+            } else if (this.matchTopic(topic, 'to/drone/+/transaction/+/execute')) {
+                // This message is only received if the drone is the transaction's "to" instance and has already sent the "ready" message
+                this.drones[topic.id].completeTransaction(this);
+            } else if (this.matchTopic(topic, 'to/drone/+/transaction/+/complete')) {
+                // This message is only received if the drone is the transaction's "from" instance and has already sent the "execute" message
+                this.drones[topic.id].completeTask(this);
             }
         }
-        // //TODO remove
-        // else if (this.matchTopic(topic, '+/+/+/test_init')) {
-        //     this.test_init();
-        // }
-        else if (this.matchTopic(topic, 'to/drone/+/mission')) {
-            this.drones[topic.id].setMission(message, this);
-        }
-        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/ready')) {
-            // This message is only received if the drone is the transaction's "from" instance
-            let transaction = this.drones[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
-            transaction.ready = true;
-        }
-        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/unready')) {
-            // This message is only received if the drone is the transaction's "from" instance
-            let transaction = this.drones[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
-            transaction.ready = false;
-        }
-        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/execute')) {
-            // This message is only received if the drone is the transaction's "to" instance and has already sent the "ready" message
-            this.drones[topic.id].completeTransaction(this);
-        }
-        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/complete')) {
-            // This message is only received if the drone is the transaction's "from" instance and has already sent the "execute" message
-            this.drones[topic.id].completeTask(this);
+        catch (err) {
+            console.log(`-- Caught Error: Drone/${topic.id} - ${err.message}`)
+            this.publishFrom(`drone/${topic.id}`, 'error', err.message)
         }
     }
 
