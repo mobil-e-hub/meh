@@ -63,13 +63,9 @@ class OptimizationEngine(MQTTClient):
             self.reject_parcel(parcel)
 
         else:
-
-            # TODO if 1 return is None send a failed mission to visualization instead of publishing missions...
             self.create_and_start_mission(parcel, drone1, vehicle, v_type, drone2, route)
 
             logging.info(f"< [{self.client_name}] - Started delivery mission for parcel: {parcel}")
-
-        # self.publish("bar/test", "tested/bar")
 
     def reject_parcel(self, parcel):
         """Called when no delivery route for a parcel can be found -> doesn't exist"""
@@ -482,6 +478,9 @@ class OptimizationEngine(MQTTClient):
 
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/placed/#", self.on_message_placed)
 
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/from/+/+/error/capacity/exceeded/#",
+                                        self.on_message_cap_exceeded)
+
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/delivered/#",
                                         self.on_message_parcel_delivered)
         # TODO default handler is on_message
@@ -535,6 +534,16 @@ class OptimizationEngine(MQTTClient):
             logging.warn(f"[{self.client_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
 
+    def on_message_cap_exceeded(self, client, userdata, msg):
+        """handles error messages from entity that could not accept a parcel because of capacity already full"""
+        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        logging.warn(
+            f"[{self.client_name}] - Error received: Capacity of {entity}/{id_} already full. Could not accept {args[3]}/{args[4]} ")
+
+    #     TODO handle replanning: delivery of stranded parcel...
+    #           --> this.parcel holds current carrier and destination --> run planning again
+    #               --> refactor replanning to also handle entity to hub deliveries / not air-ground-air tours
+
     def split_topic(self, topic: str) -> List[str]:
         """splits received MQTT topic into several string values for further processing"""
         # TODO exception handling --> topic always fixes length? or just do for state messages??
@@ -574,7 +583,7 @@ class OptimizationEngine(MQTTClient):
 
     def update_car(self, id_, state):
 
-        car = Car(id=state['id'], position=state['position'], speed=state['speed'], parcel=state['parcel'],
+        car = Car(id=state['id'], position=state['position'], speed=state['speed'], parcels=state['parcels'],
                   state=state['state'])
         self.cars[id_] = car
 

@@ -185,7 +185,7 @@ class Bus {
 
         let transaction = task.transaction;
         simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/unready`);
-        task.state = TaskState.ongoing;    // TODO or use new state??
+        task.state = TaskState.ongoing;
 
         this.missions[mID].tasks.unshift({
             type: 'move', state: 'TaskState.notStarted', destination: this.position,
@@ -207,14 +207,13 @@ class Bus {
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
         } else {
-            //TODO handle differently --> send MQTT error message instead of just printing to console...
-            console.assert(this.parcels.length < this.capacity,
-                `Transaction Error: Bus/${this.id} has no free capacity for transaction/${tID}`);
             let transaction = task.transaction;
-
-            this.parcels.push(transaction.parcel);
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
-
+            if(this.parcels.length < this.capacity) {
+                this.parcels.push(transaction.parcel);
+                simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+            } else {
+                simulator.publishFrom(`bus/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`);
+            }
             this.completeTask(simulator, tID, mID);
         }
     }
@@ -237,7 +236,6 @@ class Bus {
             mID = this.matchTransactionToMission(tID);
         }
 
-
         // TODO here? :  check if any active task != move
         //              --> no: busState = plannedStop
 
@@ -245,10 +243,9 @@ class Bus {
         let oldTask = this.missions[mID].tasks.splice(0, 1)[0];
         if (oldTask.type === 'dropoff') {
             this.parcels = this.parcels.filter(p => p !== oldTask.transaction.parcel);      // TODO debug: crashed ->    oldTask.transaction is undefined --> cannot read parcel
-
         }
 
-        // TODO IN DebUG: check if parcels are correct
+        // TODO IN Debug: check if parcels are correct
         delete this.activeTasks[mID];
         if (!(Object.values(this.activeTasks).find(t => t.type !== 'move'))) {  // TODO overthink... --> reset BusState before new task is even started???
             this.state = BusState.plannedStop;

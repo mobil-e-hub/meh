@@ -52,10 +52,6 @@ module.exports = class HubSimulator extends MQTTClient {
                 this[topic.rest]();
             }
         }
-            // //TODO remove
-            // else if (this.matchTopic(topic, '+/+/+/test_init')) {
-            //     this.test_init();
-        // }
         else if (this.matchTopic(topic, 'to/hub/+/mission')) {
             let hub = this.hubs[topic.id];
             let transaction = message.tasks[0].transaction;
@@ -106,7 +102,12 @@ module.exports = class HubSimulator extends MQTTClient {
     }
 
     addParcelToHub(hubID, parcel) {
-        this.hubs[hubID].parcels[parcel] = parcel;
-        this.publishFrom(`hub/${hubID}`, 'state',  this.hubs[hubID]);
+        let success = this.hubs[hubID].addParcel(parcel);
+        if(success) {
+            this.publishFrom(`hub/${hubID}`, 'state', this.hubs[hubID]);
+        }
+        else {
+            this.publishFrom(`hub/${hubID}`, `error/capacity/exceeded/parcel/${parcel.id}`, this.hubs[hubID]);
+        }
     }
 };

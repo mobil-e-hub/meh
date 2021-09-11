@@ -31,12 +31,13 @@ const TaskState = {
 //      - model timeout/  transaction abort mechanism
 
 class Car {
-    constructor(id, position) {
+    constructor(id, position, capacity = 2) {
         this.id = id;
         this.position = position;
 
         this.speed = 10;
-        this.parcel = null;
+        this.capacity = capacity;
+        this.parcels = [];
         this.state = CarState.idle;
 
     }
@@ -100,10 +101,17 @@ class Car {
             console.log('Wrong transaction!');
         } else {
             let transaction = task.transaction;
-            this.parcel = transaction.parcel;
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
-
+            // this.parcel = transaction.parcel;
+            if(this.parcels.length < this.capacity) {
+                this.parcels.push(transaction.parcel)
+                simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+            } else {
+                  simulator.publishFrom(`car/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`); // TODO include in table
+            }
+            // TODO Is task completed when parcel is rejected and other modules are notified?
             this.completeTask(simulator);
+
+
         }
     }
 
@@ -141,7 +149,7 @@ class Car {
 
     completeTask(simulator) {
         if (this.mission.tasks[0].type === 'dropoff') {
-            this.parcel = null;
+            this.parcels = this.parcels.filter(p => p !== this.mission.tasks[0].transaction.parcel);
         }
         this.mission.tasks.splice(0, 1);
 

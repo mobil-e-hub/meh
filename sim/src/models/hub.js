@@ -6,4 +6,12 @@ module.exports = class Hub {
         this.transactions = { };
         this.parcels = {  };
     }
+
+    addParcel(parcel) {
+        let success = Object.keys(this.parcels).length < this.capacity;
+          if(success) {
+            this.parcels[parcel.id] = parcel;
+        }
+        return success;
+    }
 };
