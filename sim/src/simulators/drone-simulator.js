@@ -16,8 +16,6 @@ module.exports = class DroneSimulator extends MQTTClient {
 
         this.timer = null;
         this.interval = 100;
-
-        // this.transactionTopics = { };       // TODO was macht das??
     }
 
     start() {
@@ -59,10 +57,8 @@ module.exports = class DroneSimulator extends MQTTClient {
             let id = drone.id || uuid();
             let position = drone.position || random.droneHub().position;
 
-            // TODO changed position of new drones to be only spawned at hubs --> clarify again
             // return { [id]: new Drone(id, random.position())};
             // return { [id]: new Drone(id, random.position(), { id: uuid(), items: [{ type: 'fly', destination: random.position(), minimumDuration: 10 }] }) };
-            // TODO wieso direkt Task übergeben?
             return { [id]: new Drone(id, position)};  //{ id: uuid(), items: [{ type: 'fly', destination: random.droneHub().position, minimumDuration: 10 }] }) };
         }));
         for (const [id, drone] of Object.entries(this.drones)) {
@@ -74,12 +70,6 @@ module.exports = class DroneSimulator extends MQTTClient {
         this.stop();
         this.start();
     }
-
-    // //TODO remove function & remove topic from receive
-    // test_init() {
-    //     this.drones = { d00: new Drone('d00', { x: -50, y: 60, z: 0 }), d01: new Drone('d01', { x: -60, y: -60, z: 0 }), d02: new Drone('d02', { x: 60, y: 0, z: 0 }) };
-    //     this.resume(); //side-effect: also starts app -> sets timer!
-    // }
 
     moveDrones = () => {
         for (const [id, drone] of Object.entries(this.drones)) {

@@ -12,9 +12,6 @@ from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Rou
 from mqtt_client import MQTTClient
 
 
-# TODO handle stop and pause from vueApp also here --> do not send stuff out!
-
-
 class OptimizationEngine(MQTTClient):
     """TODO add docstring"""
 
