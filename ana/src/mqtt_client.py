@@ -24,9 +24,12 @@ class MQTTClient:
         self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME")
         self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD")
 
+        self.ROOT = os.environ.get("ROOT")
+        self.VERSION = os.environ.get("VERSION")
+
         # Client Configuration
-        self.topic = "mobil-e-hub/v0/from/opt"
-        self.root = "mobil-e-hub/v0"
+        self.topic = f"{self.ROOT}/{self.VERSION}/from/opt"
+        self.root = f"{self.ROOT}/{self.VERSION}"
         self.client_name = os.environ.get("CLIENT_ID")  # Root & id?
 
         # MQTT Setup
