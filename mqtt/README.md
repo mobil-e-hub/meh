@@ -32,3 +32,8 @@ An EventGrid message is the body of a POST request and therefore in JSON format.
   }
 ]
 ```
+
+## Testing
+
+This module can be manually tested via any mqtt client (e.g. [this one](http://www.hivemq.com/demos/websocket-client/)) and the api testing tool [Postman](https://www.postman.com).
+

@@ -9,7 +9,12 @@ const { EventGridPublisherClient, AzureKeyCredential } = require("@azure/eventgr
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
 
+<<<<<<< Updated upstream
 // Environment variables
+=======
+
+ß// Environment variables
+>>>>>>> Stashed changes
 dotenv.config();
 
 const eventGridEndpoint = process.env.EVENT_GRID_ENDPOINT;
