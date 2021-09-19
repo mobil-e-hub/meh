@@ -45,7 +45,7 @@ const server = app.listen(port, () => {
 const mqttClient = MQTT.connect(brokerUrl, {
                 username: brokerUsername,
                 password: brokerPassword
-            });
+});
 
 // Listen to any message which starts with the correct root and version
 mqttClient.on('connect', () => {
