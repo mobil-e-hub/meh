@@ -9,14 +9,17 @@ const { EventGridPublisherClient, AzureKeyCredential } = require("@azure/eventgr
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
 
-
 // Environment variables
 dotenv.config();
 
 const eventGridEndpoint = process.env.EVENT_GRID_ENDPOINT;
 const eventGridKey = process.env.EVENT_GRID_KEY;
 const port = process.env.SERVER_PORT || 3004;
-const brokerUrl = process.env.BROKER_URL || 'ws://broker.hivemq.com:8000/mqtt';
+
+const brokerUrl = process.env.MQTT_BROKER_URL;
+const brokerUsername = process.env.MQTT_BROKER_USERNAME;
+const brokerPassword = process.env.MQTT_BROKER_PASSWORD;
+
 const root = process.env.ROOT || 'mobil-e-hub';
 const version = process.env.VERSION || 'v1';
 
@@ -39,7 +42,10 @@ const server = app.listen(port, () => {
 
 
 // MQTT client
-const mqttClient = MQTT.connect(brokerUrl);
+const mqttClient = MQTT.connect(brokerUrl, {
+                username: brokerUsername,
+                password: brokerPassword
+            });
 
 // Listen to any message which starts with the correct root and version
 mqttClient.on('connect', () => {
