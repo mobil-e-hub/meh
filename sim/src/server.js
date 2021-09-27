@@ -25,10 +25,9 @@ const topology = require('../assets/topology');
 dotenv.config();
 const port = process.env.SIM_PORT || 3000;
 
-// TODO replace with prod broker
-const mqttBrokerURL = process.env.MQTT_BROKER_URL;
-const mqttPort = process.env.MQTT_BROKER_PORT;
-const mqttRoot = process.env.MQTT_ROOT;
+const brokerUrl = process.env.MQTT_BROKER_URL;
+const brokerUsername = process.env.MQTT_BROKER_USERNAME;
+const brokerPassword = process.env.MQTT_BROKER_PASSWORD;
 
 // Server
 const app = express();
@@ -67,6 +66,12 @@ function shutdown() {
     });
 }
 
+// MQTT client
+const mqttClient = MQTT.connect(brokerUrl, {
+                username: brokerUsername,
+                password: brokerPassword
+});
+
 // Endpoints
 app.get('/', (req, res) => {
     res.status(200).send(`This is the base url of the simulation module. 
@@ -79,7 +84,7 @@ app.get('/ping', (req, res) => {
 });
 
 app.get('/ping/mqtt', (req, res) => {
-    mqtt.publish('pong', 'simulator');
+    mqttClient.publish('pong', 'simulator');
     res.status(200).json({mqtt: 'pong'});
 });
 
