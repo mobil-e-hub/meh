@@ -78,12 +78,13 @@ app.get('/ping', (req, res) => {
 // Receive events from EventGrid and forward them to MQTT broker
 //TODO remove this dummy post method
 app.post('/dummy', async (req, res) => {
-    for (const event of req.body) {
+    for (const event in req.body) {
+        const body = req.body[event];
         // If this is a validation request, reply appropriately
-        if (event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
+        if (body.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
             try {
-                console.log(`> (mqtt) SubscriptionValidation received from EventGrid: Validation code = ${event.data.validationCode}, topic = ${event.topic}`);
-                res.status(200).json({ ValidationResponse: event.data.validationCode });
+                console.log(`> (mqtt) SubscriptionValidation received from EventGrid: Validation code = ${body.data.validationCode}, topic = ${body.topic}`);
+                res.status(200).json({ ValidationResponse: body.data.validationCode });
             }
             catch (err)
             {
@@ -91,14 +92,14 @@ app.post('/dummy', async (req, res) => {
             }
         }
         // If it is a simple echo, log it
-        else if (event.eventType === "Portal_Echo") {
+        else if (body.eventType === "Portal_Echo") {
             console.log(`> (mqtt) Echo received from EventGrid!`);
         }
         // If it has the correct root and version, process it
-        else if (event.eventType === root && event.dataVersion === version){
+        else if (body.eventType === root && body.dataVersion === version){
             try {
-                const topic = event.subject;
-                const message = JSON.stringify(event.data);
+                const topic = body.subject;
+                const message = JSON.stringify(body.data);
                 let [entity, id, ...args] = topic.split('/');
 
                 // Forward message to MQTT broker
@@ -113,7 +114,7 @@ app.post('/dummy', async (req, res) => {
         // Otherwise, log it
         else {
             try {
-                console.log(`> (mqtt) Invalid message received from EventGrid: ${JSON.stringify({ type: event.eventType, version: event.dataVersion, topic: event.subject, message: event.data })}`);
+                console.log(`> (mqtt) Invalid message received from EventGrid: ${JSON.stringify({ type: body.eventType, version: body.dataVersion, topic: body.subject, message: body.data })}`);
             }
             catch (err) {
                 console.log(`> (mqtt) Invalid event received from EventGrid: ${err}`);
