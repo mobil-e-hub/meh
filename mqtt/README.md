@@ -35,5 +35,10 @@ An EventGrid message is the body of a POST request and therefore in JSON format.
 
 ## Testing
 
-This module can be manually tested via any mqtt client (e.g. [this one](http://www.hivemq.com/demos/websocket-client/)) and the api testing tool [Postman](https://www.postman.com).
+This module can be manually tested with any mqtt client (e.g. [this one](http://www.hivemq.com/demos/websocket-client/)), and the api testing tool [Postman](https://www.postman.com).
+The MQTT to EventGrid direction can be tested in [this](../README.md#Testing) way. 
 
+For the other direction send an HTTP Post Request via Postman to the EventGrid Endpoint as described [here](https://social.technet.microsoft.com/wiki/contents/articles/53692.azure-eventgrid-submitting-from-postman-to-custom-topic.aspx). 
+If the EventGrid cannot be accessed the messages can also be send directly to the connector at ``https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector``. 
+For the body format select the *raw* checkbox and pick JSON.
+Then the body content needs to follow the schema described in the paragraph [above](./README.md#EventGrid message), with at least the four keys that can be seen there.
