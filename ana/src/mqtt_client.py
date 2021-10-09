@@ -53,7 +53,7 @@ class MQTTClient:
 
         self.client.loop_start()
         for subscription in subscriptions:
-            self.subscribe(subscription[0], subscription[1])
+            self.subscribe(f"{self.root}/{subscription[0]}", subscription[1])
 
     def terminate(self):
         time.sleep(1)

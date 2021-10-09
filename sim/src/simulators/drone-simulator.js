@@ -10,7 +10,7 @@ const topology = require('../../assets/topology');
 // Class
 module.exports = class DroneSimulator extends MQTTClient {
     constructor(numberOfDrones) {
-        super('drone-simulator', ['to/drone/#', 'from/visualization/#']);
+        super('drone-simulator', ['drone/#', 'visualization/#']);
 
         this.numberOfDrones = numberOfDrones;
         this.drones = { };
@@ -42,7 +42,7 @@ module.exports = class DroneSimulator extends MQTTClient {
             this.timer = setInterval(this.moveDrones, this.interval);
         }
         for (const [id, drone] of Object.entries(this.drones)) {
-            this.publishFrom(`drone/${id}`, 'state', drone);
+            this.publish(`drone/${id}`, 'state', drone);
         }
     }
 
@@ -64,7 +64,7 @@ module.exports = class DroneSimulator extends MQTTClient {
             return { [id]: new Drone(id, random.value(random.droneHubs()).position, { id: uuid(), items: [{ type: 'fly', destination: random.value(random.droneHubs()).position, minimumDuration: 10 }] }) };
         }));
         for (const [id, drone] of Object.entries(this.drones)) {
-            this.publishFrom(`drone/${id}`, 'state', drone);
+            this.publish(`drone/${id}`, 'state', drone);
         }
     }
 
@@ -82,7 +82,7 @@ module.exports = class DroneSimulator extends MQTTClient {
     moveDrones = () => {
         for (const [id, drone] of Object.entries(this.drones)) {
             if (drone.move(this.interval / 1000, this)) {
-                this.publishFrom(`drone/${id}`, 'state', drone);
+                this.publish(`drone/${id}`, 'state', drone);
             }
         }
     };
@@ -90,28 +90,28 @@ module.exports = class DroneSimulator extends MQTTClient {
     receive(topic, message) {
         super.receive(topic, message);
 
-        if (this.matchTopic(topic, 'from/visualization/#')) {
+        if (this.matchTopic(topic, 'visualization/#')) {
             if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
         }
         //TODO remove
-        else if (this.matchTopic(topic, '+/+/+/test_init')) {
+        else if (this.matchTopic(topic, '+/+/test_init')) {
             this.test_init();
         }
-        else if (this.matchTopic(topic, 'to/drone/+/mission')) {
+        else if (this.matchTopic(topic, 'drone/+/mission')) {
             this.drones[topic.id].setMission(message, this);
         }
-        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/ready')) {
+        else if (this.matchTopic(topic, 'drone/+/transaction/+/ready')) {
             // This message is only received if the drone is the transaction's "from" instance
             let transaction = this.drones[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
             transaction.ready = true;
         }
-        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/execute')) {
+        else if (this.matchTopic(topic, 'drone/+/transaction/+/execute')) {
             // This message is only received if the drone is the transaction's "to" instance and has already sent the "ready" message
             this.drones[topic.id].completeTransaction(this);
         }
-        else if (this.matchTopic(topic, 'to/drone/+/transaction/+/complete')) {
+        else if (this.matchTopic(topic, 'drone/+/transaction/+/complete')) {
             // This message is only received if the drone is the transaction's "from" instance and has already sent the "execute" message
             this.drones[topic.id].completeTask(this);
         }
@@ -123,6 +123,6 @@ module.exports = class DroneSimulator extends MQTTClient {
 
     updateDroneState(id) {
         let drone = this.drones[id];
-        this.publishFrom(`drone/${id}`, 'state', drone);
+        this.publish(`drone/${id}`, 'state', drone);
     }
 };

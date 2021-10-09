@@ -15,7 +15,7 @@ def load_topology(path):
     nodes = data["nodes"]
     edges = data["edges"]
 
-    g = nx.MultiDiGraph()  # TODO clarify Graph type: directed, parallel edges allowed -> air / road
+    g = nx.MultiDiGraph()
     g.add_nodes_from(nodes)
 
     for node in nodes:  # add attribute values
@@ -25,9 +25,8 @@ def load_topology(path):
 
     for edge in edges:  # add edges with attributes
         g.add_edge(*(edges[edge]["from"], edges[edge]["to"]), weight=edges[edge]["distance"],
-                   e_type=edges[edge]["type"], id=edges[edge]["id"])  # TODO better use length instead of weight?
+                   e_type=edges[edge]["type"], id=edges[edge]["id"])
 
-    # TODO create sub-graphs for air / road / node-types? -> necessary / nicer?
     return g
 
 

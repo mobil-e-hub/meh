@@ -7,11 +7,6 @@ from dotenv import load_dotenv
 import paho.mqtt.client as mqtt
 
 
-# TODO:
-#       -root + UUID!
-#       -matchTopic
-#       -destructor
-
 class MQTTClient:
     """
         Wrapper class for Paho mqtt client encapsulates all MQTT for the Optimization Engine, except the on_message
@@ -54,7 +49,7 @@ class MQTTClient:
 
         self.client.loop_start()  # starts new thread
 
-    def terminate(self):  # TODO when to call this one??
+    def terminate(self):
         time.sleep(1)
         logging.info('f"< [{self.client_name}] - Terminating Connection to Broker')
         self.client.loop_stop()
@@ -70,30 +65,11 @@ class MQTTClient:
         self.client.unsubscribe(topic)
         self.subscriptions.discard(topic)
 
-    # TODO are all published messages encoded to JSON? only missions? 2 different publish messages needed?
-    def publish_json(self, topic, message='', sender=''):
-        pass
-        # self.mqtt_client.publish(f'{sender}/{topic}', message)
-        # self.publish(f'{sender}/{topic}', message)
-
-    # TODO ensure that project/version are beginning of topic
-    def publish(self, topic, message=''):  # topic, message = ''
-        # this.publishFrom(`${this.type}/${this.mqtt.id}`, topic, message);
-        # sender = sender or f'optimization-engine/{self.id}'
-        self.client.publish(topic, message)
-        logging.debug(f"{self.client_name}: published message")
-
-    def publish_from(self, sender, topic, message):
+    def publish(self, sender, topic, message):
         if topic is None:
             topic = self.topic
-        logging.debug(f"< [{self.client_name}] {self.root}/from/{sender}/{topic}: {message}")
-        self.client.publish(f'{self.root}/from/{sender}/{topic}', json.dumps(message))
-
-    def publish_to(self, receiver, topic, message):
-        if topic is None:
-            topic = self.topic
-        logging.debug(f"< [{self.client_name}] {self.root}/to/{receiver}/{topic}: {message}")
-        self.client.publish(f'{self.root}/to/{receiver}/{topic}', json.dumps(message))
+        logging.debug(f"< [{self.client_name}] {self.root}/{sender}/{topic}: {message}")
+        self.client.publish(f'{self.root}/{sender}/{topic}', json.dumps(message))
 
     def receive(self, topic, message):
         logging.debug(f"> {self.client_name}: Msg received - [{topic}]: {message}")
@@ -103,10 +79,6 @@ class MQTTClient:
             --> only logs the incoming message"""
         topic = msg.topic
         logging.info(f"DEFAULT MSG_CALLBACK: Message received! -> Topic: {topic}:  {msg.payload}")
-        # m_decode = str(msg.payload.decode("utf-8", "ignore"))
-        # m_in = json.loads(m_decode)
-        # print(f"< [{self.client_name}] {topic.direction}/{topic.entity}/{topic.id}/"
-        #       f"{topic.rest}: {m_in}")
 
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:

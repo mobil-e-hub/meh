@@ -238,17 +238,17 @@ export default {
         // Subscribe to all relevant topics
         console.log("Subscribing to topics - VUE_CREATED ")
         this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
-        this.$mqtt.subscribe('from/+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
-        this.$mqtt.subscribe('from/+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
-        this.$mqtt.subscribe('from/+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
-        this.$mqtt.subscribe('to/drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
-        this.$mqtt.subscribe('from/parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
-        this.$mqtt.subscribe('from/control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
-        this.$mqtt.subscribe('from/car/+/arrived', (topic, message) => this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`));
-        this.$mqtt.subscribe('from/+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
-        this.$mqtt.subscribe('from/+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
-        this.$mqtt.subscribe('from/parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
-        this.$mqtt.subscribe('to/visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
+        this.$mqtt.subscribe('+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
+        this.$mqtt.subscribe('+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
+        this.$mqtt.subscribe('+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
+        this.$mqtt.subscribe('drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
+        this.$mqtt.subscribe('parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
+        this.$mqtt.subscribe('car/+/arrived', (topic, message) => this.showToastStatus('Car arrived', `Car ${topic.id} has arrived at node ${message}.`));
+        this.$mqtt.subscribe('+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
+        this.$mqtt.subscribe('+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
+        this.$mqtt.subscribe('parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },
     mounted: function() {
         // Update incoming message counter regularly

@@ -131,8 +131,8 @@ class Bus {
                             } else if (task.type === 'dropoff') {
 
                                 if (task.transaction.ready) {
-                                    simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
-                                    simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
+                                    simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
+                                    simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
                                     // drive = false;
                                     // TODO call Mission Complete? --> done from simulator
                                 }
@@ -175,7 +175,7 @@ class Bus {
 
             for (let task in this.tasksAtStop) {
                 if (task.type === 'pickup') {
-                    simulator.publishTo(`${task.from.type}/${task.from.id}`, `transaction/${task.id}/ready`);
+                    simulator.publish(`${task.from.type}/${task.from.id}`, `transaction/${task.id}/ready`);
                     this.state = BusState.transactionState;
                 }
                 //dropoff gets active after ready message received          TODO check can happen from the move method (continuous calls)
@@ -202,7 +202,7 @@ class Bus {
         } else {
             let transaction = task.transaction;
             this.parcels = transaction.parcel;
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
 
             this.completeTask(simulator);
         }
@@ -257,7 +257,7 @@ class Bus {
             // task.state = TaskState.ongoing;
         } else if (task.type === 'pickup') {
             let transaction = task.transaction;
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = BusState.transactionState;
             task.state = TaskState.waitingForTransaction;
         } else if (task.type === 'dropoff') {
@@ -277,7 +277,7 @@ class Bus {
         this.mission.tasks.splice(0, 1);
 
         if (this.mission.tasks.length === 0) {
-            simulator.publishFrom(`bus/${this.id}`, `mission/${this.mission.id}/complete`);
+            simulator.publish(`bus/${this.id}`, `mission/${this.mission.id}/complete`);
             this.mission = null;
             this.state = BusState.idle;
         } else {

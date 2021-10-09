@@ -9,6 +9,7 @@ from analysis_engine.database import Database
 load_dotenv()
 dialect = str(os.environ.get('DB_DIALECT', 'sqlite'))
 host = str(os.environ.get('DB_HOST', 'data/database.db'))
+root = str(os.environ.get('DB_HOST', 'data/database.db'))
 
 
 class AnalysisEngine(MQTTClient):
@@ -21,12 +22,12 @@ class AnalysisEngine(MQTTClient):
 
     def begin_client(self):
         subscriptions = [
-            ('mobil-e-hub/v0/from/visualization/+/+', self.experiment_callback),
-            ('mobil-e-hub/v0/to/+/+/mission', self.mission_callback),
-            ('mobil-e-hub/v0/from/hub/+/state', self.hub_callback),
-            ('mobil-e-hub/v0/from/drone/+/state', self.drone_callback),
-            ('mobil-e-hub/v0/from/car/+/state', self.car_callback),
-            ('mobil-e-hub/v0/from/bus/+/state', self.bus_callback)
+            ('visualization/+/+', self.experiment_callback),
+            ('+/+/mission', self.mission_callback),
+            ('hub/+/state', self.hub_callback),
+            ('drone/+/state', self.drone_callback),
+            ('car/+/state', self.car_callback),
+            ('bus/+/state', self.bus_callback)
         ]
         super().begin_client(subscriptions)
         return self
