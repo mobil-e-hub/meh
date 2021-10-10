@@ -27,19 +27,18 @@ module.exports = class MQTTClient {
 
         this.mqtt.client.on('connect', () => {
             this.mqtt.client.subscribe(subscriptionTopics.map(topic => `${this.mqtt.root}/${topic}`));
-            this.publish('connected');
+            this.publish(this.type, 'connected');
         });
 
         this.mqtt.client.on('message', (topic, message) => {
-            let [project, version, direction, entity, id, ...args] = topic.split('/');
+            let [project, version, entity, id, ...args] = topic.split('/');
             this.receive({
                 version,
-                direction,
                 entity,
                 id,
                 args,
                 rest: args.join('/'),
-                string: {long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}`}
+                string: {long: topic, short: `${entity}/${id}/${args.join('/')}`}
             }, JSON.parse(message.toString()));
         });
     }
@@ -48,22 +47,20 @@ module.exports = class MQTTClient {
         this.mqtt.client.end();
     }
 
-    publishFrom(sender, topic, message = '') {
-        this.mqtt.client.publish(`${this.mqtt.root}/from/${sender}/${topic}`, JSON.stringify(message));
-        console.log(`< [${this.type}] from/${sender}/${topic}: ${JSON.stringify(message)}`);
-    }
-
-    publish(topic, message = '') {
-        this.publishFrom(`${this.type}/${this.mqtt.id}`, topic, message);
-    }
-
-    publishTo(receiver, topic, message = '') {
-        this.mqtt.client.publish(`${this.mqtt.root}/to/${receiver}/${topic}`, JSON.stringify(message));
-        console.log(`< [${this.type}] to/${receiver}/${topic}: ${JSON.stringify(message)}`);
+    publish(sender, topic, message = '') {
+        // if(topic == undefined){
+        //     //e.g. for connect message
+        //     this.mqtt.client.publish(`${this.mqtt.root}/${sender}`, JSON.stringify(message));
+        //     console.log(`< [${this.type}] ${sender}/${topic}: ${JSON.stringify(message)}`);
+        // }
+        // else {
+        this.mqtt.client.publish(`${this.mqtt.root}/${sender}/${topic}`, JSON.stringify(message));
+        console.log(`< [${this.type}] ${sender}/${topic}: ${JSON.stringify(message)}`);
+        // }
     }
 
     receive(topic, message) {
-        console.log(`> [${this.type}] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
+        console.log(`> [${this.type}] ${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
     }
 
     subscribe(topics) {

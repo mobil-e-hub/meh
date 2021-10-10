@@ -20,7 +20,6 @@ class VehicleState(enum.Enum):
     CHARGING = 4
 
 
-# TODO enum values not capitalized since they are defined like that in the js entities...
 class TaskState(enum.Enum):
     notStarted = 0
     ongoing = 1
@@ -29,7 +28,7 @@ class TaskState(enum.Enum):
     completed = 4
 
 
-# #################### Namedtuples ######################
+# #################### Namedtuple ######################
 
 Hub = namedtuple('Hub', 'id position transactions parcels')
 
@@ -43,4 +42,5 @@ Bus = namedtuple('Bus', 'id position capacity route nextStop missions speed parc
 Parcel = namedtuple('Parcel', 'id carrier destination')
 
 Route = namedtuple('Route', 'distance path')
+
 Routes = namedtuple('Routes', 'air1 road air2')  # container for subroutes of complete route

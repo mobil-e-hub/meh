@@ -80,8 +80,8 @@ class Drone {
                     }
                     else {
                         // this.state === DroneState.executingTransaction
-                        simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
-                        simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
+                        simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
+                        simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
 
                         return true;
                     }
@@ -103,7 +103,7 @@ class Drone {
         else {
             let transaction = task.transaction;
             this.parcel = transaction.parcel;
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
 
             this.completeTask(simulator);
         }
@@ -129,7 +129,7 @@ class Drone {
         }
         else if (task.type === 'pickup') {
             let transaction = task.transaction;
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = DroneState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
         }
@@ -157,7 +157,7 @@ class Drone {
         this.mission.tasks.splice(0, 1);
 
         if (this.mission.tasks.length === 0) {
-            simulator.publishFrom(`drone/${this.id}`, `mission/${this.mission.id}/complete`);
+            simulator.publish(`drone/${this.id}`, `mission/${this.mission.id}/complete`);
             this.mission = null;
             this.state = DroneState.idle;
         }

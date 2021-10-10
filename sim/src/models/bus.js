@@ -133,8 +133,8 @@ class Bus {
                             } else if (task.type === 'dropoff') {
 
                                 if (task.transaction.ready) {
-                                    simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
-                                    simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
+                                    simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
+                                    simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
                                     // drive = false;
                                 }
                                 // drive = true;
@@ -210,9 +210,9 @@ class Bus {
             let transaction = task.transaction;
             if(this.parcels.length < this.capacity) {
                 this.parcels.push(transaction.parcel);
-                simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+                simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
             } else {
-                simulator.publishFrom(`bus/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`);
+                simulator.publish(`bus/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`);
             }
             this.completeTask(simulator, tID, mID);
         }
@@ -244,6 +244,7 @@ class Bus {
         if (oldTask.type === 'dropoff') {
             this.parcels = this.parcels.filter(p => p !== oldTask.transaction.parcel);      // TODO debug: crashed ->    oldTask.transaction is undefined --> cannot read parcel
         }
+
 
         // TODO IN Debug: check if parcels are correct
         delete this.activeTasks[mID];
@@ -327,7 +328,7 @@ class Bus {
         } else if (task.type === 'pickup') {
 
             let transaction = task.transaction;
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = BusState.transactionState;
             task.state = TaskState.waitingForTransaction;
         } else if (task.type === 'dropoff') {

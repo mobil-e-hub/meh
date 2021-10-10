@@ -64,6 +64,7 @@ class OptimizationEngine(MQTTClient):
 
             logging.info(f"< [{self.client_name}] - Started delivery mission for parcel: {parcel}")
 
+
     def reject_parcel(self, parcel):
         """Called when no delivery route for a parcel can be found -> doesn't exist"""
         # TODO what to do here?? --> send MQTT message
@@ -259,7 +260,8 @@ class OptimizationEngine(MQTTClient):
         """Computes and returns driving time of bus between two nodes given its route.
         Also considers waiting time at stops."""
 
-        t = 0
+        duration = 0
+
         started = False
         ended = False
 
@@ -277,11 +279,15 @@ class OptimizationEngine(MQTTClient):
                     ended = True
 
                 distance = self.dist[current_node][next_node]
-                t = t + (distance / speed)  # TODO assumption: not multiple edges between two nodes
-                t = t + waiting_time  # => shortest path = bus_route
+
+                duration = duration + (distance / speed)  # TODO assumption: not multiple edges between two nodes
+                #         => shortest path = bus_route
+                duration = duration + waiting_time
 
             bus_route.append(bus_route.pop(0))
-        return t
+
+        return duration
+
 
     def get_busses_passing_node(self, node_start, node_end):
         """ returns list with tuples (id, bus) that pass the first and the final node of the delivery route on their
@@ -419,11 +425,11 @@ class OptimizationEngine(MQTTClient):
         }
 
         logging.info(f"[{self.client_name}] - Publish missions to assigned entities ")
-        self.publish_to(f"hub/{self.hubs[parcel.carrier['id']].id}", "mission", m00)
-        self.publish_to(f"drone/{drone1_id}", "mission", m01)
-        self.publish_to(f"drone/{drone2_id}", "mission", m02)
-        self.publish_to(f"{vehicle_type}/{vehicle_id}", "mission", m03)
-        self.publish_to(f"hub/{self.hubs[parcel.destination['id']].id}", "mission", m04)
+        self.publish(f"hub/{self.hubs[parcel.carrier['id']].id}", "mission", m00)
+        self.publish(f"drone/{drone1_id}", "mission", m01)
+        self.publish(f"drone/{drone2_id}", "mission", m02)
+        self.publish(f"{vehicle_type}/{vehicle_id}", "mission", m03)
+        self.publish(f"hub/{self.hubs[parcel.destination['id']].id}", "mission", m04)
 
     def create_transaction(self, parcel, from_type, from_id, to_type, to_id):
         """creates and returns dict modeling a transaction of a given parcel between the given entities from and to,
@@ -441,6 +447,7 @@ class OptimizationEngine(MQTTClient):
     def generate_transaction_id(self):
         """generates and returns an uuid v4 for usage as transaction identifier"""
         return str(uuid4())[0:4]
+
 
     # Find idle / suitable entities for a new mission
     def get_idle_drones(self):
@@ -465,21 +472,23 @@ class OptimizationEngine(MQTTClient):
     # TODO manage subscriptions here???
     def add_message_callbacks(self):
         """registers functions for handling different message topics to the MQTT client as callbacks"""
+
         # self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/test", self.on_message_test)
 
         # entities: state updates
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/state/#", self.on_message_state)
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/state/#", self.on_message_state)
 
         # entity: connect updates #difference to state update???
-        # self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/connected/#", self.on_message_state) # Sent from simulators, not the models
+        # self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/connected/#", self.on_message_state) # Sent from simulators, not the models
 
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/placed/#", self.on_message_placed)
+        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/placed/#", self.on_message_placed)
 
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/from/+/+/error/capacity/exceeded/#",
                                         self.on_message_cap_exceeded)
 
         self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/delivered/#",
                                         self.on_message_parcel_delivered)
+
         # TODO default handler is on_message
         # self.subscribe("meh/#")
         # self.client.message_callback_add('meh/#', self.on_message_split)
@@ -545,8 +554,8 @@ class OptimizationEngine(MQTTClient):
         """splits received MQTT topic into several string values for further processing"""
         # TODO exception handling --> topic always fixes length? or just do for state messages??
         # TODO better use named tuples here?
-        project, version, direction, entity, id_, *args = topic.split('/')
-        return [project, version, direction, entity, id_, *args]
+        project, version, entity, id_, *args = topic.split('/')
+        return [project, version, entity, id_, *args]
 
     # TODO handle unknown id? --> log?
     def update_state(self, entity, id_, state_json):

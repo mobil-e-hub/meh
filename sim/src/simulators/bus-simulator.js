@@ -10,8 +10,9 @@ const {Bus} = require("../models/bus");
 //          - add abort mission
 
 module.exports = class BusSimulator extends MQTTClient {
+
     constructor(scenario) {
-        super('bus-simulator', ['to/bus/#', 'from/visualization/#']);
+        super('bus-simulator', ['bus/#', 'visualization/#']);
 
         this.scenario = scenario;
         this.buses = {};
@@ -41,7 +42,7 @@ module.exports = class BusSimulator extends MQTTClient {
             this.timer = setInterval(this.moveBuses, this.interval);
         }
         for (const [id, bus] of Object.entries(this.buses)) {
-            this.publishFrom(`bus/${id}`, 'state', bus);
+            this.publish(`bus/${id}`, 'state', bus);
         }
     }
 
@@ -64,7 +65,7 @@ module.exports = class BusSimulator extends MQTTClient {
         }));
 
         for (const [id, bus] of Object.entries(this.buses)) {
-            this.publishFrom(`bus/${id}`, 'state', bus);
+            this.publish(`bus/${id}`, 'state', bus);
         }
     }
 
@@ -76,19 +77,19 @@ module.exports = class BusSimulator extends MQTTClient {
     receive(topic, message) {
         super.receive(topic, message);
 
-        if (this.matchTopic(topic, 'from/visualization/#')) {
+        if (this.matchTopic(topic, 'visualization/#')) {
             if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
-        } else if (this.matchTopic(topic, 'to/bus/+/mission')) {
+        } else if (this.matchTopic(topic, 'bus/+/mission')) {
             this.buses[topic.id].setMission(message, this);
-        } else if (this.matchTopic(topic, 'to/bus/+/transaction/+/ready')) {
+        } else if (this.matchTopic(topic, 'bus/+/transaction/+/ready')) {
             // This message is only received if the car is the transaction's "from" instance
             this.setTransactionReady(topic.id, topic.args[1])
-        } else if (this.matchTopic(topic, 'to/bus/+/transaction/+/execute')) {
+        } else if (this.matchTopic(topic, 'bus/+/transaction/+/execute')) {
             // This message is only received if the car is the transaction's "to" instance and has already sent the "ready" message
             this.buses[topic.id].completeTransaction(this, topic.args[1]);
-        } else if (this.matchTopic(topic, 'to/bus/+/transaction/+/complete')) {
+        } else if (this.matchTopic(topic, 'bus/+/transaction/+/complete')) {
             // This message is only received if the car is the transaction's "from" instance and has already sent the "execute" message
             this.buses[topic.id].completeTask(this, topic.args[1]);
         }
@@ -115,7 +116,7 @@ module.exports = class BusSimulator extends MQTTClient {
     moveBuses = () => {
         for (const [id, bus] of Object.entries(this.buses)) {
             if (bus.move(this.interval / 1000, this)) {
-                this.publishFrom(`bus/${id}`, 'state', bus);
+                this.publish(`bus/${id}`, 'state', bus);
             }
         }
     };

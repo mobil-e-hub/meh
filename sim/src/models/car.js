@@ -80,8 +80,8 @@ class Car {
                         return false;
                     } else {
                         // this.state === CarState.executingTransaction
-                        simulator.publishTo(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
-                        simulator.publishTo(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
+                        simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
+                        simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
 
                         return true;
                     }
@@ -101,17 +101,17 @@ class Car {
             console.log('Wrong transaction!');
         } else {
             let transaction = task.transaction;
+
             // this.parcel = transaction.parcel;
             if(this.parcels.length < this.capacity) {
                 this.parcels.push(transaction.parcel)
-                simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+                simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
             } else {
-                  simulator.publishFrom(`car/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`); // TODO include in table
+                  simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`); // TODO include in table
             }
             // TODO Is task completed when parcel is rejected and other modules are notified?
+
             this.completeTask(simulator);
-
-
         }
     }
 
@@ -133,7 +133,7 @@ class Car {
             task.state = TaskState.ongoing;
         } else if (task.type === 'pickup') {
             let transaction = task.transaction;
-            simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
         } else if (task.type === 'dropoff') {
@@ -154,7 +154,7 @@ class Car {
         this.mission.tasks.splice(0, 1);
 
         if (this.mission.tasks.length === 0) {
-            simulator.publishFrom(`car/${this.id}`, `mission/${this.mission.id}/complete`);
+            simulator.publish(`car/${this.id}`, `mission/${this.mission.id}/complete`);
             this.mission = null;
             this.state = CarState.idle;
         } else {

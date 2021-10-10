@@ -21,8 +21,8 @@ export default {
             client.subscribe(`${options.root}/#`);
         });
         client.on('message', (topic, message) => {
-            let [project, version, direction, entity, id, ...args] = topic.split('/');
-            topic = { version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } };
+            let [project, version, entity, id, ...args] = topic.split('/');
+            topic = { version, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${entity}/${id}/${args.join('/')}` } };
             message = JSON.parse(message.toString());
 
             console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short}.`)
