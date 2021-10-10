@@ -33,6 +33,9 @@ class MQTTClient:
         self.client = mqtt.Client(self.client_name, transport='websockets')  # TODO bleibt websockets?
         self.client.ws_set_options(path=self.MQTT_PATH)
         self.client.tls_set()
+        # TODO HOTFIX: remove ASAP
+        self.client.tls_insecure_set(True)
+
         self.client.username_pw_set(username=self.MQTT_USERNAME, password=self.MQTT_PASSWORD)
         logger = logging.getLogger(__name__)
         self.client.enable_logger(logger)
