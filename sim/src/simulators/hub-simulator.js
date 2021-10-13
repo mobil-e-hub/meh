@@ -87,9 +87,12 @@ module.exports = class HubSimulator extends MQTTClient {
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
 
-            delete hub.transactions[transaction.id];
-            delete hub.parcels[transaction.parcel];
-
+            if(transaction.id in hub.transactions) {
+                delete hub.transactions[transaction.id];
+            } else {
+                this.publish(`hub/${hub.id}`, 'error', `Transaction ${transaction.id} not found.`);
+            }
+            (transaction.parcel in hub.parcels) ? delete hub.parcels[transaction.parcel] : this.publish(`hub/${hub.id}`, 'error', `Parcel ${transaction.id} not found in Hub ${hub.id}.`);
 
             this.publish(`hub/${hub.id}`, `transaction/${transaction.id}/complete`);
             this.publish(`hub/${hub.id}`, 'state', hub);
@@ -111,10 +114,10 @@ module.exports = class HubSimulator extends MQTTClient {
     addParcelToHub(hubID, parcel) {
         let success = this.hubs[hubID].addParcel(parcel);
         if(success) {
-            this.publishFrom(`hub/${hubID}`, 'state', this.hubs[hubID]);
+            this.publish(`hub/${hubID}`, 'state', this.hubs[hubID]);
         }
         else {
-            this.publishFrom(`hub/${hubID}`, `error/capacity/exceeded/parcel/${parcel.id}`, this.hubs[hubID]);
+            this.publish(`hub/${hubID}`, `error/capacity/exceeded/parcel/${parcel.id}`, this.hubs[hubID]);
         }
     }
 };

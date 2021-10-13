@@ -37,7 +37,7 @@ export default {
         app.prototype.$mqtt = {
             broker: options.broker,
             root: options.root,
-            publish: (topic, message='', sender=`from/visualization/${id}`) => {
+            publish: (topic, message='', sender=`visualization/${id}`) => {
                 client.publish(`${options.root}/${sender}/${topic}`, JSON.stringify(message));
             },
             subscribe: (topic, handler) => {

@@ -42,34 +42,35 @@ const server = app.listen(port, () => {
 // Map and initial entities
 const scenario = require('../assets/scenario');
 
-// MQTT client
-const mqtt_client = {
-    client: MQTT.connect('wss://ines-gpu-01.informatik.uni-mannheim.de:9001/meh/mqtt'),
-    root: 'mobil-e-hub/sim',
-    id: uuid(),
-    type: 'server'
-};
-mqtt_client.client.on('connect', () => {
-    console.log('Connected');
-    mqtt_client.client.subscribe(subscriptionTopics.map(topic => `${mqtt_client.root}/${topic}`));
-});
-
-mqtt_client.client.on('message', (topic, message) => {
-    let [project, version, direction, entity, id, ...args] = topic.split('/');
-    mqtt.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
-});
-const mqtt = {
-    publish(topic, message = '') {
-        mqtt.publishFrom(`mobil-e-hub/${mqtt_client.id}`, topic, message);
-    },
-    receive(topic, message) {
-        console.log(`> [${mqtt_client.type}] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
-    },
-    publishFrom(sender, topic, message = '') {
-        mqtt_client.client.publish(`mobil-e-hub/sim/from/${sender}/${topic}`, JSON.stringify(message));
-        console.log(`< [${mqtt_client.type}] from/${sender}/${topic}: ${JSON.stringify(message)}`);
-    }
-};
+// // MQTT client   TODO: why is there an extra MQTT client on the server?
+// const mqtt_client = {
+//     client: MQTT.connect('wss://ines-gpu-01.informatik.uni-mannheim.de:9001/meh/mqtt'),
+//     root: 'mobil-e-hub/sim',
+//     id: uuid(),
+//     type: 'server'
+// };
+// mqtt_client.client.on('connect', () => {
+//     console.log('Connected');
+//     mqtt_client.client.subscribe(subscriptionTopics.map(topic => `${mqtt_client.root}/${topic}`));
+// });
+//
+// mqtt_client.client.on('message', (topic, message) => {
+//     let [project, version, direction, entity, id, ...args] = topic.split('/');
+//     mqtt.receive({ version, direction, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${direction}/${entity}/${id}/${args.join('/')}` } }, JSON.parse(message.toString()));
+// });
+// const mqtt = {
+//     publish(topic, message = '') {
+//         mqtt_client.client.publish(`mobil-e-hub/${mqtt_client.id}`, topic, message);
+//         console.log(`< [${mqtt_client.type}] from/${sender}/${topic}: ${JSON.stringify(message)}`);
+//         },
+//     receive(topic, message) {
+//         console.log(`> [${mqtt_client.type}] ${topic.direction}/${topic.entity}/${topic.id}/${topic.rest}: ${JSON.stringify(message)}`);
+//     },
+//     // publishFrom(sender, topic, message = '') {
+//     //     mqtt_client.client.publish(`mobil-e-hub/sim/from/${sender}/${topic}`, JSON.stringify(message));
+//     //     console.log(`< [${mqtt_client.type}] from/${sender}/${topic}: ${JSON.stringify(message)}`);
+//     // }
+// };
 
 
 // Simulators

@@ -184,7 +184,7 @@ class Bus {
     unreadyTransaction(simulator, mID, task) {
 
         let transaction = task.transaction;
-        simulator.publishTo(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/unready`);
+        simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/unready`);
         task.state = TaskState.ongoing;
 
         this.missions[mID].tasks.unshift({
@@ -269,7 +269,7 @@ class Bus {
         // TODO: set Mission State to Complete (OR Failed ???)
 
         delete this.missions[mID];
-        simulator.publishFrom(`bus/${this.id}`, `mission/${mID}/complete`);
+        simulator.publish(`bus/${this.id}`, `mission/${mID}/complete`);
 
         this.startTask(simulator)
     }

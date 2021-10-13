@@ -52,7 +52,7 @@ class OptimizationEngine(MQTTClient):
         if drone1 is None or vehicle is None or drone2 is None:
             # send error MQTT message
             # TODO differentiate: assignment failed / not found vs. entity not needed (parcel at street hub already...)
-            self.publish_from("error", f"Could not find route for parcel: {parcel}: {drone1} - "
+            self.publish("error", f"Could not find route for parcel: {parcel}: {drone1} - "
                                        f"{vehicle} - {drone2}")
 
             logging.error(f"< [{self.client_name}] - Could not find route for parcel: {parcel}: {drone1} - {vehicle} -"
@@ -172,7 +172,7 @@ class OptimizationEngine(MQTTClient):
             print("DIDN'T find BUS OR CAR, - CAR: ", str(found_car), " __ BUS: ", str(found_bus))
             # nothing found --> send error message
             logging.error(f"[{self.client_name}] - Failed to find vehicle for route: {route}: ")
-            self.publish_from("error", f"Could not find available ground vehicle for route: {route}: ")
+            self.publish("error", f"Could not find available ground vehicle for route: {route}: ")
 
         logging.info(
             f"[{self.client_name}] - Assigned Ground vehicle to route: {route} -> {vehicle_type}/{optimal_vehicle}")
@@ -425,11 +425,11 @@ class OptimizationEngine(MQTTClient):
         }
 
         logging.info(f"[{self.client_name}] - Publish missions to assigned entities ")
-        self.publish(f"hub/{self.hubs[parcel.carrier['id']].id}", "mission", m00)
-        self.publish(f"drone/{drone1_id}", "mission", m01)
-        self.publish(f"drone/{drone2_id}", "mission", m02)
-        self.publish(f"{vehicle_type}/{vehicle_id}", "mission", m03)
-        self.publish(f"hub/{self.hubs[parcel.destination['id']].id}", "mission", m04)
+        self.publish("mission", m00, f"hub/{self.hubs[parcel.carrier['id']].id}")
+        self.publish("mission", m01, f"drone/{drone1_id}")
+        self.publish("mission", m02, f"drone/{drone2_id}")
+        self.publish("mission", m03, f"{vehicle_type}/{vehicle_id}")
+        self.publish("mission", m04, f"hub/{self.hubs[parcel.destination['id']].id}")
 
     def create_transaction(self, parcel, from_type, from_id, to_type, to_id):
         """creates and returns dict modeling a transaction of a given parcel between the given entities from and to,
@@ -499,18 +499,18 @@ class OptimizationEngine(MQTTClient):
 
     def on_message_state(self, client, userdata, msg):
         # TODO add to the respective dict
-        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        [_, _, entity, id_, *args] = self.split_topic(msg.topic)
         self.update_state(entity, id_, msg.payload)
         logging.debug(f"[{self.client_name}] - Updated state of {entity}/{id_}: {msg.payload}")
 
     def on_message_parcel_delivered(self, client, userdata, msg):
         # TODO handle parcel delivered
-        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        [_, _, entity, id_, *args] = self.split_topic(msg.topic)
         pass
 
     def on_message_placed(self, client, userdata, msg):
         """handles placed messages from parcels and orders"""
-        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        [_, _, entity, id_, *args] = self.split_topic(msg.topic)
 
         if entity == 'parcel':
             logging.warn(f"[{self.client_name}] - Should Create Delivery Route for: {entity}/{id_} - {msg.payload} -  "
@@ -532,17 +532,17 @@ class OptimizationEngine(MQTTClient):
             try:
                 self.create_delivery_route(parcel)
             except ValueError as e:
-                self.publish_from('error', f"Could not deliver parcel: {msg.payload}. ")
+                self.publish('error', f"Could not deliver parcel: {msg.payload}.")
 
         elif entity == 'order':
             pass
         else:
-            logging.warn(f"[{self.client_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
+            logging.warn(f" > [opt_engine] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
 
     def on_message_cap_exceeded(self, client, userdata, msg):
         """handles error messages from entity that could not accept a parcel because of capacity already full"""
-        [_, _, _, entity, id_, *args] = self.split_topic(msg.topic)
+        [_, _, entity, id_, *args] = self.split_topic(msg.topic)
         logging.warn(
             f"[{self.client_name}] - Error received: Capacity of {entity}/{id_} already full. Could not accept {args[3]}/{args[4]} ")
 

@@ -123,6 +123,6 @@ module.exports = class BusSimulator extends MQTTClient {
 
     updateBusState(id) {
         let bus = this.buses[id];
-        this.publishFrom(`bus/${id}`, 'state', bus);
+        this.publish(`bus/${id}`, 'state', bus);
     }
 };

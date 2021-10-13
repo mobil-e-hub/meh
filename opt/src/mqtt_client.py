@@ -25,7 +25,6 @@ class MQTTClient:
         self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME")
         self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD")
 
-        # self.topic = "mobil-e-hub/v0/from/opt"
         self.root = "mobil-e-hub/vX"    # TODO weg --> überschreibt das hier den in opt_engine gesetzten root??
         self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
         self.id = str(uuid4())[0:8]
@@ -70,23 +69,19 @@ class MQTTClient:
         self.client.unsubscribe(topic)
         self.subscriptions.discard(topic)
 
-    def publish(self, sender, topic, message):
-        if topic is None:
-            topic = self.topic
-        logging.debug(f"< [{self.client_name}] {self.root}/{sender}/{topic}: {message}")
+    def publish(self, topic, message, sender='opt'):
+
+        logging.debug(f"< [opt_engine] {self.root}/{sender}/{topic}: {message}")
         self.client.publish(f'{self.root}/{sender}/{topic}', json.dumps(message))
 
     def receive(self, topic, message):
         logging.debug(f"> {self.client_name}: Msg received - [{topic}]: {message}")
 
-
     def on_message(self, client, userdata, msg):
         """default message callback, should only be triggered if topic is not matched by other callback
             --> only logs the incoming message"""
         topic = msg.topic
-
-        logging.info(f"DEFAULT MSG_CALLBACK: Message received! -> Topic: {topic}:  {msg.payload}")
-
+        logging.info(f"> [opt_engine] default msg_callback {topic}:  {msg.payload}")
 
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
