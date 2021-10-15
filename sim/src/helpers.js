@@ -2,7 +2,7 @@ const random = require('random');
 const { v4: uuid } = require('uuid');
 
 // Internal modules
-const scenario = require("../assets/scenario");
+const scenario = require("../assets/original_scenario");
 
 module.exports = {
     random: {

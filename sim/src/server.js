@@ -18,7 +18,7 @@ const ParcelSimulator = require('./simulators/parcel-simulator');
 // const ControlSystem = require('./control-system/control-system');
 
 const {uuid} = require('./helpers');
-const topology = require('../assets/scenario');
+const topology = require('../assets/original_scenario');
 
 
 // Environment variables
@@ -40,7 +40,7 @@ const server = app.listen(port, () => {
 });
 
 // Map and initial entities
-const scenario = require('../assets/scenario');
+const scenario = require('../assets/original_scenario');
 
 // // MQTT client   TODO: why is there an extra MQTT client on the server?
 // const mqtt_client = {
