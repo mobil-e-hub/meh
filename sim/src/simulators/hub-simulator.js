@@ -87,14 +87,15 @@ module.exports = class HubSimulator extends MQTTClient {
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
 
-            if(transaction.id in hub.transactions) {
+            if(typeof transaction !== "undefined" && transaction.id in hub.transactions) {
                 delete hub.transactions[transaction.id];
+                this.publish(`hub/${hub.id}`, `transaction/${transaction.id}/complete`);
             } else {
-                this.publish(`hub/${hub.id}`, 'error', `Transaction ${transaction.id} not found.`);
+                this.publish(`hub/${hub.id}`, 'error', `Transaction not found.`);
             }
-            (transaction.parcel in hub.parcels) ? delete hub.parcels[transaction.parcel] : this.publish(`hub/${hub.id}`, 'error', `Parcel ${transaction.id} not found in Hub ${hub.id}.`);
+            (typeof transaction !== "undefined" && transaction.parcel in hub.parcels) ?
+                delete hub.parcels[transaction.parcel] : this.publish(`hub/${hub.id}`, 'error', `Parcel not found in Hub ${hub.id}.`);
 
-            this.publish(`hub/${hub.id}`, `transaction/${transaction.id}/complete`);
             this.publish(`hub/${hub.id}`, 'state', hub);
         } else if (this.matchTopic(topic, 'parcel/+/placed')) {
             let hubID = message.carrier.id;
