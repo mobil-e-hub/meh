@@ -8,7 +8,7 @@
     "setup:mac": "npm install",
     "start:mac": "nodemon src/server.js",
     "setup:windows": "npm install",
-    "start:windows": "nodemon src/server.js"
+    "start:windows": "title mqtt_bridge && nodemon src/server.js"
   },
   "dependencies": {
     "@azure/eventgrid": "^4.3.0",
