@@ -9,7 +9,7 @@
     "start:mac": "vue serve src/app.js",
     "build:mac": "vue build src/app.js",
     "setup:windows": "npm install",
-    "start:windows": "vue serve src/app.js",
+    "start:windows": "title vue_app && vue serve src/app.js",
     "build:windows": "vue build src/app.js"
   },
   "dependencies": {
