@@ -1,6 +1,8 @@
 import json
 import enum
 import logging
+from uuid import uuid4
+
 import networkx as nx
 
 
@@ -48,3 +50,8 @@ def backtrack_shortest_path(predecessors, start, end, distance):
         raise ValueError(f"There is no path between these nodes. start: {start}, end: {end}, distance: {distance});")
     path = nx.algorithms.shortest_paths.dense.reconstruct_path(start, end, predecessors)
     return path
+
+
+def generate_transaction_id():
+    """generates and returns an uuid v4 for usage as transaction identifier"""
+    return str(uuid4())[0:4]

@@ -64,7 +64,7 @@ module.exports = {
             d02: {id: null, position: null}
         },
         cars: {
-            v00: {id:'v00', position: {'x': 50, 'y': -50, 'z': 0}} //, speed:0, parcel:null, state:VehicleState.IDLE}
+
         },
         buses: {
             v01: {id:'v01', position:{'x': 50, 'y': 50, 'z': 0},
@@ -81,7 +81,6 @@ module.exports = {
             p00: {id:'p00', carrier: {type: 'hub', id: 'h01'}, destination: {type: 'hub', id: 'h00'}}
         },
         missions: {
-            // TODO nötig? --> einfach für alle Pakete in der Init eine Mission erstellen?
 
         }
     }

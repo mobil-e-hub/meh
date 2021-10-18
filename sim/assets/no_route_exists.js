@@ -82,7 +82,6 @@ module.exports = {
             p00: {id:'p00', carrier: {type: 'hub', id: 'h0X'}, destination: {type: 'hub', id: 'h00'}}
         },
         missions: {
-            // TODO nötig? --> einfach für alle Pakete in der Init eine Mission erstellen?
 
         }
     }

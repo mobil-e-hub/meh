@@ -59,21 +59,26 @@ module.exports = {
             h02: {id: null, position: null},
         },
         drones: {
-            d00: {id: 'd00', position: { x: -50, y: 60, z: 0 }},
-            d01: {id: 'd01', position: { x: -60, y: -60, z: 0 }},
-            d02: {id: null, position: null}
+
         },
         cars: {
             v00: {id:'v00', position: {'x': 50, 'y': -50, 'z': 0}}
         },
         buses: {
-
+            v01: {id:'v01', position:{'x': 50, 'y': -50, 'z': 0},
+                route: [
+                    {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 12},
+                    {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 10},
+                    {node: 'n01', position: {x: -50, y: -50, z: 0}, time: 18},
+                    {node: 'n02', position: {x: 50, y: -50, z: 0}, time: 12},
+                    {node: 'n09', position: {x: 50, y: 0, z: 0}, time: 6}
+                ],
+            }
         },
         parcels: {
             p00: {id:'p00', carrier: {type: 'hub', id: 'h01'}, destination: {type: 'hub', id: 'h00'}}
         },
         missions: {
-            // TODO nötig? --> einfach für alle Pakete in der Init eine Mission erstellen?
 
         }
     }

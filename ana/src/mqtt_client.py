@@ -30,7 +30,8 @@ class MQTTClient:
         # Client Configuration
         self.topic = f"{self.ROOT}/{self.VERSION}/from/opt"
         self.root = f"{self.ROOT}/{self.VERSION}"
-        self.client_name = os.environ.get("CLIENT_ID")  # Root & id?
+        self.client_name = os.environ.get("CLIENT_ID")
+        self.logging_name = "ana_engine"
 
         # MQTT Setup
         self.client = mqtt.Client(self.client_name, transport='websockets')  # TODO bleibt websockets?
@@ -48,7 +49,7 @@ class MQTTClient:
         self.client.on_message = self.on_message
 
     def begin_client(self, subscriptions: list = []):
-        print(f" > {self.client_name}: Setting up connection - broker: {self.MQTT_BROKER} on port: {self.MQTT_PORT}.")
+        print(f" > {self.logging_name}: Setting up connection - broker: {self.MQTT_BROKER} on port: {self.MQTT_PORT}.")
         self.client.connect(self.MQTT_BROKER, self.MQTT_PORT)
 
         self.client.loop_start()
@@ -57,18 +58,18 @@ class MQTTClient:
 
     def terminate(self):
         time.sleep(1)
-        logging.info('f"< [{self.client_name}] - Terminating Connection to Broker')
+        logging.info('f"< [{self.logging_name}] - Terminating Connection to Broker')
         self.client.loop_stop()
         self.client.disconnect()
 
     def subscribe(self, topic, callback=None):
-        logging.debug(f"< [{self.client_name}] - SUBSCRIBING for topic: {topic}")
+        logging.debug(f"< [{self.logging_name}] - SUBSCRIBING for topic: {topic}")
         self.client.subscribe(topic)
         if callback is not None:
             self.client.message_callback_add(topic, callback)
 
     def unsubscribe(self, topic):
-        logging.debug(f"< [{self.client_name}] - UNSUBSCRIBING from topic: {topic}")
+        logging.debug(f"< [{self.logging_name}] - UNSUBSCRIBING from topic: {topic}")
         self.client.unsubscribe(topic)
 
     def on_message(self, client, userdata, msg):
@@ -79,16 +80,16 @@ class MQTTClient:
 
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
-            logging.debug(f"[{self.client_name}] - Connected to broker: {self.MQTT_BROKER} - Port: {self.MQTT_PORT}")
+            logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER} - Port: {self.MQTT_PORT}")
         else:
-            logging.warn(f"[{self.client_name}] - Bad connection: Returned code=", rx)
+            logging.warn(f"[{self.logging_name}] - Bad connection: Returned code=", rx)
 
     def on_disconnect(self, client, userdata, rc=0):
-        logging.debug(f"[{self.client_name}] - Disconnected from Broker: result code " + str(rc))
+        logging.debug(f"[{self.logging_name}] - Disconnected from Broker: result code " + str(rc))
         client.loop_stop()
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
-        logging.debug(f"[{self.client_name}] -Subscription successful")
+        logging.debug(f"[{self.logging_name}] -Subscription successful")
 
     def on_unsubscribe(self, client, userdata, mid):
-        logging.debug(f"[{self.client_name}] - Unsubscription successful")
+        logging.debug(f"[{self.logging_name}] - Unsubscription successful")

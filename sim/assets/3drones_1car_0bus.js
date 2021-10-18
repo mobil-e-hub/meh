@@ -59,9 +59,9 @@ module.exports = {
             h02: {id: null, position: null},
         },
         drones: {
-            d00: {id: 'd00', position: { x: -50, y: 60, z: 0 }},
+            d00: {id: 'd00', position: { x: 50, y: 50, z: 0 }},
             d01: {id: 'd01', position: { x: -60, y: -60, z: 0 }},
-            d02: {id: null, position: null}
+            d02: {id: 'd02', position: { x: -50, y: 50, z: 0 }},
         },
         cars: {
             v00: {id:'v00', position: {'x': 50, 'y': -50, 'z': 0}}
@@ -73,7 +73,6 @@ module.exports = {
             p00: {id:'p00', carrier: {type: 'hub', id: 'h01'}, destination: {type: 'hub', id: 'h00'}}
         },
         missions: {
-            // TODO nötig? --> einfach für alle Pakete in der Init eine Mission erstellen?
 
         }
     }

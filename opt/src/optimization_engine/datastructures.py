@@ -1,4 +1,5 @@
 from collections import namedtuple
+from dataclasses import dataclass
 import enum
 
 
@@ -34,7 +35,7 @@ Hub = namedtuple('Hub', 'id position transactions parcels')
 
 Drone = namedtuple('Drone', 'id position speed parcel state')
 
-Car = namedtuple('Car', 'id position speed parcels state')
+Car = namedtuple('Car', 'id position speed parcels capacity state')
 
 Bus = namedtuple('Bus', 'id position capacity route nextStop missions speed parcels activeTasks '
                         'arrivalTimeAtStop state')
@@ -44,3 +45,5 @@ Parcel = namedtuple('Parcel', 'id carrier destination')
 Route = namedtuple('Route', 'distance path')
 
 Routes = namedtuple('Routes', 'air1 road air2')  # container for subroutes of complete route
+
+

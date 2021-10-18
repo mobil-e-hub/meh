@@ -89,7 +89,6 @@ module.exports = class HubSimulator extends MQTTClient {
 
             if(typeof transaction !== "undefined" && transaction.id in hub.transactions) {
                 delete hub.transactions[transaction.id];
-                this.publish(`hub/${hub.id}`, `transaction/${transaction.id}/complete`);
             } else {
                 this.publish(`hub/${hub.id}`, 'error', `Transaction not found.`);
             }
