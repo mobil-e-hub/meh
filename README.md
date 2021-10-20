@@ -73,7 +73,7 @@ Other registered clients are the Vue.app `'visualization'` and the Optimization 
 | `/[Entity]/[id]/mission/[id]/complete` | on mission success | Entity | all, opt | - | |
 | `/[Entity]/[id]/mission/[id]/failed`	| WIP | Entity | all, opt| -  |  *not implemented yet* |
 | **Error Handling:** | | | | |
-| `/opt_engine/error` | WIP: no route for parcel found | opt | viz | Parcel Object | |
+| `/opt/error` | WIP: no route for parcel found | opt | viz | Parcel Object | |
 | `/[Entity]/[id]/error/capacity/exceeded/[parcel]/[id]` | capacity full, could not receive new parcel | Entity | viz, opt | Entity Object | |
 ---
 

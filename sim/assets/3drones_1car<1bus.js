@@ -78,7 +78,7 @@ module.exports = {
             }
         },
         parcels: {
-            p00: {id:'p00', carrier: {type: 'hub', id: 'h01'}, destination: {type: 'hub', id: 'h00'}}
+            p00: {id:'p00', carrier: {type: 'hub', id: 'h00'}, destination: {type: 'hub', id: 'h01'}}
         },
         missions: {
 

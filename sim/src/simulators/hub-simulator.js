@@ -80,7 +80,7 @@ module.exports = class HubSimulator extends MQTTClient {
                 this.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
                 delete this.hubs[topic.id].transactions[topic.args[1]];
             } else {
-                this.publish(`hub/${hub.id}`, 'error', `Parcel not found in Hub ${hub.id}.`);
+                this.publish(`hub/${hub.id}`, 'error', `No outstanding transaction ${topic.args[1]} in ${hub.id}.`);
             }
             this.publish(`hub/${hub.id}`, 'state', hub);
         } else if (this.matchTopic(topic, 'hub/+/transaction/+/complete')) {

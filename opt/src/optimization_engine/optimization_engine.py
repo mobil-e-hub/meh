@@ -96,6 +96,7 @@ class OptimizationEngine(MQTTClient):
                                                         self.dist[node_source][junction_source]))
         except ValueError as e:
             logging.error(f"< [{self.logging_name}] - No first route exists: " + str(e))
+            self.publish("error", f"No first route exists: " + str(e))
             raise ValueError("No first route exists: " + str(e))
         try:
             route2 = Route(distance=self.dist[junction_source][junction_destination],
@@ -103,6 +104,7 @@ class OptimizationEngine(MQTTClient):
                                                         self.dist[junction_source][junction_destination]))
         except ValueError as e:
             logging.error(f"< [{self.logging_name}] - No second route 2 exists: " + str(e))
+            self.publish("error", f"No second route exists: " + str(e))
             raise ValueError("No second route 2 exists: " + str(e))
         try:
             route3 = Route(distance=self.dist[junction_destination][node_destination],
@@ -110,6 +112,7 @@ class OptimizationEngine(MQTTClient):
                                                         self.dist[junction_destination][node_destination]))
         except ValueError as e:
             logging.error(f"< [{self.logging_name}] - No third route exists: " + str(e))
+            self.publish("error", f"No third route exists: " + str(e))
             raise ValueError("No third route exists: " + str(e))
 
         logging.info(f"< [{self.logging_name}] - New route for parcel {parcel.id}: {[route1, route2, route3]}")

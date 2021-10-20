@@ -249,6 +249,7 @@ export default {
         this.$mqtt.subscribe('+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
         this.$mqtt.subscribe('+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
         this.$mqtt.subscribe('parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('+/error/#', (topic, message) => this.showToastError(`Error ${topic.string.short}`, `${JSON.stringify(message)}`));
         this.$mqtt.subscribe('+/+/error/#', (topic, message) => this.showToastError(`Error ${topic.string.short}`, `${JSON.stringify(message)}`));
         this.$mqtt.subscribe('visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },

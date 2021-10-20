@@ -1,5 +1,5 @@
 module.exports = {
-    _description: "Scenario with one car and one bus + 3 drones, car is better positioned and should deliver the parcel",
+    _description: "Scenario with one car and one bus + 3 drones, bus is better positioned and should deliver parcel",
     topology: {
         nodes: {
             n00: {id: 'n00', position: {x: -50, y: 50, z: 0}, type: 'parking'},
@@ -18,6 +18,7 @@ module.exports = {
             e00: {id: 'e00', from: 'n00', to: 'n01', type: 'road', distance: 100},
             e01: {id: 'e01', from: 'n01', to: 'n02', type: 'road', distance: 100},
             e02: {id: 'e02', from: 'n02', to: 'n09', type: 'road', distance: 50},
+            e10: {id: 'e10', from: 'n09', to: 'n03', type: 'road', distance: 50},
             e03: {id: 'e03', from: 'n03', to: 'n00', type: 'road', distance: 100},
             e04: {id: 'e04', from: 'n00', to: 'n04', type: 'air', distance: 10},
             e05: {id: 'e05', from: 'n04', to: 'n05', type: 'air', distance: 10},
@@ -25,7 +26,6 @@ module.exports = {
             e07: {id: 'e07', from: 'n06', to: 'n00', type: 'air', distance: 10},
             e08: {id: 'e08', from: 'n01', to: 'n07', type: 'air', distance: 14},
             e09: {id: 'e09', from: 'n07', to: 'n01', type: 'air', distance: 14},
-            e10: {id: 'e10', from: 'n09', to: 'n03', type: 'road', distance: 50},
             e11: {id: 'e11', from: 'n00', to: 'n08', type: 'road', distance: 71},
             e12: {id: 'e12', from: 'n08', to: 'n01', type: 'road', distance: 71},
             e13: {id: 'e13', from: 'n08', to: 'n09', type: 'road', distance: 50},
@@ -64,10 +64,10 @@ module.exports = {
             d02: {id: null, position: null}
         },
         cars: {
-            v00: {id:'v00', position: {'x': 50, 'y': 50, 'z': 0}}
+            v00: {id:'v00', position: {'x': 50, 'y': 50, 'z': 0}} //, speed:0, parcel:null, state:VehicleState.IDLE}
         },
         buses: {
-            v01: {id:'v01', position:{'x': 50, 'y': -50, 'z': 0},
+            v01: {id:'v01', position:{'x': 50, 'y': 50, 'z': 0},
                 route: [
                     {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 12},
                     {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 10},
@@ -78,7 +78,7 @@ module.exports = {
             }
         },
         parcels: {
-            p00: {id:'p00', carrier: {type: 'hub', id: 'h01'}, destination: {type: 'hub', id: 'h00'}}
+            p00: {id:'p00', carrier: {type: 'hub', id: 'h00'}, destination: {type: 'hub', id: 'h01'}}
         },
         missions: {
 
