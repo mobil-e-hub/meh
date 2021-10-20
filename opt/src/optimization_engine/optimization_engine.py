@@ -191,7 +191,7 @@ class OptimizationEngine(MQTTClient):
 
         if optimal_entity is None:
             found_entity = False
-            logging.error(f"No suitable entity could be found for route {route}.")
+            logging.warn(f"No suitable entity could be found for route {route}.")
         if optimal_time is float("inf"):
             found_entity = False
             logging.error("No route was found.")
@@ -226,10 +226,10 @@ class OptimizationEngine(MQTTClient):
 
         if optimal_bus is None:
             found_bus = False
-            logging.error(f"No suitable bus could be found for route {route}.")
+            logging.warn(f"No suitable bus could be found for route {route}.")
         if optimal_time is float("inf"):
             found_bus = False
-            logging.error("No bus - route was found.")
+            logging.warn("No bus - route was found.")
 
         optimal_id = optimal_bus[0] if optimal_bus is not None else None
 
