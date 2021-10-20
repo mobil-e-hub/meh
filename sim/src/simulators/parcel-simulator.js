@@ -34,8 +34,8 @@ module.exports = class ParcelSimulator extends MQTTClient {
     init() {
         this.parcels = Object.assign({}, ...Object.values(this.scenario.entities.parcels).map(p => {
             let id = p.id || uuid();
-            let carrier = p.destination;
-            let destination = p.carrier;
+            let carrier = p.carrier;
+            let destination = p.destination;
             let newParcel = new Parcel(id, carrier, destination)
 
             return {[id]: newParcel};
@@ -48,8 +48,10 @@ module.exports = class ParcelSimulator extends MQTTClient {
 
     test() {
         for (const [id, parcel] of Object.entries(this.parcels)) {
+            // add parcel to viz/opt
             this.publish(`parcel/${id}`, 'state', parcel),
-                this.publish(`parcel/${id}`, 'placed', parcel)
+            // start delivery mission
+            this.publish(`parcel/${id}`, 'placed', parcel)  //
 
         }
     }

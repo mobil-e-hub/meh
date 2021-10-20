@@ -17,7 +17,8 @@ def load_topology(path):
     nodes = data["nodes"]
     edges = data["edges"]
 
-    g = nx.MultiDiGraph()
+    g = nx.MultiGraph()    # undirected graph --> walk edges in both directions
+    # g = nx.MultiDiGraph()  # directed graph --> walk edges only in declared direction
     g.add_nodes_from(nodes)
 
     for node in nodes:  # add attribute values

@@ -69,12 +69,6 @@ module.exports = class CarSimulator extends MQTTClient {
         this.start();
     }
 
-    // //TODO remove function & remove topic from receive
-    // test_init() {
-    //     this.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
-    //     this.resume();
-    // }
-
     moveCars = () => {
         for (const [id, car] of Object.entries(this.cars)) {
             if (car.move(this.interval / 1000, this)) {

@@ -464,8 +464,6 @@ class OptimizationEngine(MQTTClient):
         [_, _, entity, id_, *args] = split_topic(msg.topic)
 
         if entity == 'parcel':
-            logging.warn(f"[{self.logging_name}] - Should Create Delivery Route for: {entity}/{id_} - {msg.payload} -  "
-                         f"Not yet Implemented")
 
             state = json.loads(msg.payload)
             parcel = Parcel(id=state['id'], carrier=state['carrier'],
@@ -476,9 +474,10 @@ class OptimizationEngine(MQTTClient):
                 self.publish('error', f"Could not deliver parcel: {msg.payload}.")
 
         elif entity == 'order':
-            pass
+            logging.warn(f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
+                         f"Not yet Implemented")
         else:
-            logging.warn(f" > [opt_engine] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
+            logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
 
     def on_message_cap_exceeded(self, client, userdata, msg):

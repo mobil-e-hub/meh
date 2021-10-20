@@ -75,12 +75,13 @@ module.exports = class HubSimulator extends MQTTClient {
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
 
-            this.addParcelToHub(hub.id, transaction.parcel);
-            this.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
-            delete this.hubs[topic.id].transactions[topic.args[1]];
-
-
-
+            if(typeof transaction !== "undefined"){
+                this.addParcelToHub(hub.id, transaction.parcel);
+                this.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+                delete this.hubs[topic.id].transactions[topic.args[1]];
+            } else {
+                this.publish(`hub/${hub.id}`, 'error', `Parcel not found in Hub ${hub.id}.`);
+            }
             this.publish(`hub/${hub.id}`, 'state', hub);
         } else if (this.matchTopic(topic, 'hub/+/transaction/+/complete')) {
             // This message is only received if the hub is the transaction's "from" instance and has already sent the "execute" message
