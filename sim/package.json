@@ -22,7 +22,7 @@
     "mqtt-match": "^2.0.3",
     "random": "^2.2.0",
     "uuid": "^8.3.2",
-    "ws": "^7.4.2"
+    "ws": "^7.4.6"
   },
   "author": "",
   "license": "ISC",
