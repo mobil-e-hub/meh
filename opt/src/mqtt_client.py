@@ -25,11 +25,16 @@ class MQTTClient:
         self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME")
         self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD")
 
-        self.root = "mobil-e-hub/vX"    # TODO weg --> überschreibt das hier den in opt_engine gesetzten root??
-        self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
-        self.id = str(uuid4())[0:8]
+        self.project = os.environ.get("MQTT_ROOT")
+        self.version = os.environ.get("MQTT_VERSION")
+        self.root = f"{self.project}/{self.version}"
 
-        self.subscriptions = {'mobil-e-hub/vX/#'}  # TODO remove topic?
+        self.subscriptions = {f"mobil-e-hub/{self.version}/#"}
+        self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
+        # self.id = str(uuid4())[0:8]
+
+        self.topic = "opt"  # TODO macht default topic überhaupt sinn?? --> als fallback
+
 
         self.client = mqtt.Client(self.client_name, transport='websockets')
         self.client.ws_set_options(path=self.MQTT_PATH)

@@ -20,9 +20,6 @@ class OptimizationEngine(MQTTClient):
         MQTTClient.__init__(self)
 
         self.logging_name = "opt_engine"
-        self.project = 'mobil-e-hub'
-        self.version = 'vX'
-        self.root = self.project + '/' + self.version
 
         self.g_topo = load_topology('assets/topology.json')
         self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
@@ -438,19 +435,19 @@ class OptimizationEngine(MQTTClient):
         """registers functions for handling different message topics to the MQTT client as callbacks"""
 
         # entities: state updates
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/state/#", self.on_message_state)
+        self.subscribe_and_add_callback("+/+/state/#", self.on_message_state)
 
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/placed/#", self.on_message_placed)
-
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/from/+/+/error/capacity/exceeded/#",
+        self.subscribe_and_add_callback("+/+/error/capacity/exceeded/#",
                                         self.on_message_cap_exceeded)
 
-        self.subscribe_and_add_callback(f"{self.project}/{self.version}/+/+/+/delivered/#",
+        self.subscribe_and_add_callback("+/+/placed/#", self.on_message_placed)
+
+        self.subscribe_and_add_callback("+/+/delivered/#",
                                         self.on_message_parcel_delivered)
 
     def subscribe_and_add_callback(self, topic, callback_function):
-        self.subscribe(topic)
-        self.client.message_callback_add(topic, callback_function)
+        self.subscribe(f"{self.project}/{self.version}/{topic}")
+        self.client.message_callback_add(f"{self.project}/{self.version}/{topic}", callback_function)
 
     def on_message_state(self, client, userdata, msg):
         [_, _, entity, id_, *args] = split_topic(msg.topic)

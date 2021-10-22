@@ -40,7 +40,7 @@ const server = app.listen(port, () => {
 });
 
 // Map and initial entities
-const scenario = require('../assets/no_route_exists');
+const scenario = require('../assets/3drones_1car_0bus');
 
 
 // Simulators
