@@ -17,7 +17,7 @@
     "bootstrap": "^4.6.0",
     "bootstrap-vue": "^2.21.2",
     "lodash": "^4.17.20",
-    "mqtt": "^4.2.6",
+    "mqtt": "^4.2.8",
     "mqtt-match": "^2.0.3",
     "random": "^2.2.0",
     "socket.io-client": "^4.0.1",
