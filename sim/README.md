@@ -63,7 +63,7 @@ A task can either be going from one node of an edge to the other node, or pickin
 ### Transactions
 A _transaction_ describes the passing of a parcel from one entity to another. The process of a transaction is as follows:
 1. The receiver sends a `transaction/[id]/ready` message to the giver
-2. The giver sends a `transaction/[id]/execute` message to the giver and sends a  `transfer` message to the parcel
+2. The giver sends a `transaction/[id]/execute` message to the receiver and sends a  `transfer` message to the parcel
 3. The receiver sends a `transaction/[id]/complete` message to the giver and marks the transaction as complete
 4. The giver marks the transaction as complete
 

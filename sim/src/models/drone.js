@@ -27,7 +27,7 @@ const TaskState = {
     completed: 4
 };
 
-// TODO add timeout mechanism / abort transaction mechanism
+// TODO add timeout mechanism / abort transaction mechanism --> is unready message already sufficient?
 
 class Drone {
     constructor(id, position) {
@@ -74,6 +74,7 @@ class Drone {
                     // this.state === DroneState.waitingForTransaction
                     return false;
                 case 'dropoff':
+                    this.checkTransactionReady(this.mission.tasks[0]);
                     if (this.state === DroneState.waitingForTransaction) {
                         return false;
                     }
@@ -90,6 +91,12 @@ class Drone {
 
     completeTransaction(simulator) {
         let task = this.mission.tasks[0];
+
+        if (task.type === undefined) {
+            console.error(`Transaction failed! - Could not find transaction in tasks of Drone.`)
+            return;
+        }
+
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
         }
@@ -127,7 +134,12 @@ class Drone {
             task.state = TaskState.waitingForTransaction;
         }
         else if (task.type === 'dropoff') {
-            if (task.transaction.ready) {
+            this.checkTransactionReady(task);
+        }
+    }
+
+    checkTransactionReady(task) {
+        if (task.transaction.ready) {
                 this.state = DroneState.executingTransaction;
                 task.state = TaskState.executingTransaction;
             }
@@ -135,11 +147,9 @@ class Drone {
                 this.state = DroneState.waitingForTransaction;
                 task.state = TaskState.waitingForTransaction;
             }
-        }
     }
 
     completeTask(simulator) {
-        // TODO: only called when parcel dropped off successfully?
         if (this.mission.tasks[0].type === 'dropoff') {
              this.parcel = null;
         }

@@ -1,6 +1,7 @@
 **/node_modules/
 /opt/venv/
 /ana/venv/
+/ana/data/
 **/.env
 **/package-lock.json
 **/__pycache__/

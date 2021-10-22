@@ -142,7 +142,7 @@
 
                 <b-nav-text class="mx-3" title="Number of parcels">
                   <!--                  // better: inventory_2 (parcel box)  &ndash;&gt; didn't  work-->
-                  <vue-material-icon name="mail"  :size="24" />
+                  <vue-material-icon name="crop_square"  :size="24" />
 <!--                    <font-awesome-icon icon="archive" style="color: green" />-->
                   : {{numberOfParcels}}
                 </b-nav-text>
@@ -210,7 +210,7 @@ export default {
             },
             display: {
                 areToastsEnabled: true,
-                enabledToastTypes: ['status', 'routing'],
+                enabledToastTypes: ['status', 'routing', 'errors'],
             },
             stats: {
                 waitingDrones:0,
@@ -238,6 +238,7 @@ export default {
         // Subscribe to all relevant topics
         console.log("Subscribing to topics - VUE_CREATED ")
         this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
+
         this.$mqtt.subscribe('+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
         this.$mqtt.subscribe('+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
         this.$mqtt.subscribe('+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
@@ -248,6 +249,8 @@ export default {
         this.$mqtt.subscribe('+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
         this.$mqtt.subscribe('+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
         this.$mqtt.subscribe('parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('+/error/#', (topic, message) => this.showToastError(`Error ${topic.string.short}`, `${JSON.stringify(message)}`));
+        this.$mqtt.subscribe('+/+/error/#', (topic, message) => this.showToastError(`Error ${topic.string.short}`, `${JSON.stringify(message)}`));
         this.$mqtt.subscribe('visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },
     mounted: function() {
@@ -285,14 +288,19 @@ export default {
                 this.showToast(title, message)
             }
         },
+        showToastError: function(title, message) {
+            if (this.display.enabledToastTypes.includes('errors')){
+                this.showToast(title, `ERROR: ${message}`, 'danger')
+            }
+        },
         showToastRouting: function(title, message) {
             if (this.display.enabledToastTypes.includes('routing')){
                 this.showToast(title, message)
             }
         },
-        showToast: function(title, message) {
+        showToast: function(title, message, variant='default') {
             if (this.display.areToastsEnabled) {
-                this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left'});
+                this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left', variant: variant});
             }
         },
         toggleSidebar: function() {

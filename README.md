@@ -15,6 +15,7 @@ This project allows for the simulation, control and visualization of a Drone Log
   
 - WIP: Analysis Engine (Flask server in `/ana`): TODO
 
+
 Please refer to the `README.md` files in the respective sub-folders for instructions and documentation.
 
 ## Installation and usage
@@ -27,8 +28,6 @@ The individual modules can also be started using the commands `npm run start:sim
 
 
 ## Interaction and Communication
-
-TODO: Describe Event Grid and interaction between modules
 
 Communication between the components is via MQTT.
 
@@ -74,7 +73,7 @@ Other registered clients are the Vue.app `'visualization'` and the Optimization 
 | `/[Entity]/[id]/mission/[id]/complete` | on mission success | Entity | all, opt | - | |
 | `/[Entity]/[id]/mission/[id]/failed`	| WIP | Entity | all, opt| -  |  *not implemented yet* |
 | **Error Handling:** | | | | |
-| `/opt_engine/error` | WIP: no route for parcel found | opt | viz | Parcel Object | |
+| `/opt/error` | WIP: no route for parcel found | opt | viz | Parcel Object | |
 | `/[Entity]/[id]/error/capacity/exceeded/[parcel]/[id]` | capacity full, could not receive new parcel | Entity | viz, opt | Entity Object | |
 ---
 

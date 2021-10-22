@@ -31,12 +31,13 @@ const TaskState = {
 //      - model timeout/  transaction abort mechanism
 
 class Car {
-    constructor(id, position) {
+    constructor(id, position, capacity = 2) {
         this.id = id;
         this.position = position;
 
         this.speed = 10;
-        this.parcel = null;
+        this.capacity = capacity;
+        this.parcels = [];
         this.state = CarState.idle;
 
     }
@@ -44,8 +45,7 @@ class Car {
     move(interval, simulator) {
         if (!this.mission) {
             return false;
-        }
-        else {
+        } else {
             let task = this.mission.tasks[0];
             switch (task.type) {
                 case 'move':
@@ -78,8 +78,7 @@ class Car {
                 case 'dropoff':
                     if (this.state === CarState.waitingForTransaction) {
                         return false;
-                    }
-                    else {
+                    } else {
                         // this.state === CarState.executingTransaction
                         simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
                         simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
@@ -92,13 +91,25 @@ class Car {
 
     completeTransaction(simulator) {
         let task = this.mission.tasks[0];
+
+        if (task.type === undefined) {
+            console.error(`Transaction failed! - Could not find transaction in tasks of Car.`)
+            return;
+        }
+
         if (task.type !== 'pickup') {
             console.log('Wrong transaction!');
-        }
-        else {
+        } else {
             let transaction = task.transaction;
-            this.parcel = transaction.parcel;
-            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+
+            // this.parcel = transaction.parcel;
+            if(this.parcels.length < this.capacity) {
+                this.parcels.push(transaction.parcel)
+                simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+            } else {
+                  simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`); // TODO include in table
+            }
+            // TODO Is task completed when parcel is rejected and other modules are notified?
 
             this.completeTask(simulator);
         }
@@ -108,8 +119,7 @@ class Car {
         this.mission = mission;
         if (mission === null) {
             this.state = CarState.idle;
-        }
-        else {
+        } else {
             this.startTask(simulator);
 
         }
@@ -121,19 +131,16 @@ class Car {
         if (task.type === 'move') {
             this.state = CarState.moving;
             task.state = TaskState.ongoing;
-        }
-        else if (task.type === 'pickup') {
+        } else if (task.type === 'pickup') {
             let transaction = task.transaction;
             simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
-        }
-        else if (task.type === 'dropoff') {
+        } else if (task.type === 'dropoff') {
             if (task.transaction.ready) {
                 this.state = CarState.executingTransaction;
                 task.state = TaskState.executingTransaction;
-            }
-            else {
+            } else {
                 this.state = CarState.waitingForTransaction;
                 task.state = TaskState.waitingForTransaction;
             }
@@ -142,7 +149,7 @@ class Car {
 
     completeTask(simulator) {
         if (this.mission.tasks[0].type === 'dropoff') {
-             this.parcel = null;
+            this.parcels = this.parcels.filter(p => p !== this.mission.tasks[0].transaction.parcel);
         }
         this.mission.tasks.splice(0, 1);
 
@@ -150,12 +157,11 @@ class Car {
             simulator.publish(`car/${this.id}`, `mission/${this.mission.id}/complete`);
             this.mission = null;
             this.state = CarState.idle;
-        }
-        else {
+        } else {
             this.startTask(simulator);
         }
         simulator.updateCarState(this.id);
     }
 }
 
-module.exports = { Car, CarState, TaskState };
+module.exports = {Car, CarState, TaskState};

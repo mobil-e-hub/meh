@@ -64,6 +64,7 @@ export default new Vuex.Store({
         numberOfCars: state => Object.keys(state.entities.cars).length,
         numberOfBuses: state => Object.keys(state.entities.buses).length,
         numberOfParcels: state => Object.keys(state.entities.parcels).length,
+        // busHasParcels: (state, id) => Object.keys(state.entities.buses[id].parcels).length,
     },
     mutations: {
         updateEntityState(state, { type, id, payload }) {

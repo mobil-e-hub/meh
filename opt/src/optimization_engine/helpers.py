@@ -1,6 +1,8 @@
 import json
 import enum
 import logging
+from uuid import uuid4
+
 import networkx as nx
 
 
@@ -15,7 +17,8 @@ def load_topology(path):
     nodes = data["nodes"]
     edges = data["edges"]
 
-    g = nx.MultiDiGraph()
+    g = nx.MultiGraph()    # undirected graph --> walk edges in both directions
+    # g = nx.MultiDiGraph()  # directed graph --> walk edges only in declared direction
     g.add_nodes_from(nodes)
 
     for node in nodes:  # add attribute values
@@ -48,3 +51,8 @@ def backtrack_shortest_path(predecessors, start, end, distance):
         raise ValueError(f"There is no path between these nodes. start: {start}, end: {end}, distance: {distance});")
     path = nx.algorithms.shortest_paths.dense.reconstruct_path(start, end, predecessors)
     return path
+
+
+def generate_transaction_id():
+    """generates and returns an uuid v4 for usage as transaction identifier"""
+    return str(uuid4())[0:4]

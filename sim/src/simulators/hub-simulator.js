@@ -5,13 +5,12 @@ const {random, uuid} = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const Hub = require('../models/hub');
 
-const topology = require('../../assets/topology');
-
 module.exports = class HubSimulator extends MQTTClient {
-    constructor(numberOfHubs) {
-        super('hub-simulator', ['hub/#', 'visualization/#']);
 
-        this.numberOfHubs = numberOfHubs;
+    constructor(scenario) {
+        super('hub-simulator', ['hub/#', 'visualization/#', "parcel/+/placed"]);
+
+        this.scenario = scenario;
         this.hubs = {};
     }
 
@@ -34,21 +33,16 @@ module.exports = class HubSimulator extends MQTTClient {
     }
 
     init() {
-        this.hubs = Object.assign({}, ...Array.from({length: this.numberOfHubs}).map(() => {
-            let id = uuid();
-            return {[id]: new Hub(id, random.key(topology.nodes))};
+        this.hubs = Object.assign({}, ...Object.values(this.scenario.entities.hubs).map(hub => {
+            let id = hub.id || uuid();
+            let position = hub.position || random.key(this.scenario.topology.nodes);
+            return {[id]: new Hub(id, position)};
         }));
     }
 
     reset() {
         this.stop();
         this.start();
-    }
-
-    //TODO remove function & remove topic from receive
-    test_init() {
-        this.hubs = { h00: new Hub('h00', 'n05'), h01: new Hub('h01', 'n07'), h02: new Hub('h02', 'n10') };
-        this.resume();
     }
 
     receive(topic, message) {
@@ -59,11 +53,9 @@ module.exports = class HubSimulator extends MQTTClient {
                 this[topic.rest]();
             }
         }
-        //TODO remove
-        else if (this.matchTopic(topic, '+/+/test_init')) {
-            this.test_init();
-        }
+
         else if (this.matchTopic(topic, 'hub/+/mission')) {
+
             let hub = this.hubs[topic.id];
             let transaction = message.tasks[0].transaction;
 
@@ -82,26 +74,51 @@ module.exports = class HubSimulator extends MQTTClient {
             // This message is only received if the hub is the transaction's "to" instance and has already sent the "ready" message
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
-            // console.log(transaction);
-            // console.log("topic: " +  topic.args[1]);
-            hub.parcels[transaction.parcel] = transaction.parcel; // TODO sometimes: execute received again before complete send to the giving entity -> nullpointer...
-            this.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
-            delete hub.transactions[topic.args[1]];
 
+            if(typeof transaction !== "undefined"){
+                this.addParcelToHub(hub.id, transaction.parcel);
+                this.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+                delete this.hubs[topic.id].transactions[topic.args[1]];
+            } else {
+                this.publish(`hub/${hub.id}`, 'error', `No outstanding transaction ${topic.args[1]} in ${hub.id}.`);
+            }
             this.publish(`hub/${hub.id}`, 'state', hub);
         } else if (this.matchTopic(topic, 'hub/+/transaction/+/complete')) {
             // This message is only received if the hub is the transaction's "from" instance and has already sent the "execute" message
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
 
-            delete hub.transactions[transaction.id];
-            delete hub.parcels[transaction.parcel];
+            if(typeof transaction !== "undefined" && transaction.id in hub.transactions) {
+                delete hub.transactions[transaction.id];
+            } else {
+                this.publish(`hub/${hub.id}`, 'error', `Transaction not found.`);
+            }
+            (typeof transaction !== "undefined" && transaction.parcel in hub.parcels) ?
+                delete hub.parcels[transaction.parcel] : this.publish(`hub/${hub.id}`, 'error', `Parcel not found in Hub ${hub.id}.`);
 
-            this.publish(`hub/${hub.id}`, `transaction/${transaction.id}/complete`);
             this.publish(`hub/${hub.id}`, 'state', hub);
-        } else if (this.matchTopic(topic, 'hub/test')) {
+        } else if (this.matchTopic(topic, 'parcel/+/placed')) {
+            let hubID = message.carrier.id;
+            if (!this.hubs.hasOwnProperty(hubID)) {
+                console.error(`Could not find carrier entity hub/${hubID} of parcel/${topic.id}`);
+            }
+            else {
+                this.addParcelToHub(hubID, message);
+            }
+
+        } else if (this.matchTopic(topic, 'to/hub/test')) {
             console.log(`<<<<< HUB-SIMULATOR: RECEIVED MESSAGE: ${message} <<<<<<<<`)
         }
 
+    }
+
+    addParcelToHub(hubID, parcel) {
+        let success = this.hubs[hubID].addParcel(parcel);
+        if(success) {
+            this.publish(`hub/${hubID}`, 'state', this.hubs[hubID]);
+        }
+        else {
+            this.publish(`hub/${hubID}`, `error/capacity/exceeded/parcel/${parcel.id}`, this.hubs[hubID]);
+        }
     }
 };

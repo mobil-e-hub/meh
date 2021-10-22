@@ -7,11 +7,12 @@ const {random, uuid} = require('../helpers');
 const Parcel = require('../models/parcel');
 
 module.exports = class ParcelSimulator extends MQTTClient {
-    constructor(hubSimulator) {
+
+    constructor(scenario) {
         super('parcel-simulator', ['parcel/#', 'visualization/#']);
 
         this.parcels = {};
-        this.hubSimulator = hubSimulator;
+        this.scenario = scenario;
     }
 
     resume() {
@@ -20,24 +21,48 @@ module.exports = class ParcelSimulator extends MQTTClient {
         }
     }
 
-    stop() {
-        this.parcels = {p00: new Parcel('p00', {type: 'hub', id: 'h00'}, {type: 'hub', id: 'h01'})};
+    start() {
+        this.init();
+        this.resume();
     }
 
-    //TODO remove function & remove topic from receive
-    test_init() {
-        this.parcels = {p00: new Parcel('p00', {type: 'hub', id: 'h00'}, {type: 'hub', id: 'h01'})};
+    reset() {
+        this.stop();
+        this.start();
+    }
+
+    init() {
+        this.parcels = Object.assign({}, ...Object.values(this.scenario.entities.parcels).map(p => {
+            let id = p.id || uuid();
+            let carrier = p.carrier;
+            let destination = p.destination;
+            let newParcel = new Parcel(id, carrier, destination)
+
+            return {[id]: newParcel};
+        }));
+    }
+
+    stop() {
+        this.parcels = {};
+    }
+
+    test() {
+        for (const [id, parcel] of Object.entries(this.parcels)) {
+            // add parcel to viz/opt
+            this.publish(`parcel/${id}`, 'state', parcel),
+            // start delivery mission
+            this.publish(`parcel/${id}`, 'placed', parcel)  //
+
+        }
     }
 
     receive(topic, message) {
         super.receive(topic, message);
 
-        //TODO remove
-        if (this.matchTopic(topic, '+/+/test_init')) {
-            this.test_init();
-        } else if (topic.entity === 'visualization') {
-            if (topic.rest === 'stop') {
-                this.stop();
+
+        if (topic.entity === 'visualization') {
+            if (['start', 'stop', 'reset', 'test'].includes(topic.rest)) {
+                this[topic.rest]();
             } else if (topic.rest === 'place-order') {
                 let id = uuid();
                 this.publish(`order/${id}`, 'placed');
@@ -46,12 +71,11 @@ module.exports = class ParcelSimulator extends MQTTClient {
                 let id = uuid();
                 // let [source, destination] = random.keys(this.hubSimulator.hubs, 2);
                 // this.orders[orderId] = new Order(source, destination);
-                this.parcels[id] = new Parcel(id, message.carrier, message.destination);
 
-                // this.publish(`order/${id}`, 'state', this.orders[id]);
-                this.publish(`parcel/${id}`, 'placed', this.parcels[id]);
-                this.publish(`parcel/${id}`, 'state', this.parcels[id]);
+                // this.publishFrom(`order/${id}`, 'state', this.orders[id]);
+                this.placeParcel(id, message.carrier, message.destination);
             }
+
         } else {
             if (topic.entity === 'parcel') {
                 if (topic.rest === 'pickup') {
@@ -76,7 +100,12 @@ module.exports = class ParcelSimulator extends MQTTClient {
         }
     }
 
-    addParcel() {
+    placeParcel(id, carrier, destination) {
+        this.parcels[id] = new Parcel(id, carrier, destination);
 
+        this.publish(`parcel/${id}`, 'placed', this.parcels[id]);
+        this.publish(`parcel/${id}`, 'state', this.parcels[id]);
+
+        return {[id]: this.parcels[id]};
     }
 };
