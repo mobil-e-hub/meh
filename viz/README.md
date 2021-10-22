@@ -26,14 +26,7 @@ In the `created()` lifecycle function, subscribe to topics using
 this.$eventgrid.subscribe(pattern, handler);
 ```
 
-## Communication with MQTT - [Deprecated!]
-Communication between entities exclusively uses the public MQTT broker `broker.hivemq.com`.
 
-All topics start with `mobil-e-hub/v1/[from|to]/[entity]/[id]/`, and all messages are string representations of JSON objects.
-Each entity publishes `{ topic: mobil-e-hub/v1/from/[entity]/[id]/connected, message: ''}` upon connection.
-
-
----
 ## Project Structure
 
 ### Visualization

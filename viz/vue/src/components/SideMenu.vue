@@ -36,6 +36,10 @@
                                 <input class="float-right" type="checkbox" id="checkbox_routing" value="routing" :disabled="true" v-model="this.display.enabledToastTypes">
                             </li>
                             <li>
+                                <label for="checkbox_routing" >Routing</label>
+                                <input class="float-right" type="checkbox" id="checkbox_errors" value="errors" :disabled="true" v-model="this.display.enabledToastTypes">
+                            </li>
+                            <li>
                                 <label for="checkbox_mission" >Missions</label>
                                 <input class="float-right" type="checkbox" id="checkbox_mission" value="mission" :disabled="true" v-model="this.display.enabledToastTypes">
                             </li>

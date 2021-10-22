@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 # Internal modules
 from optimization_engine.optimization_engine import OptimizationEngine
 
-from mqtt_client import MQTTClient
 
 # TODO add logging
 #       Reihenfolge? -> erst server -> opt_engine -> start Mqtt Loop
+#from src.optimization_engine.optimization_engine import OptimizationEngine
 
 # Environment variables
 load_dotenv()
@@ -44,7 +44,7 @@ def ping_mqtt():
     return {'mqtt': 'pong'}
 
 
-app.run(port=port, debug=True)
+app.run(port=port, use_reloader=True)
 logging.info(f"< Server listening at http://localhost:${port}.")
 
 

@@ -6,13 +6,12 @@ const { random, uuid } = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const { Car, CarState } = require('../models/car');
 
-const topology = require('../../assets/topology');
-
 module.exports = class CarSimulator extends MQTTClient {
-    constructor(numberOfCars) {
+
+    constructor(scenario) {
         super('car-simulator', ['car/#', 'visualization/#']);
 
-        this.numberOfCars = numberOfCars;
+        this.scenario = scenario;
         this.cars = { };
 
         this.timer = null;
@@ -54,11 +53,11 @@ module.exports = class CarSimulator extends MQTTClient {
     }
 
     init() {
-        this.cars = Object.assign({}, ...Array.from({ length: this.numberOfCars }).map(() => {
-            let id = uuid();
-            let start = random.key(_.pickBy(topology.nodes, n => ['parking', 'road-junction'].includes(n.type)));
+        this.cars = Object.assign({}, ...Object.values(this.scenario.entities.cars).map(car => {
+            let id = car.id || uuid();
+            let position = car.position || random.roadHub().position;
 
-            return { [id]: new Car (id, topology.nodes[start].position) };
+            return { [id]: new Car (id, position)};
         }));
         for (const [id, car] of Object.entries(this.cars)) {
             this.publish(`car/${id}`, 'state', car);
@@ -68,12 +67,6 @@ module.exports = class CarSimulator extends MQTTClient {
     reset() {
         this.stop();
         this.start();
-    }
-
-    //TODO remove function & remove topic from receive
-    test_init() {
-        this.cars = { v00: new Car ('v00', { x: -50, y: 50, z: 0 }) };
-        this.resume();
     }
 
     moveCars = () => {
@@ -91,18 +84,18 @@ module.exports = class CarSimulator extends MQTTClient {
             if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
             }
-        }
-        //TODO remove
-        else if (this.matchTopic(topic, '+/+/test_init')) {
-            this.test_init();
-        }
-        else if (this.matchTopic(topic, 'car/+/mission')) {
+        } else if (this.matchTopic(topic, 'car/+/mission')) {
             this.cars[topic.id].setMission(message, this);
         }
         else if (this.matchTopic(topic, 'car/+/transaction/+/ready')) {
             // This message is only received if the car is the transaction's "from" instance
             let transaction = this.cars[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
             transaction.ready = true;
+        }
+        else if (this.matchTopic(topic, 'car/+/transaction/+/unready')) {
+            // This message is only received if the car is the transaction's "from" instance
+            let transaction = this.cars[topic.id].mission.tasks.find(t => t.transaction && t.transaction.id === topic.args[1]).transaction;
+            transaction.ready = false;
         }
         else if (this.matchTopic(topic, 'car/+/transaction/+/execute')) {
             // This message is only received if the car is the transaction's "to" instance and has already sent the "ready" message

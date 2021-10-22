@@ -16,8 +16,8 @@
               :height="sizeParcel"
               :href="require('../../assets/entities.svg') + '#parcel-symbol'"
               fill="green"
-              fill-opacity="0.8">
-
+              fill-opacity="0.8"
+      >
       </use>
   </svg>
 </template>
@@ -52,7 +52,7 @@ export default {
       } : null;
     },
     hasParcel: function() {
-        return (this.$store.state.entities.cars[this.id].parcel != null);
+        return (this.$store.state.entities.cars[this.id].parcels.length > 0);
     },
     sizeParcel: function() {
         return this.$store.state.settings.map.displaySize.parcel * (this.$store.state.settings.map.zoom.entities ? this.$store.state.settings.map.zoom.factor : 1.0);

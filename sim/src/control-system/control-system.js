@@ -1,3 +1,4 @@
+
 // External modules
 const MQTT = require('mqtt');
 const _ = require('lodash');
@@ -46,19 +47,5 @@ module.exports = class ControlSystem extends MQTTClient {
             // this.findRoute(new Parcel('p00', 'h00', 'h01'));
         }
     }
-
-
-
-    //TODO check if no idle drone is at a hub --> throw error
-    getNodeByPosition(position) {
-        return Object.keys(topology.nodes).find(key => topology.nodes[key].position.x === position.x && topology.nodes[key].position.y === position.y) ;
-    }
-
-
-    getHubs(position, radius) {
-        return Object.values(this.hubSimulator.hubs).filter(h => dist2d(topology.nodes[h.position].position, position) <= radius);
-    }
-
+    
 };
-
-
