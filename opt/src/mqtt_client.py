@@ -61,7 +61,7 @@ class MQTTClient:
         self.client.disconnect()
 
     def subscribe(self, topic):
-        logging.info(f"< [{self.logging_name}] - SUBSCRIBING for topic: {topic}")
+        logging.debug(f"< [{self.logging_name}] - SUBSCRIBING for topic: {topic}")
         self.client.subscribe(topic)
         self.subscriptions.add(topic)
 
@@ -87,6 +87,7 @@ class MQTTClient:
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
             logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER} - Port: {self.MQTT_PORT}")
+            self.publish('connected', '')
             for topic in self.subscriptions:
                 self.subscribe(topic)
         else:
