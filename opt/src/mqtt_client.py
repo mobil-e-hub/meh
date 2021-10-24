@@ -18,6 +18,7 @@ class MQTTClient:
         load_dotenv()
         logging.basicConfig(level=os.environ.get("LOGGING_LVL", 'WARNING').upper())
         print(f"LOGGING_LEVEL SET TO: {logging.root.level}")
+        print(f"LOGGING_LEVEL should be: {os.environ.get('LOGGING_LVL').upper()}")
 
         self.MQTT_BROKER = os.environ.get("MQTT_BROKER")
         self.MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT"))
@@ -34,7 +35,6 @@ class MQTTClient:
         # self.id = str(uuid4())[0:8]
 
         self.topic = "opt"  # TODO macht default topic überhaupt sinn?? --> als fallback
-
 
         self.client = mqtt.Client(self.client_name, transport='websockets')
         self.client.ws_set_options(path=self.MQTT_PATH)

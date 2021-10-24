@@ -74,9 +74,16 @@ class OptimizationEngine(MQTTClient):
         """
 
         # map hubs to their node location
-        carrier_id = parcel.carrier['id']
-        node_source = self.hubs[carrier_id].position
-        node_destination = self.hubs[parcel.destination['id']].position
+        try:
+            node_source = self.hubs[parcel.carrier['id']].position
+        except KeyError as e:
+            logging.error(f"Could not find source hub {parcel.carrier['id']}")
+            raise ValueError("Could not find source hub: " + str(e))
+        try:
+            node_destination = self.hubs[parcel.destination['id']].position
+        except KeyError as e:
+            logging.error(f"Could not find destination hub {parcel.destination['id']}")
+            raise ValueError("Could not find destination hub: " + str(e))
 
         # find closest road junction to source & destination hubs  (parking: both drones and cars can access)
         nodes_road = [x for x, y in self.g_topo.nodes(data=True) if y['type'] == 'parking']  # map n => n.id
