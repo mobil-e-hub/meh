@@ -18,7 +18,6 @@ class MQTTClient:
         load_dotenv()
         logging.basicConfig(level=os.environ.get("LOGGING_LVL", 'WARNING').upper())
         print(f"LOGGING_LEVEL SET TO: {logging.root.level}")
-        print(f"LOGGING_LEVEL should be: {os.environ.get('LOGGING_LVL').upper()}")
 
         self.MQTT_BROKER = os.environ.get("MQTT_BROKER")
         self.MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT"))
@@ -32,9 +31,8 @@ class MQTTClient:
 
         self.subscriptions = {f"mobil-e-hub/{self.version}/#"}
         self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
-        # self.id = str(uuid4())[0:8]
 
-        self.topic = "opt"  # TODO macht default topic überhaupt sinn?? --> als fallback
+        self.topic = "opt"
 
         self.client = mqtt.Client(self.client_name, transport='websockets')
         self.client.ws_set_options(path=self.MQTT_PATH)
@@ -63,7 +61,7 @@ class MQTTClient:
         self.client.disconnect()
 
     def subscribe(self, topic):
-        logging.debug(f"< [{self.logging_name}] - SUBSCRIBING for topic: {topic}")
+        logging.info(f"< [{self.logging_name}] - SUBSCRIBING for topic: {topic}")
         self.client.subscribe(topic)
         self.subscriptions.add(topic)
 
