@@ -54,9 +54,7 @@ class Bus {
         this.nextStop = null;
 
         //difference to car/drones: Bus can have several Missions -> won't move differently:
-        this.missions = {};  // TODO use array (or Map?) to guarantee order --> opt_engine can insert missions at optimal index = priority order
-                             //  --> alternative: maintain array for sequence of keys ordered by priority --> look up which to start next
-        // this.activeMissions = {}; --> TODO better performance if active ones stored here? -> better: lookup for state.Ongoing --> how many missions for bus are realistic
+        this.missions = {};
 
         this.speed = 10;
         this.parcels = [];
