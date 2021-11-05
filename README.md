@@ -170,17 +170,9 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 - Written in node.js
 - Runs on InES machine
 
-
 #### Simulation of shop (order management)
 - Simple UI which allows a customer to place an order and to view updates on existing orders (can be an additional view in the Visualization)
 - Endpoint to receive orders (can be part of the simulation server)
-
-
-### TODO
-- Set up Linux partition on InES machine
-- Set up git and IDE (VS Code?), possibly set up CD/CI
-- Create a Python web server (Flask/Django) which can send and receive messages to/from EventGrid and contains a function stub for handling incoming messages
-- ...
 
 #### Components from a technological perspective
 ##### node.js server
