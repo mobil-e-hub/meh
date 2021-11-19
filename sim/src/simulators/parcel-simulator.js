@@ -39,9 +39,9 @@ module.exports = class ParcelSimulator extends MQTTClient {
 
     init() {
         this.parcels = Object.assign({}, ...Object.values(this.scenario.entities.parcels).map(p => {
-            let id = p.id || uuid();
-            let carrier = p.carrier;
-            let destination = p.destination;
+            let id = _.cloneDeep(p.id) || uuid();
+            let carrier = _.cloneDeep(p.carrier);
+            let destination = _.cloneDeep(p.destination);
             let newParcel = new Parcel(id, carrier, destination)
 
             return {[id]: newParcel};

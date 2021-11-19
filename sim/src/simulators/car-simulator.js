@@ -54,8 +54,8 @@ module.exports = class CarSimulator extends MQTTClient {
 
     init() {
         this.cars = Object.assign({}, ...Object.values(this.scenario.entities.cars).map(car => {
-            let id = car.id || uuid();
-            let position = car.position || random.roadHub().position;
+            let id = _.cloneDeep(car.id) || uuid();
+            let position = _.cloneDeep(car.position) || random.roadHub().position;
 
             return { [id]: new Car (id, position)};
         }));

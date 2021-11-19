@@ -1,4 +1,5 @@
 // External modules
+const _ = require('lodash');
 
 // Internal modules
 const {random, uuid} = require('../helpers');
@@ -34,8 +35,8 @@ module.exports = class HubSimulator extends MQTTClient {
 
     init() {
         this.hubs = Object.assign({}, ...Object.values(this.scenario.entities.hubs).map(hub => {
-            let id = hub.id || uuid();
-            let position = hub.position || random.key(this.scenario.topology.nodes);
+            let id = _.cloneDeep(hub.id) || uuid();
+            let position = _.cloneDeep(hub.position) || random.key(this.scenario.topology.nodes);
             return {[id]: new Hub(id, position)};
         }));
     }

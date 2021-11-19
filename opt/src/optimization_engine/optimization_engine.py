@@ -445,7 +445,7 @@ class OptimizationEngine(MQTTClient):
         self.subscribe_and_add_callback("+/+/delivered/#",
                                         self.on_message_parcel_delivered)
 
-        self.subscribe_and_add_callback("visualization/+/start/scenario", self.on_message_reset_state)
+        self.subscribe_and_add_callback("visualization/+/scenario/start", self.on_message_reset_state)
 
     def on_message_state(self, client, userdata, msg):
         [_, _, entity, id_, *args] = split_topic(msg.topic)
@@ -537,7 +537,6 @@ class OptimizationEngine(MQTTClient):
         self.parcels[id_] = parcel
 
     def reset_entity_states(self):
-
         self.hubs = {}
         self.drones = {}
         self.cars = {}

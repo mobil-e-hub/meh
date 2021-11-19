@@ -69,11 +69,11 @@ module.exports = {
         buses: {
             v01: {id:'v01', position:{'x': 50, 'y': -50, 'z': 0},
                 route: [
+                    {node: 'n02', position: {x: 50, y: -50, z: 0}, time: 12},
+                    {node: 'n09', position: {x: 50, y: 0, z: 0}, time: 6},
                     {node: 'n03', position: {x: 50, y: 50, z: 0}, time: 12},
                     {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 10},
-                    {node: 'n01', position: {x: -50, y: -50, z: 0}, time: 18},
-                    {node: 'n02', position: {x: 50, y: -50, z: 0}, time: 12},
-                    {node: 'n09', position: {x: 50, y: 0, z: 0}, time: 6}
+                    {node: 'n01', position: {x: -50, y: -50, z: 0}, time: 18}
                 ],
             }
         },

@@ -262,6 +262,10 @@ export default {
         // Set map origin to center of viewport
         this.$store.commit('mapSetOrigin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
 
+        this.$nextTick(function () {
+        // Code that will run only after the entire view has been rendered
+          this.$mqtt.publish('scenario/request')
+  })
 
     },
     methods: {

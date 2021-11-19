@@ -8,7 +8,6 @@ import topology from '../../assets/topology';
 // Setup
 Vue.use(Vuex);
 
-// TODO: Consistent handling of plural forms
 const plural = {
     drone: 'drones',
     car: 'cars',
@@ -68,7 +67,6 @@ export default new Vuex.Store({
         numberOfCars: state => Object.keys(state.entities.cars).length,
         numberOfBuses: state => Object.keys(state.entities.buses).length,
         numberOfParcels: state => Object.keys(state.entities.parcels).length,
-        // busHasParcels: (state, id) => Object.keys(state.entities.buses[id].parcels).length,
         availableScenarios: state => Object.keys(state.scenarios),
     },
     mutations: {
@@ -77,18 +75,13 @@ export default new Vuex.Store({
         },
         resetEntityState(state) {
             Object.assign(state.entities, resetEntityStates())
-            // state.entities = Object.assign({}, state.entities, defaultEntityStates)
         },
         stopEntityState(state) {
             Object.assign(state.entities, resetEntityStates())
-            // state.entities = Object.assign({}, state.entities, defaultEntityStates)
         },
         updateScenarios(state, scenarios) {
-            // state.scenarios= Object.keys(scenarios);
-            console.log(scenarios)
             state.scenarios= scenarios;
             state.selectedScenario = Object.keys(scenarios).find( i => scenarios[i]);
-            console.log(`selectedScenario is ${state.selectedScenario}`)
         },
         mapZoom(state, { factor }) {
             state.settings.map.zoom.factor *= factor;
@@ -105,8 +98,9 @@ export default new Vuex.Store({
             state.settings.sideMenuVisible = !this.state.settings.sideMenuVisible;
         },
         setSelectedScenario(state, scenario) {
-            console.log(`Stored scenario ${scenario}`)
-            state.selectedScenario = scenario
+            state.scenarios[state.selectedScenario] = false;
+            state.selectedScenario = scenario;
+            state.scenarios[scenario] = true;
         }
     }
 });

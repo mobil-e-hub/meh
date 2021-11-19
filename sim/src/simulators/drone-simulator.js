@@ -1,4 +1,5 @@
 // External modules
+const _ = require('lodash');
 
 // Internal modules
 const { random, uuid } = require('../helpers');
@@ -54,8 +55,8 @@ module.exports = class DroneSimulator extends MQTTClient {
 
     init() {
         this.drones = Object.assign({}, ...Object.values(this.scenario.entities.drones).map(drone => {
-            let id = drone.id || uuid();
-            let position = drone.position || random.droneHub().position;
+            let id = _.cloneDeep(drone.id) || uuid();
+            let position = _.cloneDeep(drone.position) || random.droneHub().position;
 
             // return { [id]: new Drone(id, random.position())};
             // return { [id]: new Drone(id, random.position(), { id: uuid(), items: [{ type: 'fly', destination: random.position(), minimumDuration: 10 }] }) };

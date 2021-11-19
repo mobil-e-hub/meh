@@ -58,7 +58,7 @@ module.exports = class BusSimulator extends MQTTClient {
     init() {
         // TODO why is position value in scenario entities
         this.buses = Object.assign({}, ...Object.values(this.scenario.entities.buses).map(bus => {
-            let id = bus.id || uuid();
+            let id =  _.cloneDeep(bus.id) || uuid();
             let position = _.cloneDeep(bus.position) || random.roadHub().position;
             let route = _.cloneDeep(bus.route) || null;
 

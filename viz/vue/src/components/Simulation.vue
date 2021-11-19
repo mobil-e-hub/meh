@@ -228,6 +228,7 @@ export default {
             'numberOfBuses',
             'numberOfParcels'
       ]),
+      //TODO beide benötigt??
       scenarios: {
         get() {
           return this.$store.getters.availableScenarios;
@@ -251,7 +252,8 @@ export default {
         },
         publishStartScenario: function() {
           this.$mqtt.publish('scenario/start' , this.$store.state.selectedScenario);
-          this.$store.commit('resetEntityState')
+          this.$store.commit('resetEntityState');
+          this.resetControlElements();
         },
         publishStart: function() {
           let topic = (!this.isStarted)? 'start': this.isPaused? 'resume': 'pause';
@@ -260,14 +262,16 @@ export default {
           this.$mqtt.publish(topic);
         },
         publishStop: function() {
-          this.isPaused = true;
-          this.isStarted = false;
+          this.resetControlElements();
           this.$mqtt.publish('stop');  // TODO unterschied stopp / reset? --> löscht auch alle entitäten und pausiert auch?
         },
         publishReset: function() {
-          this.isPaused = true;
-           this.isStarted = false;
+          this.resetControlElements();
           this.$mqtt.publish('reset');
+        },
+        resetControlElements: function() {
+          this.isPaused = true;
+          this.isStarted = false;
         },
         clickSendButton: function() {
           this.$mqtt.publish(this.command.message.topic, JSON.stringify(this.command.message.message), this.command.message.sender);
