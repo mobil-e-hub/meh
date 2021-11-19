@@ -445,9 +445,7 @@ class OptimizationEngine(MQTTClient):
         self.subscribe_and_add_callback("+/+/delivered/#",
                                         self.on_message_parcel_delivered)
 
-    def subscribe_and_add_callback(self, topic, callback_function):
-        self.subscribe(f"{self.project}/{self.version}/{topic}")
-        self.client.message_callback_add(f"{self.project}/{self.version}/{topic}", callback_function)
+        self.subscribe_and_add_callback("visualization/+/start/scenario", self.on_message_reset_state)
 
     def on_message_state(self, client, userdata, msg):
         [_, _, entity, id_, *args] = split_topic(msg.topic)
@@ -458,6 +456,10 @@ class OptimizationEngine(MQTTClient):
         # TODO handle parcel delivered
         [_, _, entity, id_, *args] = split_topic(msg.topic)
         pass
+
+    def on_message_reset_state(self, client, userdata, msg):
+        [_, _, entity, id_, *args] = split_topic(msg.topic)
+        self.reset_entity_states()
 
     def on_message_placed(self, client, userdata, msg):
         """handles placed messages from parcels and orders"""
@@ -533,6 +535,15 @@ class OptimizationEngine(MQTTClient):
 
         parcel = Parcel(id=state['id'], carrier=state['carrier'], destination=state['destination'])
         self.parcels[id_] = parcel
+
+    def reset_entity_states(self):
+
+        self.hubs = {}
+        self.drones = {}
+        self.cars = {}
+        self.buses = {}
+        self.parcels = {}
+        self.orders = {}
 
 
 # Helper Functions

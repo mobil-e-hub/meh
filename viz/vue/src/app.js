@@ -5,6 +5,7 @@ import App from './app.vue';
 // External modules
 const {v4: uuid} = require('uuid');
 const process = require('process');
+// const dotenv = require('dotenv').config();;
 
 // Own modules
 import store from './store/store';
@@ -19,7 +20,7 @@ const mqttPort = process.env.VUE_APP_MQTT_BROKER_PORT || 443;   //     -> https:
 const mqttUsername = process.env.VUE_APP_MQTT_BROKER_USERNAME || 'meh';
 const mqttPassword = process.env.VUE_APP_MQTT_BROKER_PASSWORD || 'meh';
 
-const mqttRoot = process.env.VUE_APP_MQTT_ROOT || 'mobil-e-hub/v1';
+const mqttRoot = process.env.VUE_APP_MQTT_ROOT || 'mobil-e-hub/vX';
 
 // UI
 import {BootstrapVue, IconsPlugin} from 'bootstrap-vue';

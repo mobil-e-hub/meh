@@ -69,6 +69,12 @@ module.exports = class CarSimulator extends MQTTClient {
         this.start();
     }
 
+    reload(scenario) {
+        this.stop();
+        this.scenario = scenario;
+        this.start();
+    }
+
     moveCars = () => {
         for (const [id, car] of Object.entries(this.cars)) {
             if (car.move(this.interval / 1000, this)) {

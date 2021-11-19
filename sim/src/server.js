@@ -8,7 +8,6 @@ const mqttMatch = require('mqtt-match');
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
 
-
 // Internal modules
 const DroneSimulator = require('./simulators/drone-simulator');
 const CarSimulator = require('./simulators/car-simulator');
@@ -18,7 +17,7 @@ const ParcelSimulator = require('./simulators/parcel-simulator');
 // const ControlSystem = require('./control-system/control-system');
 
 const {uuid} = require('./helpers');
-const topology = require('../assets/original_scenario');
+//const topology = require('../assets/original_scenario');
 
 
 // Environment variables
@@ -28,7 +27,10 @@ const port = process.env.SIM_PORT || 3000;
 const brokerUrl = process.env.MQTT_BROKER_URL;
 const brokerUsername = process.env.MQTT_BROKER_USERNAME;
 const brokerPassword = process.env.MQTT_BROKER_PASSWORD;
+const mqttRoot = process.env.MQTT_ROOT;
 
+const scenarioPath = process.env.PATH_SCENARIOS;
+const defaultScenario = process.env.DEFAULT_SCENARIO;
 // Server
 const app = express();
 app.use(cors());
@@ -40,15 +42,14 @@ const server = app.listen(port, () => {
 });
 
 // Map and initial entities
-const scenario = require('../assets/3drones_1car_0bus');
-
+const initScenario = require(scenarioPath + defaultScenario);
 
 // Simulators
-const hubSimulator = new HubSimulator(scenario);
-const droneSimulator = new DroneSimulator(scenario);
-const carSimulator = new CarSimulator(scenario);
-const busSimulator = new BusSimulator(scenario);
-const parcelSimulator = new ParcelSimulator(scenario);
+const hubSimulator = new HubSimulator(initScenario);
+const droneSimulator = new DroneSimulator(initScenario);
+const carSimulator = new CarSimulator(initScenario);
+const busSimulator = new BusSimulator(initScenario);
+const parcelSimulator = new ParcelSimulator(initScenario);
 
 
 // Graceful shutdown
@@ -69,11 +70,6 @@ function shutdown() {
     });
 }
 
-// MQTT client
-const mqttClient = MQTT.connect(brokerUrl, {
-                username: brokerUsername,
-                password: brokerPassword
-});
 
 // Endpoints
 app.get('/', (req, res) => {
@@ -91,47 +87,81 @@ app.get('/ping/mqtt', (req, res) => {
     res.status(200).json({mqtt: 'pong'});
 });
 
-function matchTopic(pattern, topic) {
-    return mqttMatch(pattern, topic.string);
-}
 
-app.get('/ping/mqtt', (req, res) => {
-    mqtt.publish('pong', 'simulator');
-    res.status(200).json({ mqtt: 'pong' });
+// MQTT client
+// TODO erweitere diesen MQTT client: get list of available scenarios and send them to viz
+// Message Callback for 'request-scenarios':
+
+const mqttClient = MQTT.connect(brokerUrl, {
+                username: brokerUsername,
+                password: brokerPassword
 });
 
+mqttClient.on("connect",function() {
+    console.log("< [Sim-Server] mqtt-client connected  " + mqttClient.connected);
+    mqttClient.subscribe([`${mqttRoot}/visualization/#`]);
 
-// app.post('/meh/viz/hubs/find', (req, res) => {
-//     res.json(controlSystem.getHubs(req.body.position, req.body.radius));
-// });
-//
-// app.post('/meh/viz/orders/request', (req, res) => {
-//     res.json({
-//         sourceHubs: controlSystem.getHubs(req.body.source.position, req.body.source.radius).map(h => ({ id: h.id, position: topology.nodes[h.position].position })),
-//         destinationHubs: controlSystem.getHubs(req.body.destination.position, req.body.destination.radius).map(h => ({ id: h.id, position: topology.nodes[h.position].position }))
-//     });
-// });
-//
-// app.post('/meh/viz/orders/place', (req, res) => {
-//     const sourceHub = hubSimulator.hubs[req.body.destinationHubs];
-//     const destinationHubs = _.pick(hubSimulator.hubs, req.body.destinationHubs);
-//
-//     parcelSimulator.
-//     controlSystem.
-//
-//     res.status(200).json('ok');
-// });
+    sendAvailableScenarios(scenarioPath);
+});
 
-// Receive and distribute incoming event
-// async function receive(topic, message) {
-//     console.log(`> ${topic.string}: ${JSON.stringify(message)}`);
-//     for (const [pattern, handlers] of Object.entries(eventGridSubscriptions)) {
-//         if (matchTopic(pattern, topic)) {
-//             for (const handler of handlers) {
-//                 await handler(topic, message);
-//             }
-//         }
-//     }
-// }
+mqttClient.on("message", (topic, message) => {
+    let [project, version, entity, id, ...args] = topic.split('/');
+    console.log(`!!! [sim-server] ${entity}/${id}/${args.join('/')}: ${message}`);
+    let topicShort =  `${entity}/${id}/${args.join('/')}`;
+    if(matchTopic('visualization/+/scenario/request', topicShort)) {
+
+        sendAvailableScenarios(scenarioPath);
+    }
+    else if(matchTopic('visualization/+/scenario/start', topicShort)) {
+        console.log("!!! [SIM_SERVER] received start-scenario " + message);
+        //TODO check if scenario exists?
+        // cancel current missions!!
+        try {
+            reloadScenario(JSON.parse(message));
+        }
+        catch (e) {
+            console.error("[Sim-server] could not parse scenario name from ../scenario/start message");
+        }
+    }
+});
+
+function matchTopic(pattern, topic) {
+    return mqttMatch(pattern, topic);
+}
+
+function sendAvailableScenarios(path) {
+    const testFolder = __dirname + '/' + path;
+    const fs = require('fs');
+
+    fs.readdir(testFolder, (err, files) => {
+        if(err) {
+            mqttClient.publish(`${mqttRoot}/error/no-scenarios`, "The scenarios could not be loaded.");
+        }
+        else {
+            let scenarios = new Object();
+            files.forEach(file => {
+                scenarios[file.slice(0, -3)] = false;
+
+            });
+            scenarios[defaultScenario] = true;
+            mqttClient.publish(`${mqttRoot}/visualization/scenario/update`, JSON.stringify(scenarios));
+        }
+    });
+};
+
+function reloadScenario(scenarioName) {
+    //TODO jeweils stop(), overwrite scenario & start() mit dem neuen scenario
+    let scenario = require(scenarioPath + scenarioName);
+
+    hubSimulator.reload(scenario);
+    droneSimulator.reload(scenario);
+    carSimulator.reload(scenario);
+    busSimulator.reload(scenario);
+    parcelSimulator.reload(scenario);
+
+
+//    TODO notify opt_engine to delete everything
+//    TODO notify vue / vuex to delete everything
+}
 
 

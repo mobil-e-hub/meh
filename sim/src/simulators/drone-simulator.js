@@ -71,6 +71,12 @@ module.exports = class DroneSimulator extends MQTTClient {
         this.start();
     }
 
+    reload(scenario) {
+        this.stop();
+        this.scenario = scenario;
+        this.start();
+    }
+
     moveDrones = () => {
         for (const [id, drone] of Object.entries(this.drones)) {
             if (drone.move(this.interval / 1000, this)) {

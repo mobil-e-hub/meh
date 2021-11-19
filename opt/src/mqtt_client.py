@@ -62,6 +62,10 @@ class MQTTClient:
         self.client.loop_stop()
         self.client.disconnect()
 
+    def subscribe_and_add_callback(self, topic, callback_function):
+        self.subscribe(f"{self.project}/{self.version}/{topic}")
+        self.client.message_callback_add(f"{self.project}/{self.version}/{topic}", callback_function)
+
     def subscribe(self, topic):
         logging.debug(f"< [{self.logging_name}] - SUBSCRIBING for topic: {topic}")
         self.client.subscribe(topic)

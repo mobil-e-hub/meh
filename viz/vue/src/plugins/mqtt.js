@@ -25,7 +25,7 @@ export default {
             topic = { version, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${entity}/${id}/${args.join('/')}` } };
             message = JSON.parse(message.toString());
 
-            console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short}.`)
+            // console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short}.`)
 
             for (const [pattern, handler] of Object.entries(subscriptions)) {
                 if (mqttMatch(pattern, topic.string.short)) {

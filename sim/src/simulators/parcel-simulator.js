@@ -31,6 +31,12 @@ module.exports = class ParcelSimulator extends MQTTClient {
         this.start();
     }
 
+    reload(scenario) {
+        this.stop();
+        this.scenario = scenario;
+        this.start();
+    }
+
     init() {
         this.parcels = Object.assign({}, ...Object.values(this.scenario.entities.parcels).map(p => {
             let id = p.id || uuid();

@@ -45,6 +45,12 @@ module.exports = class HubSimulator extends MQTTClient {
         this.start();
     }
 
+    reload(scenario) {
+        this.stop();
+        this.scenario = scenario;
+        this.start()
+    }
+
     receive(topic, message) {
         super.receive(topic, message);
 

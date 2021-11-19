@@ -2,6 +2,44 @@
     <div>
         <h4 class="mb-2">Simulation</h4>
         <b-container fluid>
+            <b-row class="my-2 no-gutters">
+                <b-col>
+                    <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
+                        <div class="card-header">
+                          <b>Select Scenario</b>
+                        </div>
+                        <b-container fluid>
+
+                            <b-row class="my-2 no-gutters" style="">
+                                <b-col>
+                                    <select
+                                        style="width: 160px"
+                                        label="Start simulation"
+                                        v-model="selectedScenario">
+                                        <option v-for="scenario in scenarios" :key="scenario">
+                                          {{scenario}}
+                                        </option>
+                                    </select>
+                                </b-col>
+
+                                <b-col>
+                                    <b-button variant="link" title="Refresh scenarios" @click="publishRequestScenarios">
+                                        <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>
+                                    </b-button>
+                                </b-col>
+
+                                <b-col>
+                                    <b-button variant="link" title="Reset simulation" @click="publishStartScenario">
+                                        <b-icon icon="check-circle-fill" aria-hidden="true"></b-icon>
+                                    </b-button>
+                                </b-col>
+                            </b-row>
+                        </b-container>
+                    </div>
+                </b-col>
+            </b-row>
+
+
             <b-row class="my-2">
                 <b-col>
                     <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
@@ -100,9 +138,6 @@
                 </b-col>
             </b-row>
 
-
-
-
             <div class="card" style="width: 20rem; margin-top: 10px;">
                 <div class="card-header">
                     <b>Statistics Table (Dummy)</b>
@@ -160,6 +195,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import mapState from "vuex/dist/vuex.mjs";
 
 export default {
     name: 'Simulation',
@@ -178,7 +214,8 @@ export default {
               customer: null,
               pickup: null,
               dropoff: null
-            }
+            },
+            selectedScenario: null,
           },
 
         }
@@ -189,10 +226,33 @@ export default {
             'numberOfDrones',
             'numberOfCars',
             'numberOfBuses',
-            'numberOfParcels',
-        ])
+            'numberOfParcels'
+      ]),
+      scenarios: {
+        get() {
+          return this.$store.getters.availableScenarios;
+        },
+        set (value) {
+            this.$store.commit('setSelectedScenario', value);
+        }
+      },
+      selectedScenario: {
+        get() {
+           return this.$store.state.selectedScenario;
+        },
+        set (value) {
+          this.$store.commit('setSelectedScenario', value);
+        }
+      }
     },
     methods: {
+        publishRequestScenarios: function() {
+          this.$mqtt.publish('scenario/request');
+        },
+        publishStartScenario: function() {
+          this.$mqtt.publish('scenario/start' , this.$store.state.selectedScenario);
+          this.$store.commit('resetEntityState')
+        },
         publishStart: function() {
           let topic = (!this.isStarted)? 'start': this.isPaused? 'resume': 'pause';
           this.isPaused = !this.isPaused;
@@ -223,8 +283,17 @@ export default {
             pickup: this.command.order.pickup,
             dropoff: this.command.order.dropoff
           });
-      },
+        },
     },
 
 }
 </script>
+
+<style>
+
+.row-no-padding > [class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+</style>

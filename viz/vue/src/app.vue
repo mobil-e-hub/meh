@@ -242,6 +242,7 @@ export default {
         this.$mqtt.subscribe('+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
         this.$mqtt.subscribe('+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
         this.$mqtt.subscribe('+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
+        this.$mqtt.subscribe('+/scenario/update', (topic, message) => this.$store.commit('updateScenarios', message));
         this.$mqtt.subscribe('drone/+/tasks', (topic, message) => this.showToastRouting('Task assigned', `Drone ${topic.id} has been assigned a new task.`));
         this.$mqtt.subscribe('parcel/+/placed', (topic, message) => this.showToastStatus('Order placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
         this.$mqtt.subscribe('control-system/+/route-update', (topic, message) => this.showToastRouting('Route update', `Control System ${topic.id} has updated the routes.`));
@@ -251,6 +252,7 @@ export default {
         this.$mqtt.subscribe('parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
         this.$mqtt.subscribe('+/error/#', (topic, message) => this.showToastError(`Error ${topic.string.short}`, `${JSON.stringify(message)}`));
         this.$mqtt.subscribe('+/+/error/#', (topic, message) => this.showToastError(`Error ${topic.string.short}`, `${JSON.stringify(message)}`));
+
         this.$mqtt.subscribe('visualization/#', (topic, message) => this.showToastStatus('Message received', `${topic.string.short}: ${JSON.stringify(message)}`));
     },
     mounted: function() {
@@ -259,6 +261,8 @@ export default {
 
         // Set map origin to center of viewport
         this.$store.commit('mapSetOrigin', { x: this.$refs.svg.clientWidth / 2, y:this.$refs.svg.clientHeight / 2 });
+
+
     },
     methods: {
         onMouseWheelMap: function(event) {
