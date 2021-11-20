@@ -53,6 +53,8 @@ Other registered clients are the Vue.app `'visualization'` and the Optimization 
 | `/visualization/[id]/resume`  	| when Resume button is pressed in Viz 	| viz | all | - | 
 | `/visualization/[id]/stop`	| when Stop button is pressed in Viz 	| viz | all | - |
 | `/visualization/[id]/reset`	| when Reset button is pressed in Viz 	| viz | all | - |
+| `/visualization/[id]/scenario/request`	| request list of available scenarios | viz | sim | - |
+| `/visualization/[id]/scenario/start`	| reset to scenario specified in payload | viz | all | scenario name | also triggers reset of entity states in opt
 | `/visualization/[id]/test`*	| used during DEV (Test Btn in Viz) | viz | all | - |
 | **Orders / Parcels:**| | | | |
 | `/visualization/[id]/place-order`  | WIP	| viz | ParcelSimulator | - | 
