@@ -75,7 +75,7 @@ module.exports = class DroneSimulator extends MQTTClient {
     reload(scenario) {
         this.stop();
         this.scenario = scenario;
-        this.start();
+        // this.start();
     }
 
     moveDrones = () => {

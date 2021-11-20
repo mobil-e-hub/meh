@@ -12,21 +12,21 @@
 
                             <b-row class="my-2 no-gutters" style="">
                                 <b-col>
-                                    <select
-                                        style="width: 160px"
-                                        label="Start simulation"
-                                        v-model="selectedScenario">
-                                        <option v-for="scenario in scenarios" :key="scenario">
-                                          {{scenario}}
-                                        </option>
-                                    </select>
-                                </b-col>
-
-                                <b-col>
                                     <b-button variant="link" title="Refresh scenarios" @click="publishRequestScenarios">
                                         <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>
                                     </b-button>
                                 </b-col>
+
+                                <b-col>
+                                      <select
+                                          style="width: 160px"
+                                          label="Start simulation"
+                                          v-model="selectedScenario">
+                                          <option v-for="scenario in scenarios" :key="scenario">
+                                            {{scenario}}
+                                          </option>
+                                      </select>
+                                  </b-col>
 
                                 <b-col>
                                     <b-button variant="link" title="Reset simulation" @click="publishStartScenario">

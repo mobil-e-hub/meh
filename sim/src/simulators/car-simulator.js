@@ -72,7 +72,7 @@ module.exports = class CarSimulator extends MQTTClient {
     reload(scenario) {
         this.stop();
         this.scenario = scenario;
-        this.start();
+        // this.start();
     }
 
     moveCars = () => {

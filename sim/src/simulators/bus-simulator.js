@@ -78,7 +78,7 @@ module.exports = class BusSimulator extends MQTTClient {
     reload(scenario) {
         this.stop();
         this.scenario = scenario;
-        this.start();
+        // this.start();
     }
 
     receive(topic, message) {

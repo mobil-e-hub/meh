@@ -34,7 +34,7 @@ module.exports = class ParcelSimulator extends MQTTClient {
     reload(scenario) {
         this.stop();
         this.scenario = scenario;
-        this.start();
+        // this.start();
     }
 
     init() {

@@ -308,7 +308,10 @@ export default {
         },
         showToast: function(title, message, variant='default') {
             if (this.display.areToastsEnabled) {
-                this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left', variant: variant});
+              if(message.length > 80) {
+                message = message.substring(0, 80);
+              }
+              this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left', variant: variant});
             }
         },
         toggleSidebar: function() {
