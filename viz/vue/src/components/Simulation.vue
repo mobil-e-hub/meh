@@ -19,6 +19,7 @@
 
                                 <b-col>
                                       <select
+                                          class="form-select"
                                           style="width: 160px"
                                           label="Start simulation"
                                           v-model="selectedScenario">
@@ -173,14 +174,14 @@
                                 Parcel
                                 <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
                             </td>
-                              <td> _{{numberOfParcels}} </td>
+                              <td> {{numberOfParcels}} </td>
                             <td>_42 min</td>
                         </tr>
                         <tr>
                             <td>Parcel
                                 <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>
                             </td>
-                              <td> _{{numberOfParcels}} </td>
+                              <td> {{deliveredParcels}} </td>
                             <td>_2 h</td>
                         </tr>
                         </tbody>
@@ -228,7 +229,9 @@ export default {
             'numberOfBuses',
             'numberOfParcels'
       ]),
-      //TODO beide benötigt??
+      deliveredParcels () {
+        return this.$store.state.statistics.parcelsDelivered;
+      },
       scenarios: {
         get() {
           return this.$store.getters.availableScenarios;

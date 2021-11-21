@@ -53,6 +53,11 @@ module.exports = class ParcelSimulator extends MQTTClient {
     }
 
     test() {
+        if (_.isEmpty(this.parcels)) {
+            let randomHubs = _.sampleSize(Object.keys(this.scenario.entities.hubs), 2);
+            let id = uuid();
+            this.parcels[id] = new Parcel(id,{type: 'hub', id: randomHubs[0]}, {type: 'hub', id: randomHubs[1]});
+        }
         for (const [id, parcel] of Object.entries(this.parcels)) {
             // add parcel to viz/opt
             this.publish(`parcel/${id}`, 'state', parcel),
@@ -97,12 +102,16 @@ module.exports = class ParcelSimulator extends MQTTClient {
         }
         if (this.matchTopic(topic, 'parcel/+/transfer')) {
             let parcel = this.parcels[topic.id];
-            parcel.carrier = message;
+            if (parcel != null) {
+                parcel.carrier = message;
 
-            this.publish(`parcel/${parcel.id}`, 'state', parcel);
-            if (_.isEqual(parcel.carrier, parcel.destination)) {
-                this.publish(`parcel/${parcel.id}`, 'delivered', parcel);
+                this.publish(`parcel/${parcel.id}`, 'state', parcel);
+                if (_.isEqual(parcel.carrier, parcel.destination)) {
+                    this.publish(`parcel/${parcel.id}`, 'delivered', parcel);
+                    delete this.parcels[parcel.id];
+                }
             }
+
         }
     }
 

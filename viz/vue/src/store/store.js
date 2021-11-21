@@ -53,12 +53,15 @@ export default new Vuex.Store({
             },
             sideMenuVisible: false,
         },
-        scenarios: {
-
-        },
+        scenarios: { },
         selectedScenario: " ",
         statistics: {
-            foo: "bar"  //TODO store stuff for stats here
+            //TODO store stuff for stats here
+            parcelsDelivered: 0,
+
+        //    TODO: - commit and save parcel/id/delivered messages to compute number of dones
+        //          - commit and save parcel/id/placed messages to compute number of active parcels
+        //          - TODO: how to compute TIME?? --> no central time --> pause
         }
     },
     getters: {
@@ -101,6 +104,14 @@ export default new Vuex.Store({
             state.scenarios[state.selectedScenario] = false;
             state.selectedScenario = scenario;
             state.scenarios[scenario] = true;
+        },
+        parcelDelivered(state, id) {
+            // let index = state.entities.parcels.findIndex(p => p == id );
+            // state.entities.parcels.splice(index, 1);
+            // delete state.entities.parcels[id];
+            Vue.delete(state.entities.parcels, id)
+            state.statistics.parcelsDelivered += 1;
+
         }
     }
 });

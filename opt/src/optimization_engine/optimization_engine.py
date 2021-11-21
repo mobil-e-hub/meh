@@ -75,8 +75,13 @@ class OptimizationEngine(MQTTClient):
 
         # map hubs to their node location
         carrier_id = parcel.carrier['id']
-        node_source = self.hubs[carrier_id].position
-        node_destination = self.hubs[parcel.destination['id']].position
+        print(self.hubs)
+        try:
+            node_source = self.hubs[carrier_id].position
+            node_destination = self.hubs[parcel.destination['id']].position
+        except KeyError as e:
+            self.publish("error", f"Entity not found - reload scenario" + str(e))
+            raise e
 
         # find closest road junction to source & destination hubs  (parking: both drones and cars can access)
         nodes_road = [x for x, y in self.g_topo.nodes(data=True) if y['type'] == 'parking']  # map n => n.id
@@ -112,7 +117,7 @@ class OptimizationEngine(MQTTClient):
             self.publish("error", f"No third route exists: " + str(e))
             raise ValueError("No third route exists: " + str(e))
 
-        logging.info(f"< [{self.logging_name}] - New route for parcel {parcel.id}: {[route1, route2, route3]}")
+        logging.info(f"< [{self.logging_name}] - New route for parcel {parcel.id} ({node_source} -> {node_destination}): {[route1, route2, route3]}")
 
         route = Routes(air1=route1, road=route2, air2=route3)
         return route
@@ -174,6 +179,10 @@ class OptimizationEngine(MQTTClient):
         optimal_entity_index = 0
         optimal_time = float("inf")
         found_entity = True
+
+        print(f"route path: {route.path} , {entities}")
+        if not route.path:
+            logging.error("Route.path is an empty list.")
 
         node = route.path[0]  # get first element
         travel_time = [None] * len(entities)
@@ -474,13 +483,15 @@ class OptimizationEngine(MQTTClient):
                 self.create_delivery_route(parcel)
             except ValueError as e:
                 self.publish('error', f"Could not deliver parcel: {msg.payload}.")
+            except KeyError as e:
+                logging.error("Entity not found - reload scenario" + str(e))
 
         elif entity == 'order':
             logging.warn(f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
                          f"Not yet Implemented")
         else:
             logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
-        pass
+
 
     def on_message_cap_exceeded(self, client, userdata, msg):
         """handles error messages from entity that could not accept a parcel because of capacity already full"""
