@@ -62,7 +62,7 @@ module.exports = {
         drones: {
             d00: {id: 'd00', position: { x: -50, y: 60, z: 0 }},
             d01: {id: 'd01', position: { x: -60, y: -60, z: 0 }},
-            d02: {id: null, position: null}
+            d02: {id: 'd02', position: null}
         },
         cars: {
             v00: {id:'v00', position: {'x': 50, 'y': -50, 'z': 0}} //, speed:0, parcel:null, state:VehicleState.IDLE}

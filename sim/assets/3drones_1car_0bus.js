@@ -56,7 +56,7 @@ module.exports = {
         hubs: {
             h00: {id: 'h00', position: 'n05'},
             h01: {id: 'h01', position: 'n07'},
-            h02: {id: null, position: null},
+            h02: {id: 'h02', position: null},
         },
         drones: {
             d00: {id: 'd00', position: { x: 50, y: 50, z: 0 }},

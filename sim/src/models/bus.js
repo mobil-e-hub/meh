@@ -260,7 +260,7 @@ class Bus {
         } else {
             this.startTask(simulator, mID);
         }
-    }
+     }
 
     completeMission(simulator, mID) {
         /**

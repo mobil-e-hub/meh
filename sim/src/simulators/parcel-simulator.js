@@ -53,18 +53,25 @@ module.exports = class ParcelSimulator extends MQTTClient {
     }
 
     test() {
-        if (_.isEmpty(this.parcels)) {
-            let randomHubs = _.sampleSize(Object.keys(this.scenario.entities.hubs), 2);
-            let id = uuid();
-            this.parcels[id] = new Parcel(id,{type: 'hub', id: randomHubs[0]}, {type: 'hub', id: randomHubs[1]});
-        }
+        // TODO rolled back addition of parcels with random hubs on test message, because of:
+        //      - first bug: send placed message again for parcels that were already in delivery (carried by entity) -> led to new mission
+        //      - second bug: carrier hub could also be a hub without drones
+        // if (_.isEmpty(this.parcels) || !Object.values(this.parcels).some(p => p.carrier.type == 'hub')) {
+        //     let randomHubs = _.sampleSize(Object.keys(this.scenario.entities.hubs), 2);
+        //     let id = uuid();
+        //     this.parcels[id] = new Parcel(id,{type: 'hub', id: randomHubs[0]}, {type: 'hub', id: randomHubs[1]});
+        //     this.publish(`parcel/${id}`, 'state', this.parcels[id]),
+        //             // start delivery mission
+        //     this.publish(`parcel/${id}`, 'placed', this.parcels[id])  //
+        // }
+        // else {
         for (const [id, parcel] of Object.entries(this.parcels)) {
             // add parcel to viz/opt
             this.publish(`parcel/${id}`, 'state', parcel),
-            // start delivery mission
+                // start delivery mission
             this.publish(`parcel/${id}`, 'placed', parcel)  //
-
         }
+        // }
     }
 
     receive(topic, message) {

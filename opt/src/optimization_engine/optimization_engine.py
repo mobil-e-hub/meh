@@ -485,6 +485,8 @@ class OptimizationEngine(MQTTClient):
                 self.publish('error', f"Could not deliver parcel: {msg.payload}.")
             except KeyError as e:
                 logging.error("Entity not found - reload scenario" + str(e))
+            except IndexError as e:
+                logging.error(str(e))
 
         elif entity == 'order':
             logging.warn(f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
