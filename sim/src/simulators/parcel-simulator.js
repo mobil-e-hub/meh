@@ -54,8 +54,9 @@ module.exports = class ParcelSimulator extends MQTTClient {
 
     test() {
         // TODO rolled back addition of parcels with random hubs on test message, because of:
-        //      - first bug: send placed message again for parcels that were already in delivery (carried by entity) -> led to new mission
-        //      - second bug: carrier hub could also be a hub without drones
+        //      - send placed message again for parcels that were already in delivery (carried by entity) -> led to new mission
+        //      - carrier hub could also be a hub without drones
+        //      - random uuid if none given in scenario: not saved here -> parcel placed at 'h02' while it actually had a random uuid
         // if (_.isEmpty(this.parcels) || !Object.values(this.parcels).some(p => p.carrier.type == 'hub')) {
         //     let randomHubs = _.sampleSize(Object.keys(this.scenario.entities.hubs), 2);
         //     let id = uuid();

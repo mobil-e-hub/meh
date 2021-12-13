@@ -641,7 +641,7 @@ class Database(object):
             db_url = URL(drivername=dialect, username=username,
                          password=password, host=host, port=port, query=query)
 
-        self.engine = create_engine(db_url, pool_pre_ping=True, pool_recycle=3600)
+        self.engine = create_engine(db_url, pool_pre_ping=True, pool_recycle=3600) # , future=True)
         self.session: Optional[Session] = None
         self.get_session = sessionmaker(bind=self.engine, expire_on_commit=False)
 

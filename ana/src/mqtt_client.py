@@ -76,7 +76,7 @@ class MQTTClient:
         """default message callback, should only be triggered if topic is not matched by other callback
             --> only logs the incoming message"""
         topic = msg.topic
-        logging.info(f"DEFAULT MSG_CALLBACK: Message received! -> Topic: {topic}:  {msg.payload}")
+        #logging.info(f"DEFAULT MSG_CALLBACK: Message received! -> Topic: {topic}:  {msg.payload}")
 
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:

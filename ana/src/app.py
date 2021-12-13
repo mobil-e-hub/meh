@@ -26,8 +26,9 @@ available_chart_types = [
 
 if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     analysis_engine = AnalysisEngine().begin_client()
+    # TODO clean up the following code
     df = analysis_engine.get_drone_data('f8e303d6')
-    print(df)
+    # print(df)
     column_list = df.columns.tolist()
     column_list.remove('experiment_id')
     available_indicators = column_list
@@ -135,8 +136,8 @@ def download_tikz(clicks, xaxis_column_name, yaxis_column_name, bar_type):
     else:
         plt.scatter(x=df[xaxis_column_name],
                     y=df[yaxis_column_name])
-    plt.savefig('test.png')
-    tikzplotlib.save('test.tex')
+    plt.savefig('test/test.png')
+    tikzplotlib.save('test/test.tex')
     return dcc.send_file(
         "test.tex"
     )
