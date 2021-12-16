@@ -18,8 +18,6 @@ log_backup_count = os.environ.get('LOG_BACKUP', 14)
 
 
 # TODO add reload handling to AnaEngine: --> Database --> session ids
-
-
 class AnalysisEngine(MQTTClient):
 
     def __init__(self, path: str = 'data'):
@@ -27,7 +25,7 @@ class AnalysisEngine(MQTTClient):
         self.database = Database(dialect=dialect,
                                  host=host)
         self.experiment = None
-        self.json_logger = JsonLogger('logs/test.log', daily_interval=log_daily_interval,
+        self.json_logger = JsonLogger('logs/log', daily_interval=log_daily_interval,
                                       backup_count=log_backup_count, level=log_lvl)
 
     def begin_client(self):
@@ -46,7 +44,9 @@ class AnalysisEngine(MQTTClient):
         return self
 
     def json_log_callback(self, client, userdata, msg):
-        self.json_logger.log_to_file(logging.INFO, msg.topic, msg.payload)
+        pass
+        # self.json_logger.log_to_file(logging.INFO, msg.topic, msg.payload)
+        self.json_logger.log_json(msg.topic, json.loads(str(msg.payload.decode("utf-8", "ignore"))))
 
     def experiment_callback(self, client, userdata, msg):
         action = msg.topic.split('/')[-1]
