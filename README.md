@@ -11,10 +11,9 @@ This project allows for the simulation, control and visualization of a Drone Log
 - Simulator (node.js server in `/sim`): This module simulates drones, vehicles, parcels, hubs and orders.
 - Optimization Engine (Flask server in `/opt`): This module controls the routing of drones and vehicles.
 - Visualization (Vue app in `/viz`): This module shows the current status of the DLN in the browser.
-- MQTT Connector (node.js server in `/mqtt`): This module forwards messages between the Azure EventGrid and the InES MQTT Broker
-  
-- WIP: Analysis Engine (Flask server in `/ana`): TODO
-
+- MQTT Connector (node.js server in `/connector`): This module forwards messages between the Azure EventGrid and the InES MQTT Broker.
+- MQTT broker (Mosquitto in `/mqtt`): This module handles MQTT messages between clients.
+- [WIP]Analysis Engine (Flask server in `/ana`): TODO
 
 Please refer to the `README.md` files in the respective sub-folders for instructions and documentation.
 
@@ -28,7 +27,6 @@ The individual modules can also be started using the commands `npm run start:sim
 
 
 ## Interaction and Communication
-
 Communication between the components is via MQTT.
 
 ### Communication with MQTT -
@@ -97,7 +95,7 @@ An [Action](https://github.com/mobil-e-hub/meh/actions/workflows/github-pages.ym
 
 ### NGINX
 
-An Nginx server forwards all request to the server that come in via port 443 to the corresponding localhost ports, that are listed in the following table:
+An Nginx server forwards all requests from port 443 to the respective localhost ports that are listed here:
 
 | request | port  | module | notes  |  |
 |---|---|---|---|---|
@@ -186,3 +184,9 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 ##### Static Github Pages app
 - Hosted as a Github repo
 - Contains visualization and shop simulation frontend
+
+### TODO
+- Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
+- Add JSON schema for input validation of MQTT/EventGrid messages
+- Clean up README files (top-level and modules)
+- Merge or delete old branches
