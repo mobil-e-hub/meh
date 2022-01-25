@@ -259,8 +259,8 @@ The monitored components are defined in the file `app.components.ts` in the Moni
       }
     ]
   }
-}
 ```
+
 - Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
 - Clean up README files (top-level and modules)
 - Merge or delete old branches
