@@ -188,5 +188,79 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 ### TODO
 - Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
 - Add JSON schema for input validation of MQTT/EventGrid messages
+  Suggested schema:
+  ```{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "const": "Microsoft.EventGrid.SubscriptionValidationEvent"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "validationCode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "validationCode"
+            ]
+          }
+        },
+        "required": [
+          "eventType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "const": "Portal_Echo"
+          }
+        },
+        "required": [
+          "eventType"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "const": "mobil-e-hub"
+          },
+          "dataVersion": {
+            "type": "string",
+            "enum": ["v1"]
+          },
+          "subject": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "eventType",
+          "dataVersion",
+          "subject",
+          "data"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  }
+}
+```
+- Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
 - Clean up README files (top-level and modules)
 - Merge or delete old branches
