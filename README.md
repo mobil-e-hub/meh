@@ -187,8 +187,7 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 
 ### TODO
 - Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
-- Add JSON schema for input validation of MQTT/EventGrid messages
-  Suggested schema:
+- Add JSON schema for input validation of MQTT/EventGrid messages:
   ```{
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "type": "array",
@@ -259,7 +258,7 @@ The monitored components are defined in the file `app.components.ts` in the Moni
       }
     ]
   }
-```
+
 
 - Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
 - Clean up README files (top-level and modules)
