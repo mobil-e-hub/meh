@@ -33,11 +33,11 @@ const subscriptionTopics = [
 // Server
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 // app.use(morgan('combined'));
 
 const server = app.listen(port, () => {
-    console.log(`< (mqtt) Server listening at http://localhost:${port}.`);
+    console.log(`< (connector) Server listening at http://localhost:${port}.`);
 });
 
 
@@ -49,9 +49,9 @@ const mqttClient = MQTT.connect(brokerUrl, {
 
 // Listen to any message which starts with the correct root and version
 mqttClient.on('connect', () => {
-    console.log(`< (mqtt) MQTT client connected to broker at ${brokerUrl}.`);
+    console.log(`< (connector) MQTT client connected to broker at ${brokerUrl}.`);
     mqttClient.subscribe(subscriptionTopics.map(topic => `${root}/${version}/${topic}`));
-    console.log(`< (mqtt) MQTT client subscribed to topics ${subscriptionTopics.join(', ')}.`);
+    console.log(`< (connector) MQTT client subscribed to topics ${subscriptionTopics.join(', ')}.`);
 });
 
 
@@ -62,65 +62,68 @@ const eventGridClient = new EventGridPublisherClient(eventGridEndpoint, 'EventGr
 // Endpoints
 // Base
 app.get('/', (req, res) => {
-    res.status(200).json('This is the base url of the meh/mqtt module.');
+    res.status(200).json('This is the base url of the meh/connector module.');
 });
 
 
 //Ping
 app.get('/ping', (req, res) => {
-    res.status(200).json({ mqtt: 'pong' });
+    res.status(200).json({ connector: 'pong' });
 });
 
 
 // Receive events from EventGrid and forward them to MQTT broker
 app.post('/', async (req, res) => {
     try {
-        for (const event of req.body) {
-            // If this is a validation request, reply appropriately
-            if (event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
-                try {
-                    console.log(`> (mqtt) SubscriptionValidation received from EventGrid: Validation code = ${event.data.validationCode}, topic = ${event.topic}`);
-                    res.status(200).json({ValidationResponse: event.data.validationCode});
-                } catch (err) {
-                    res.status(404).end();
+        // EventGrid messages are sent as an array
+        if (Array.isArray(req.body)) {
+            for (const event of req.body) {
+                // If this is a validation request, reply appropriately
+                if (event.eventType === "Microsoft.EventGrid.SubscriptionValidationEvent") {
+                    try {
+                        console.log(`> (connector) SubscriptionValidation received from EventGrid: Validation code = ${event.data.validationCode}, topic = ${event.topic}`);
+                        res.status(200).json({ValidationResponse: event.data.validationCode});
+                    } catch (err) {
+                        res.status(400).end();
+                    }
+                }
+                // If it is a simple echo, log it
+                else if (event.eventType === "Portal_Echo") {
+                    console.log(`> (connector) Echo received from EventGrid!`);
+                }
+                // If it has the correct root and version, process it
+                else if (event.eventType === root && event.dataVersion === version) {
+                    try {
+                        const topic = event.subject;
+                        const message = JSON.stringify(event.data);
+                        let [entity, id, ...args] = topic.split('/');
+    
+                        // Forward message to MQTT broker
+                        mqttClient.publish(`${root}/${version}/${topic}`, message);
+    
+                        console.log(`  (connector) Forwarding ${topic}: ${message} from EventGrid to MQTT`);
+                    } catch (err) {
+                        console.log(`> (connector) Invalid event received from EventGrid: ${JSON.stringify({ event, err })}`);
+                    }
+                }
+                // Otherwise, log it
+                else {
+                    console.log(`> (connector) Invalid message received: ${JSON.stringify(req.body)}`);
+                    return res.status(400).end();
                 }
             }
-            // If it is a simple echo, log it
-            else if (event.eventType === "Portal_Echo") {
-                console.log(`> (mqtt) Echo received from EventGrid!`);
-            }
-            // If it has the correct root and version, process it
-            else if (event.eventType === root && event.dataVersion === version) {
-                try {
-                    const topic = event.subject;
-                    const message = JSON.stringify(event.data);
-                    let [entity, id, ...args] = topic.split('/');
-
-                    // Forward message to MQTT broker
-                    mqttClient.publish(`${root}/${version}/${topic}`, message);
-
-                    console.log(`  (mqtt) Forwarding ${topic}: ${message} from EventGrid to MQTT`);
-                } catch (err) {
-                    console.log(`> (mqtt) Invalid event received from EventGrid: ${err}`);
-                }
-            }
-            // Otherwise, log it
-            else {
-                try {
-                    console.log(`> (mqtt) Invalid message received from EventGrid: ${JSON.stringify({
-                        type: event.eventType,
-                        version: event.dataVersion,
-                        topic: event.subject,
-                        message: event.data
-                    })}`);
-                } catch (err) {
-                    console.log(`> (mqtt) Invalid event received from EventGrid: ${err}`);
-                }
-            }
+            // All messages forwarded
+            return res.status(200).end();
         }
-    } catch (error) {
+        else {
+            console.log(`> (connector) Invalid message received: ${JSON.stringify(req.body)}`);
+            return res.status(400).end();
+        }
+    } 
+    catch (error) {
         //TODO replace with expressjs middleware error Handling  --> https://www.robinwieruch.de/node-express-error-handling/
-        return res.status(400).end()
+        console.log(`> (connector) Invalid message received: ${JSON.stringify({ body: req.body, error })}`);
+        return res.status(400).end();
     }
 
     // There's no need to return anything except status 200
@@ -139,12 +142,12 @@ mqttClient.on('message', async (topic, message) => {
             await eventGridClient.send([{ eventType: root, dataVersion: version, subject: topic, data: message }]);
         }
         catch (err) {
-            console.log(`< (mqtt) Could not forward ${topic}: ${JSON.stringify(message)} to EventGrid: ${err}`);
+            console.log(`< (connector) Could not forward ${topic}: ${JSON.stringify(message)} to EventGrid: ${err}`);
         }
 
-        console.log(`  (mqtt) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to EventGrid`);
+        console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to EventGrid`);
     }
     catch (err) {
-        console.log(`> (mqtt) Invalid event received from MQTT broker: ${err}`);
+        console.log(`> (connector) Invalid event received from MQTT broker: ${err}`);
     }
 });
