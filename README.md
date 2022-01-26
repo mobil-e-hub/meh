@@ -140,7 +140,7 @@ The two panels below for publishing messages and subscription to topics can now 
 
 #### MQTT <> Eventgrid Message Forwarder
 
-The MQTT module forwards messages between the InES mqtt broker and the Azure Eventgrid. Its documentation can be found [here](./mqtt/README.md)
+The MQTT module forwards messages between the InES mqtt broker and the Azure Eventgrid. Its documentation can be found [here](connector/README.md)
 
 ### Monitoring 
 

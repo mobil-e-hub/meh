@@ -1,4 +1,4 @@
-# meh-mqtt: Message forwarder (node.js server) for mobil-e-Hub
+# Connector: Message forwarder (node.js server) for mobil-e-Hub
 Authors:
 - Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
 - Alexander Becker
