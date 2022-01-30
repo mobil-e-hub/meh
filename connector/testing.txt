@@ -1,0 +1,35 @@
+For execution with e.g. https://reqbin.com/req/c-dwjszac0/curl-post-json-example
+--> Postman web version does not allow post requests to localhost
+
+minimal succesful examples
+
+SubscriptionValidationEvent:
+
+curl -X POST localhost:3004
+   -H 'Content-Type: application/json'
+   -d '[{
+  "data": {
+    "validationCode": "YOLO"
+  },
+  "eventType": "Microsoft.EventGrid.SubscriptionValidationEvent"
+}]'
+
+Portal_Echo:
+
+curl -X POST localhost:3004
+   -H 'Content-Type: application/json'
+   -d '[{
+  "eventType": "Portal_Echo"
+}]'
+
+
+mobil-e-hub:
+
+curl -X POST localhost:3004
+   -H 'Content-Type: application/json'
+   -d '[{
+  "subject": "to/drone/42",
+  "data": {},
+  "eventType": "mobil-e-hub",
+  "dataVersion": "v1"
+}]'

@@ -1,10 +1,12 @@
 module.exports = {
-  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  // "$schema": "https://json-schema.org/draft/2019-09/schema",
+  // "$id": "https://json-schema.org/draft/2019-09/schema",
   "type": "array",
   "items": {
+    "type": "object",
     "oneOf": [
       {
-        "type": "object",
+        // "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
@@ -31,7 +33,7 @@ module.exports = {
         ]
       },
       {
-        "type": "object",
+        // "type": "object",
         "properties": {
           "eventType": {
             "type": "string",
@@ -43,7 +45,7 @@ module.exports = {
         ]
       },
       {
-        "type": "object",
+        // "type": "object",
         "properties": {
           "eventType": {
             "type": "string",

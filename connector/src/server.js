@@ -26,8 +26,8 @@ const root = process.env.ROOT || 'mobil-e-hub';
 const version = process.env.VERSION || 'v1';
 
 // JSON schema validation
-const validate = new Validator();
-const gridSchema = require("schema")
+const { validate } = new Validator();
+const gridSchema = require("./schema")
 
 // Topics to listen to from MQTT broker (make sure that they are disjoint from topics received from EventGrid!)
 const subscriptionTopics = [
@@ -35,19 +35,14 @@ const subscriptionTopics = [
 ];
 
 function validationErrorMiddleware(error, request, response, next) {
-	if (response.headersSent) {
-		return next(error);
-	}
-
-	const isValidationError = error instanceof ValidationError;
-	if (!isValidationError) {
-		return next(error);
-	}
-
-	response.status(400).json({
-		errors: error.validationErrors,
-	});
-	next();
+	 if (error instanceof ValidationError) {
+    // Handle the error
+    response.status(400).send(error.validationErrors);
+    next();
+  } else {
+    // Pass error on if not a validation error
+    next(error);
+  }
 }
 
 
@@ -56,7 +51,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(validationErrorMiddleware);
+// app.use(validationErrorMiddleware);
+/**
+ * Error handler middleware for validation errors.
+ */
+app.use((error, req, res, next) => {
+    // Check the error is a validation error
+    console.log(`< (connector) Error caught: ${error}.`);
+    if (error instanceof ValidationError) {
+        // Handle the error
+        console.log(`< (connector) Validation Error against JSON schema caught: ${error}.`);
+        res.status(400).send(error.validationErrors);
+        next();
+    } else {
+        // Pass error on if not a validation error
+        next(error);
+    }
+});
+
+
 
 const server = app.listen(port, () => {
     console.log(`< (connector) Server listening at http://localhost:${port}.`);
