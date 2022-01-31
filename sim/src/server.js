@@ -15,6 +15,7 @@ const CarSimulator = require('./simulators/car-simulator');
 const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
 const ParcelSimulator = require('./simulators/parcel-simulator');
+const ControlSystem = require('./control-system/control-system');
 
 
 // Environment variables
@@ -45,6 +46,10 @@ const droneSimulator = new DroneSimulator(scenario);
 const carSimulator = new CarSimulator(scenario);
 const busSimulator = new BusSimulator(scenario);
 const parcelSimulator = new ParcelSimulator(scenario);
+
+
+// Control system for dummy simulation
+const controlSystem = new ControlSystem();
 
 
 // Graceful shutdown

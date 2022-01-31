@@ -114,7 +114,7 @@ app.post('/', validate({body: orderPlacedSchema}), async (req, res, next) => {
 
         mqttClient.publish(topic, JSON.stringify(message));
     
-        console.log(`  (connector) Forwarding ${topic}: ${message} from Orchestrator to MQTT`);
+        console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from Orchestrator to MQTT`);
 
         // There's no need to return anything except status 200. Return json just for human readability (e.g., from Postman))
         res.status(200).json({ success: true, message: `Message forwarded to MQTT with topic ${topic}.` });
@@ -135,7 +135,7 @@ mqttClient.on('message', async (topic, message) => {
 
         // TODO: Validate message format against schema
         if (false) {
-            console.log(`> (connector) Invalid event received from MQTT broker: ${message}`);
+            console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
         }
 
         // Forward message to Orchestrator
@@ -150,9 +150,9 @@ mqttClient.on('message', async (topic, message) => {
         }
 
         result = await axios.post(orchestrator.url, body, { headers });
-        console.log(`  (connector) Forwarding ${topic}: ${message} from MQTT to Orchestrator.`);
+        console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator.`);
     }
     catch (err) {
-        console.log(`  (connector) Could not forward ${topic}: ${message} from MQTT to Orchestrator!`);
+        console.log(`  (connector) Could not forward ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator!`);
     }
 });
