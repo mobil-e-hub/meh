@@ -112,7 +112,7 @@ app.post('/', validate({body: orderPlacedSchema}), async (req, res, next) => {
         const message = req.body;
         const topic = `${root}/${version}/order/${message.transportId}/placed`;
 
-        // mqttClient.publish(topic, JSON.stringify(message));
+        mqttClient.publish(topic, JSON.stringify(message));
     
         console.log(`  (connector) Forwarding ${topic}: ${message} from Orchestrator to MQTT`);
 
