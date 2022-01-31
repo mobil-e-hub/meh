@@ -15,10 +15,6 @@ const CarSimulator = require('./simulators/car-simulator');
 const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
 const ParcelSimulator = require('./simulators/parcel-simulator');
-// const ControlSystem = require('./control-system/control-system');
-
-const {uuid} = require('./helpers');
-const topology = require('../assets/original_scenario');
 
 
 // Environment variables

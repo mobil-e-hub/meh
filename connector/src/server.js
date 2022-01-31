@@ -8,6 +8,8 @@ const mqttMatch = require('mqtt-match');
 const { EventGridPublisherClient, AzureKeyCredential } = require("@azure/eventgrid");
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
+const { Validator, ValidationError } = require('express-json-validator-middleware');
+
 
 // Environment variables
 dotenv.config();
@@ -23,18 +25,51 @@ const brokerPassword = process.env.MQTT_BROKER_PASSWORD;
 const root = process.env.ROOT || 'mobil-e-hub';
 const version = process.env.VERSION || 'v1';
 
+// JSON schema validation
+const { validate } = new Validator();
+const gridSchema = require("./schema")
 
 // Topics to listen to from MQTT broker (make sure that they are disjoint from topics received from EventGrid!)
 const subscriptionTopics = [
     'drone/#'
 ];
 
+function validationErrorMiddleware(error, request, response, next) {
+	 if (error instanceof ValidationError) {
+    // Handle the error
+    response.status(400).send(error.validationErrors);
+    next();
+  } else {
+    // Pass error on if not a validation error
+    next(error);
+  }
+}
+
 
 // Server
 const app = express();
 app.use(cors());
 app.use(express.json());
-// app.use(morgan('combined'));
+
+// app.use(validationErrorMiddleware);
+/**
+ * Error handler middleware for validation errors.
+ */
+app.use((error, req, res, next) => {
+    // Check the error is a validation error
+    console.log(`< (connector) Error caught: ${error}.`);
+    if (error instanceof ValidationError) {
+        // Handle the error
+        console.log(`< (connector) Validation Error against JSON schema caught: ${error}.`);
+        res.status(400).send(error.validationErrors);
+        next();
+    } else {
+        // Pass error on if not a validation error
+        next(error);
+    }
+});
+
+
 
 const server = app.listen(port, () => {
     console.log(`< (connector) Server listening at http://localhost:${port}.`);
@@ -72,9 +107,15 @@ app.get('/ping', (req, res) => {
 });
 
 
+// TODO: - move async to function?
+//      - where exactly to place next() calls?
+//      - split into seperate files -> Error handling ()
+//       - move schema out of src folder
+
 // Receive events from EventGrid and forward them to MQTT broker
-app.post('/', async (req, res) => {
+app.post('/', validate({body: gridSchema}), async (req, res, next) => {
     try {
+
         // EventGrid messages are sent as an array
         if (Array.isArray(req.body)) {
             for (const event of req.body) {
@@ -86,10 +127,12 @@ app.post('/', async (req, res) => {
                     } catch (err) {
                         res.status(400).end();
                     }
+                    next();
                 }
                 // If it is a simple echo, log it
                 else if (event.eventType === "Portal_Echo") {
                     console.log(`> (connector) Echo received from EventGrid!`);
+                    next();
                 }
                 // If it has the correct root and version, process it
                 else if (event.eventType === root && event.dataVersion === version) {
@@ -105,6 +148,7 @@ app.post('/', async (req, res) => {
                     } catch (err) {
                         console.log(`> (connector) Invalid event received from EventGrid: ${JSON.stringify({ event, err })}`);
                     }
+                    next();
                 }
                 // Otherwise, log it
                 else {

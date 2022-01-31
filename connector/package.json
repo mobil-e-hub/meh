@@ -16,6 +16,7 @@
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "express-json-validator-middleware": "^2.2.1",
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "mqtt": "^4.2.8",
