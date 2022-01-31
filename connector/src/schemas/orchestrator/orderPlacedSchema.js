@@ -2,7 +2,7 @@ module.exports = {
 	"type": "object",
 	"properties": {
     "boxId": { "type": "string", "format": "uuid" },
-		"transportId": { "type": "string", "format": "uuid" },
+	"transportId": { "type": "string", "format": "uuid" },
     "partnerId": { "type": "string", "format": "uuid" },
     "timestamp": { "type": "string", "format": "date-time" },
     "startLocation": {

@@ -96,11 +96,6 @@ function matchTopic(pattern, topic) {
     return mqttMatch(pattern, topic.string);
 }
 
-app.get('/ping/mqtt', (req, res) => {
-    mqtt.publish('pong', 'simulator');
-    res.status(200).json({ mqtt: 'pong' });
-});
-
 
 // app.post('/meh/viz/hubs/find', (req, res) => {
 //     res.json(controlSystem.getHubs(req.body.position, req.body.radius));

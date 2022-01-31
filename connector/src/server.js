@@ -8,6 +8,7 @@ const dotenv = require('dotenv');
 const MQTT = require('mqtt');
 const { Validator, ValidationError } = require('express-json-validator-middleware');
 const axios = require('axios');
+const schemaValidator = require('jsonschema');
 
 // Environment variables
 dotenv.config();
@@ -29,7 +30,12 @@ const version = process.env.VERSION || 'v1';
 
 // JSON schema validation
 const { validate } = new Validator();
-const orderPlacedSchema = require("./schemas/orderPlacedSchema");
+const schemas = {
+    orchestrator: {
+        orderPlacedSchema: require("./schemas/orchestrator/orderPlacedSchema"),
+        statusUpdateSchema: require("./schemas/orchestrator/statusUpdateSchema")
+    }
+}
 
 // Topics to listen to from MQTT broker (make sure that they are disjoint from topics received from Orchestrator!)
 const subscriptionTopics = [
@@ -77,8 +83,8 @@ const server = app.listen(port, () => {
 
 // Start MQTT client
 const mqttClient = MQTT.connect(brokerUrl, {
-                username: brokerUsername,
-                password: brokerPassword
+    username: brokerUsername,
+    password: brokerPassword
 });
 
 // Listen to any message which starts with the correct root and version
@@ -107,7 +113,7 @@ app.get('/ping', (req, res) => {
 
 // Receive events from Orchestrator and forward them to MQTT broker
 // The only valid event received from Orchestrator is an order/placed event -> validate immediately
-app.post('/', validate({body: orderPlacedSchema}), async (req, res, next) => {
+app.post('/', validate({body: schemas.orchestrator.orderPlacedSchema}), async (req, res, next) => {
     try {
         const message = req.body;
         const topic = `${root}/${version}/order/${message.transportId}/placed`;
@@ -134,9 +140,10 @@ mqttClient.on('message', async (topic, message) => {
         message = JSON.parse(message.toString());
 
         // TODO: Validate message format against schema
-        if (false) {
-            console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
-        }
+        // if (!schemaValidator.validate(message, schemas.mqtt.statusUpdateSchema).valid) {
+        //     console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+        //     return;
+        // }
 
         // Forward message to Orchestrator
         headers = { 
@@ -144,15 +151,22 @@ mqttClient.on('message', async (topic, message) => {
         };
         
         body = {
-            transportId: message.id,
-            address: { platformId: message.carrier },
+            boxId: message.id,
+            transportId: message.orderId,
+            location: { platformId: message.carrier },
             state: message.state
         }
 
+        if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
+            console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+            return;
+        }
+
         result = await axios.post(orchestrator.url, body, { headers });
-        console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator.`);
+        console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}.`);
     }
     catch (err) {
-        console.log(`  (connector) Could not forward ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator!`);
+        console.log(`  (connector) Could not forward message ${JSON.stringify(body)} from MQTT to Orchestrator: ${err}!`);
+        // console.log(`  (connector) Could not forward ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}: ${err}!`);
     }
 });
