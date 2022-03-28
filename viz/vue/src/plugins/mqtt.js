@@ -8,6 +8,7 @@ const { v4: UUID } = require('uuid');
 
 // Plugin definition
 export default {
+
     install: (app, options) => {
         const id = uuid();
         const client = mqtt.connect(options.broker, {

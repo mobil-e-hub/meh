@@ -31,10 +31,8 @@ class MQTTClient:
 
         self.subscriptions = {f"mobil-e-hub/{self.version}/#"}
         self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
-        # self.id = str(uuid4())[0:8]
 
-        self.topic = "opt"  # TODO macht default topic überhaupt sinn?? --> als fallback
-
+        self.topic = "opt"
 
         self.client = mqtt.Client(self.client_name, transport='websockets')
         self.client.ws_set_options(path=self.MQTT_PATH)
@@ -93,6 +91,7 @@ class MQTTClient:
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
             logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER} - Port: {self.MQTT_PORT}")
+            self.publish('connected', '')
             for topic in self.subscriptions:
                 self.subscribe(topic)
         else:

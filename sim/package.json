@@ -8,7 +8,7 @@
     "setup:mac": "npm install",
     "start:mac": "nodemon src/server.js",
     "setup:windows": "npm install",
-    "start:windows": "nodemon src/server.js"
+    "start:windows": "title simulator && nodemon src/server.js"
   },
   "dependencies": {
     "@azure/eventgrid": "^4.1.0",
@@ -18,12 +18,12 @@
     "express": "^4.17.1",
     "lodash": "^4.17.20",
     "morgan": "^1.10.0",
-    "mqtt": "^4.2.6",
+    "mqtt": "^4.2.8",
     "mqtt-match": "^2.0.3",
     "node": "^17.0.1",
     "random": "^2.2.0",
     "uuid": "^8.3.2",
-    "ws": "^7.4.2"
+    "ws": "^7.4.6"
   },
   "author": "",
   "license": "ISC",

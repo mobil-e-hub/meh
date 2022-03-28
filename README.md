@@ -11,10 +11,9 @@ This project allows for the simulation, control and visualization of a Drone Log
 - Simulator (node.js server in `/sim`): This module simulates drones, vehicles, parcels, hubs and orders.
 - Optimization Engine (Flask server in `/opt`): This module controls the routing of drones and vehicles.
 - Visualization (Vue app in `/viz`): This module shows the current status of the DLN in the browser.
-- MQTT Connector (node.js server in `/mqtt`): This module forwards messages between the Azure EventGrid and the InES MQTT Broker
-  
-- WIP: Analysis Engine (Flask server in `/ana`): TODO
-
+- MQTT Connector (node.js server in `/connector`): This module forwards messages between the Azure EventGrid and the InES MQTT Broker.
+- MQTT broker (Mosquitto in `/mqtt`): This module handles MQTT messages between clients.
+- [WIP]Analysis Engine (Flask server in `/ana`): TODO
 
 Please refer to the `README.md` files in the respective sub-folders for instructions and documentation.
 
@@ -28,56 +27,8 @@ The individual modules can also be started using the commands `npm run start:sim
 
 
 ## Interaction and Communication
-
-Communication between the components is via MQTT.
-
-### Communication with MQTT -
-Communication between entities exclusively uses the private mosquitto MQTT broker `wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt`.
-
-All topics start with `mobil-e-hub/[version]/[entity]/[id]/`, and all messages are string representations of JSON objects.
-For example each entity publishes `{ topic: mobil-e-hub/[version]/[entity]/[id]/connected, message: ''}` upon connection.
-
-The following table lists all currently used topics in this project with short explanations on their usage
-
-Entities comprise: *Hub, Drone, Car, Bus, Parcel, (Order)* - messages are sent by the corresponding simulators.
-Other registered clients are the Vue.app `'visualization'` and the Optimization engine `'opt'`.
-
-
-| Topic | Usage | Sender | Receiver | Payload (json) | Notes |
-|---	|---	|--- |--- |--- |--- |
-| `/[entity]/[id]/connected` | upon connection | Entity | all | | <!-- TODO double check: really used? or only state send? -->
-| `/[entity]/[id]/state` | on state change | Entity | all | Entity Object |
-| **Control:** | | | | |
-| `/visualization/[id]/start` | when Start button is pressed in Viz | viz | all | - |
-| `/visualization/[id]/pause` | when Pause button is pressed in Viz	| viz | all | - | 
-| `/visualization/[id]/resume`  	| when Resume button is pressed in Viz 	| viz | all | - | 
-| `/visualization/[id]/stop`	| when Stop button is pressed in Viz 	| viz | all | - |
-| `/visualization/[id]/reset`	| when Reset button is pressed in Viz 	| viz | all | - |
-| `/visualization/[id]/scenario/request`	| request list of available scenarios | viz | sim | - |
-| `/visualization/[id]/scenario/start`	| reset to scenario specified in payload | viz | all | scenario name | also triggers reset of entity states in opt
-| `/visualization/[id]/test`*	| used during DEV (Test Btn in Viz) | viz | all | - |
-| **Orders / Parcels:**| | | | |
-| `/visualization/[id]/place-order`  | WIP	| viz | ParcelSimulator | - | 
-| `/order/[id]/placed`  | WIP	| ParcelSimulator | Entity, opt | - |
-| `/visualization/[id]/place-parcel` | create new parcel  | viz | ParcelSimulator | Parcel Object | 
-| `/parcel/[id]/placed` | parcel added to carrier (hub)  | ParcelSimulator | Entity, opt | Parcel Object |
-| `/parcel/[id]/transfer` | when entities agreed on transaction | Entity | Parcel | Entity (Receiver) | success triggers `from/parcel/[id]/delivered` | 
-| `/parcel/[id]/delivered` | parcel transfer success | Parcel | (Entity), opt | Parcel Object |  | <!-- TODO currently: only used by opt_engine--> 
-| `/[parcel]/[id]/pickup` | DEPRECATED?	| Entity | Parcel | Entity Object (Carrier) |
-| `/[parcel]/[id]/dropoff` | DEPRECATED? | Entity | Parcel | Entity Object (Carrier)  |
-| **Transactions:** | | | | |
-| `/[Entity]/[id]/transaction/[id]/ready`  	| Receiving Entity ready for transaction	| Entity (Receiver) | Entity (Giver)| - |
-| `/[Entity]/[id]/transaction/[id]/unready`  	| Receiving Entity no longer ready for transaction | Entity (Receiver) | Entity (Giver), (Opt) | - |
-| `/[Entity]/[id]/transaction/[id]/execute`  | Both ready, also sends `transfer` to parcel | Entity (Giver) | Entity (Receiver) | - | only send if `.../ready` was received |
-| `/[Entity]/[id]/transaction/[id]/complete` | Transaction success | Entity (Receiver) | Entity (Giver) | - | |
-| **Missions:** | | | | |
-| `/[Entity]/[id]/mission` | assign new mission | opt | Entity | Mission Object | |
-| `/[Entity]/[id]/mission/[id]/complete` | on mission success | Entity | all, opt | - | |
-| `/[Entity]/[id]/mission/[id]/failed`	| WIP | Entity | all, opt| -  |  *not implemented yet* |
-| **Error Handling:** | | | | |
-| `/opt/error` | WIP: no route for parcel found | opt | viz | Parcel Object | |
-| `/[Entity]/[id]/error/capacity/exceeded/[parcel]/[id]` | capacity full, could not receive new parcel | Entity | viz, opt | Entity Object | |
----
+Communication between the components is via MQTT over the private the private mosquitto MQTT broker `wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt`.
+For more details and a list of all topics currently used in this project look into the documentation of the MQTT Connector module [here](connector/README.md).
 
 
 ## Server Architecture
@@ -99,7 +50,7 @@ An [Action](https://github.com/mobil-e-hub/meh/actions/workflows/github-pages.ym
 
 ### NGINX
 
-An Nginx server forwards all request to the server that come in via port 443 to the corresponding localhost ports, that are listed in the following table:
+An Nginx server forwards all requests from port 443 to the respective localhost ports that are listed here:
 
 | request | port  | module | notes  |  |
 |---|---|---|---|---|
@@ -114,7 +65,7 @@ An Nginx server forwards all request to the server that come in via port 443 to 
 | `.../meh/viz/.*` | 8080 | vizualization | Vue app  |   |
 | `.../meh/git` | 8081 | updater.js | Webhook for master branch |  |
 
-TODO: analysis engine not deployed yet?
+<!-- TODO: analysis engine not deployed yet -->
 
 ### Mosquitto Broker
 
@@ -144,7 +95,7 @@ The two panels below for publishing messages and subscription to topics can now 
 
 #### MQTT <> Eventgrid Message Forwarder
 
-The MQTT module forwards messages between the InES mqtt broker and the Azure Eventgrid. Its documentation can be found [here](./mqtt/README.md)
+The MQTT module forwards messages between the InES mqtt broker and the Azure Eventgrid. Its documentation can be found [here](connector/README.md)
 
 ### Monitoring 
 
@@ -172,17 +123,9 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 - Written in node.js
 - Runs on InES machine
 
-
 #### Simulation of shop (order management)
 - Simple UI which allows a customer to place an order and to view updates on existing orders (can be an additional view in the Visualization)
 - Endpoint to receive orders (can be part of the simulation server)
-
-
-### TODO
-- Set up Linux partition on InES machine
-- Set up git and IDE (VS Code?), possibly set up CD/CI
-- Create a Python web server (Flask/Django) which can send and receive messages to/from EventGrid and contains a function stub for handling incoming messages
-- ...
 
 #### Components from a technological perspective
 ##### node.js server
@@ -196,3 +139,82 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 ##### Static Github Pages app
 - Hosted as a Github repo
 - Contains visualization and shop simulation frontend
+
+### TODO
+- [ ] Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
+- [ ] Add JSON schema for input validation of MQTT/EventGrid messages:
+  ```{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "const": "Microsoft.EventGrid.SubscriptionValidationEvent"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "validationCode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "validationCode"
+            ]
+          }
+        },
+        "required": [
+          "eventType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "const": "Portal_Echo"
+          }
+        },
+        "required": [
+          "eventType"
+        ]
+      },
+      {
+        "type": "object",
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "const": "mobil-e-hub"
+          },
+          "dataVersion": {
+            "type": "string",
+            "enum": ["v1"]
+          },
+          "subject": {
+            "type": "string"
+          },
+          "data": {}
+        },
+        "required": [
+          "eventType",
+          "dataVersion",
+          "subject",
+          "data"
+        ],
+        "additionalProperties": false
+      }
+    ]
+  }
+
+
+- [ ] Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
+- [ ] Clean up README files (top-level and modules)
+- [ ] Merge or delete old branches

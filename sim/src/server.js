@@ -14,10 +14,10 @@ const CarSimulator = require('./simulators/car-simulator');
 const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
 const ParcelSimulator = require('./simulators/parcel-simulator');
-// const ControlSystem = require('./control-system/control-system');
 
 const {uuid} = require('./helpers');
-//const topology = require('../assets/original_scenario');
+
+const ControlSystem = require('./control-system/control-system');
 
 
 // Environment variables
@@ -50,6 +50,10 @@ const droneSimulator = new DroneSimulator(initScenario);
 const carSimulator = new CarSimulator(initScenario);
 const busSimulator = new BusSimulator(initScenario);
 const parcelSimulator = new ParcelSimulator(initScenario);
+
+
+// Control system for dummy simulation
+const controlSystem = new ControlSystem();
 
 
 // Graceful shutdown
@@ -152,6 +156,7 @@ function sendAvailableScenarios(path) {
 function reloadScenario(scenarioName) {
     //TODO jeweils stop(), overwrite scenario & start() mit dem neuen scenario
     let scenario = require(scenarioPath + scenarioName);
+
 
     hubSimulator.reload(scenario);
     droneSimulator.reload(scenario);

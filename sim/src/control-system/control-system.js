@@ -1,51 +1,60 @@
-
 // External modules
-const MQTT = require('mqtt');
-const _ = require('lodash');
 
 // Internal modules
 const MQTTClient = require('../mqtt-client');
-const { random, uuid, dist2d } = require('../helpers');
-
-const { Drone, DroneState, TaskState } = require('../models/drone');
-const { Car, CarState } = require('../models/car');
-const {Bus, BusState} = require("../models/bus");
-const Hub = require('../models/hub');
-const Parcel = require('../models/parcel');
-
-const topology = require('../../assets/topology');
 
 
 module.exports = class ControlSystem extends MQTTClient {
-
-    constructor(droneSimulator, carSimulator, busSimulator, hubSimulator, parcelSimulator) {
+    constructor() {
         super('control-system', ['control-system/#', 'parcel/+/placed', 'parcel/+/delivered', 'visualization/#', 'order/+/placed']);
 
-        this.droneSimulator = droneSimulator;
-        this.carSimulator = carSimulator;
-        this.busSimulator = busSimulator;
-        this.hubSimulator = hubSimulator;
-        this.parcelSimulator = parcelSimulator;
-
-        this.distances = null;
-        this.countTransaction = 0;
-        this.countMission = 0;
     }
 
-    receive(topic, message) {
+    async receive(topic, message) {
         super.receive(topic, message);
 
-        if (this.matchTopic(topic, 'parcel/+/placed')) {
-            // this.createDeliveryRoute(message);
-        }
-        if (this.matchTopic(topic, 'visualization/+/test')) {
-            // this.test(message);
-            // this.findRoute(new Parcel('p00', 'h00', 'h01'));
-        }
         if (this.matchTopic(topic, 'order/+/placed')) {
-            // this.test(message);
-            // this.findRoute(new Parcel('p00', 'h00', 'h01'));
+            // When an order comes in (from the Orchestrator), start dummy simulation
+            // which returns three status updates over the next 15 seconds, ending with delivery
+            await this.startDummyDeliverySimulation(topic, message);
         }
-    }
+    } 
+
+    async startDummyDeliverySimulation(topic, message) {
+        // Dummy simulation: 
+        // - Wait 5 seconds
+        // - Send status update
+        // - Wait 5 seconds
+        // - Send status update
+        // - Wait 5 seconds
+        // - Send status update (delivered)
+        console.log('  Starting dummy simulation...');
     
-};
+        const parcel = {
+            id: message.boxId,
+            orderId: message.transportId,
+            carrier: message.startLocation.platformId,
+            state: 'WaitingForTransport'
+        }
+    
+        await sleep(5000);
+        this.publish(`parcel/${parcel.id}`, 'status', parcel);
+    
+        await sleep(5000);
+        parcel.state = 'InTransport';
+        this.publish(`parcel/${parcel.id}`, 'status', parcel);
+    
+        await sleep(5000);
+        parcel.carrier = message.destinationLocation.platformId;
+        parcel.state = 'Delivered';
+        this.publish(`parcel/${parcel.id}`, 'status', parcel);
+    
+        console.log('  Dummy simulation finished!');
+    }
+}
+  
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}

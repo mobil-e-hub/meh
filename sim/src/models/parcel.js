@@ -20,6 +20,5 @@ module.exports = class Parcel {
     }
 
     reset() {
-
     }
 };
