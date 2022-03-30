@@ -106,10 +106,6 @@ app.get('/ping', (req, res) => {
     res.status(200).json({ connector: 'pong' });
 });
 
-// TODO: - move async to function?
-//      - where exactly to place next() calls?
-//      - split into seperate files -> Error handling ()
-//       - move schema out of src folder
 
 // Receive events from Orchestrator and forward them to MQTT broker
 // The only valid event received from Orchestrator is an order/placed event -> validate immediately
@@ -126,7 +122,6 @@ app.post('/', validate({body: schemas.orchestrator.orderPlacedSchema}), async (r
         res.status(200).json({ success: true, message: `Message forwarded to MQTT with topic ${topic}.` });
     } 
     catch (error) {
-        //TODO replace with expressjs middleware error Handling  --> https://www.robinwieruch.de/node-express-error-handling/
         console.log(`> (connector) Invalid message received: ${JSON.stringify({ body: req.body, error })}`);
         return res.status(400).end();
     }
@@ -139,11 +134,6 @@ mqttClient.on('message', async (topic, message) => {
         topic = args.join('/');
         message = JSON.parse(message.toString());
 
-        // TODO: Validate message format against schema
-        // if (!schemaValidator.validate(message, schemas.mqtt.statusUpdateSchema).valid) {
-        //     console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
-        //     return;
-        // }
 
         // Forward message to Orchestrator
         headers = { 

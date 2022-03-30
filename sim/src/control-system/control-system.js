@@ -34,7 +34,7 @@ module.exports = class ControlSystem extends MQTTClient {
             id: message.boxId,
             orderId: message.transportId,
             carrier: message.startLocation.platformId,
-            state: 'WaitingForTransport'
+            state: 'WaitingForTransport'        //TODO change to ParcelState.waitingForTransport ?!?
         }
     
         await sleep(5000);
