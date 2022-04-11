@@ -1,0 +1,17 @@
+{"id": "m03",
+    "tasks": [
+
+        {"type": "move", "state": "TaskState.notStarted", "destination": {"lat":51.25673, "long": 9.54357, "alt": 0}, "minimumDuration": 10},
+        {"type": "move", "state": "TaskState.notStarted", "destination": {"lat":51.25680, "long": 9.54393, "alt": 0},
+         "minimumDuration": 10},
+        {"type": "move", "state": "TaskState.notStarted", "destination": {"lat":51.25703, "long": 9.54386, "alt": 0},
+         "minimumDuration": 10},
+
+        {"type": "move", "state": "TaskState.notStarted", "destination": {"lat":51.25696, "long": 9.54351, "alt": 0},
+         "minimumDuration": 10},
+        {"type": "move", "state": "TaskState.notStarted", "destination": {"lat":51.25673, "long": 9.54357, "alt": 0},
+         "minimumDuration": 10},
+        {"type": "move", "state": "TaskState.notStarted", "destination": {"lat":51.25661523618747, "long": 9.543280467304413, "alt": 0},
+         "minimumDuration": 10},
+  ]
+}

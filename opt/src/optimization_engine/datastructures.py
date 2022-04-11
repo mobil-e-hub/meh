@@ -47,3 +47,5 @@ Route = namedtuple('Route', 'distance path')
 Routes = namedtuple('Routes', 'air1 road air2')  # container for subroutes of complete route
 
 
+# Missions
+Position = namedtuple('Position', 'lat long alt')

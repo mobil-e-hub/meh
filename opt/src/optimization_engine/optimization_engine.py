@@ -7,9 +7,8 @@ import copy
 import networkx as nx
 from optimization_engine.helpers import load_topology, load_mapping, backtrack_shortest_path, generate_transaction_id
 from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Routes, DroneState, VehicleState, \
-    TaskState, Route
+    TaskState, Route, Position
 from mqtt_client import MQTTClient
-
 
 
 class OptimizationEngine(MQTTClient):
@@ -34,6 +33,68 @@ class OptimizationEngine(MQTTClient):
         # addresses / customers
 
         self.add_message_callbacks()
+
+        # parameters for the test_missions send in response to mqtt-topic: /test/[1-3]
+        self.test_mission_positions = [
+            Position(51.25673, 9.54357, 0),
+            Position(51.25680, 9.54393, 0),
+            Position(51.25703, 9.54386, 0),
+            Position(51.25696, 9.54351, 0),
+            Position(51.25673, 9.54357, 0),
+            Position(51.25661523618747, 9.543280467304413, 0),
+            # Position (51.25699626809572, 9.54323274214318) # Punkt I
+        ]
+        self.test_mission_parcel = 'p01'
+        self.test_mission_drone = 'd01'
+        self.test_mission_hub1 = 'h01'
+        self.test_mission_hub2 = 'h02'
+
+    def mirror_test_mission(self, client, userdata, msg):
+        """ Triggered by topic 'test/1'.
+        Reads a mission from the message payload and
+        simply mirrors it tp the the drone specified in the class variable self.test_mission_drone"""
+
+        mission = json.loads(msg.payload)
+        self.publish("mission", mission, f"drone/{self.test_mission_drone}")
+
+    def mirror_test_message_move(self, client, userdata, msg):
+        """ Triggered by topic 'test/2'. """
+        tasks = [{'type': 'move', 'state': 'TaskState.notStarted',
+                  'destination': {'lat': pos.lat, 'long': pos.long, 'alt': pos.alt}, 'minimumDuration': 10} for pos in
+                 self.test_mission_positions]
+
+        m02 = {
+            'id': 'm02',
+            'tasks': [
+                *tasks
+            ]
+        }
+
+        self.publish("mission", m02, f"drone/{self.test_mission_drone}")
+
+    def mirror_test_message_all_tasks(self, client, userdata, msg):
+        """ Triggered by topic 'test/3'. """
+        parcel_dummy = Parcel(self.test_mission_parcel, self.test_mission_hub1, self.test_mission_hub2)
+
+        pickup = create_transaction(parcel_dummy, 'hub', self.test_mission_hub1, 'drone',
+                                    self.test_mission_drone)
+        dropoff = create_transaction(parcel_dummy, 'drone', self.test_mission_drone, 'hub',
+                                     self.test_mission_hub2)
+
+        tasks = [{'type': 'move', 'state': 'TaskState.notStarted',
+                  'destination': {'lat': pos.lat, 'long': pos.long, 'alt': pos.alt}, 'minimumDuration': 10} for pos in
+                 self.test_mission_positions]
+
+        m03 = {
+            'id': 'm03',
+            'tasks': [
+                {'type': 'pickup', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(pickup)},
+                *tasks,
+                {'type': 'dropoff', 'state': 'TaskState.notStarted', 'transaction': copy.deepcopy(dropoff)},
+            ]
+        }
+
+        self.publish("mission", m03, f"drone/{self.test_mission_drone}")
 
     def create_delivery_route(self, parcel):
         """finds route for given parcel, assigns entities to handle the sub-routes and sends them their missions"""
@@ -452,6 +513,11 @@ class OptimizationEngine(MQTTClient):
         self.subscribe_and_add_callback("+/+/delivered/#",
                                         self.on_message_parcel_delivered)
 
+        # test missions
+        self.subscribe_and_add_callback("test/1", self.mirror_test_mission)
+        self.subscribe_and_add_callback("test/2", self.mirror_test_message_move)
+        self.subscribe_and_add_callback("test/3", self.mirror_test_message_all_tasks)
+
     def subscribe_and_add_callback(self, topic, callback_function):
         self.subscribe(f"{self.project}/{self.version}/{topic}")
         self.client.message_callback_add(f"{self.project}/{self.version}/{topic}", callback_function)
@@ -481,8 +547,9 @@ class OptimizationEngine(MQTTClient):
                 self.publish('error', f"Could not deliver parcel: {msg.payload}.")
 
         elif entity == 'order':
-            logging.warn(f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
-                         f"Not yet Implemented")
+            logging.warn(
+                f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
+                f"Not yet Implemented")
         else:
             logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
