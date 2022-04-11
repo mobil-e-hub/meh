@@ -12,8 +12,6 @@
 </template>
 
 <script>
-const topology = require('../../assets/topology');
-
 export default {
   name: 'Address',
   props: {

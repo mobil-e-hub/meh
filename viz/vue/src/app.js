@@ -5,7 +5,8 @@ import App from './app.vue';
 // External modules
 const {v4: uuid} = require('uuid');
 
-const dotenv = require('dotenv').config();
+// const process = require('process');
+const dotenv = require('dotenv');
 
 // Own modules
 import store from './store/store';
@@ -13,7 +14,7 @@ import uuidPlugin from './plugins/uuid';
 import mqttPlugin from './plugins/mqtt';
 
 // Environment variables
-
+dotenv.config()
 const wssUrl = process.env.VUE_APP_WSS_URL || 'wss://ines-gpu-01.informatik.uni-mannheim.de/meh/wss';
 console.log('wssUrl:', wssUrl);
 const mqttBroker = process.env.VUE_APP_MQTT_BROKER_URL || 'wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt';

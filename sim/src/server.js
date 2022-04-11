@@ -15,7 +15,7 @@ const BusSimulator = require('./simulators/bus-simulator');
 const HubSimulator = require('./simulators/hub-simulator');
 const ParcelSimulator = require('./simulators/parcel-simulator');
 
-const {uuid} = require('./helpers');
+//const {uuid} = require('./helpers');
 
 const ControlSystem = require('./control-system/control-system');
 
@@ -42,7 +42,10 @@ const server = app.listen(port, () => {
 });
 
 // Map and initial entities
-const initScenario = require(scenarioPath + defaultScenario);
+// const initScenario = require(scenarioPath + defaultScenario);
+
+const initScenario = require("../../assets/scenarios/" + defaultScenario)
+// console.log(`New Scenario is found?? => ${new_scenario}`)
 
 // Simulators
 const hubSimulator = new HubSimulator(initScenario);
@@ -51,10 +54,8 @@ const carSimulator = new CarSimulator(initScenario);
 const busSimulator = new BusSimulator(initScenario);
 const parcelSimulator = new ParcelSimulator(initScenario);
 
-
 // Control system for dummy simulation
 const controlSystem = new ControlSystem();
-
 
 // Graceful shutdown
 process.on('SIGTERM', shutdown);

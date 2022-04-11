@@ -3,7 +3,18 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 //Own modules
-import topology from '../../assets/topology';
+// import topology from '../../assets/topology';  // old location TODO remove
+console.log(`Current path is: ${__dirname}`)
+// import topology_reallabor_1_v1 from '../../../../assets'
+// import topology_quads from "../../../../assets/"
+//import "~/assets/topology_reallabor_1_v1.json"
+
+const topology_quads = require('../../../../assets/topology_quads')
+const topology_reallabor = require('../../../../assets/topology_reallabor_1_v1')
+
+const topology = topology_quads
+console.log(top)
+
 
 // Setup
 Vue.use(Vuex);

@@ -49,7 +49,7 @@ module.exports = class ControlSystem extends MQTTClient {
         parcel.state = 'Delivered';
         this.publish(`parcel/${parcel.id}`, 'status', parcel);
     
-        console.log('  Dummy simulation finished!');
+        console.log('Dummy simulation finished!');
     }
 }
   

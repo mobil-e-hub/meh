@@ -15,12 +15,13 @@ from optimization_engine.optimization_engine import OptimizationEngine
 # Environment variables
 load_dotenv()
 port = int(os.environ.get('OPT_PORT', 3001))
+default_topology = os.environ.get('DEFAULT_TOPOLOGY')
 
 # Setup
 app = Flask(__name__)
 
 if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-    opt = OptimizationEngine()  # inherits from MQTTClient
+    opt = OptimizationEngine(default_topology)  # inherits from MQTTClient
     opt.begin_client()
 
 # Endpoints

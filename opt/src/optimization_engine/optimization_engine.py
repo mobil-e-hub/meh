@@ -3,6 +3,8 @@ from typing import List
 import json
 import logging
 import copy
+import sys
+import os
 
 import networkx as nx
 from optimization_engine.helpers import load_topology, load_mapping, backtrack_shortest_path, generate_transaction_id
@@ -11,18 +13,20 @@ from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Rou
 from mqtt_client import MQTTClient
 
 
-
 class OptimizationEngine(MQTTClient):
     """The optimization engine finds delivery routes for new parcels added to the system
     and sends mission with delivery instructions to suitable entities."""
 
-    def __init__(self):
+    def __init__(self, default_topology):
         MQTTClient.__init__(self)
 
         self.logging_name = "opt_engine"
 
-        self.g_topo = load_topology('assets/topology.json')
-        self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
+        path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..', 'assets/topology_quads.json'))
+        logging.debug(f"< [{self.logging_name}] - Joined path to topology is {path}")
+
+        self.g_topo = load_topology(path)
+        self.mapping = load_mapping(path)  # hub_id <-> node_id
         self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
 
         self.hubs = {}
@@ -119,7 +123,8 @@ class OptimizationEngine(MQTTClient):
             self.publish("error", f"No third route exists: " + str(e))
             raise ValueError("No third route exists: " + str(e))
 
-        logging.info(f"< [{self.logging_name}] - New route for parcel {parcel.id} ({node_source} -> {node_destination}): {[route1, route2, route3]}")
+        logging.info(
+            f"< [{self.logging_name}] - New route for parcel {parcel.id} ({node_source} -> {node_destination}): {[route1, route2, route3]}")
 
         route = Routes(air1=route1, road=route2, air2=route3)
         return route
@@ -491,11 +496,11 @@ class OptimizationEngine(MQTTClient):
                 logging.error(str(e))
 
         elif entity == 'order':
-            logging.warn(f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
-                         f"Not yet Implemented")
+            logging.warn(
+                f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
+                f"Not yet Implemented")
         else:
             logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
-
 
     def on_message_cap_exceeded(self, client, userdata, msg):
         """handles error messages from entity that could not accept a parcel because of capacity already full"""
