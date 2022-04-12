@@ -53,9 +53,14 @@ class OptimizationEngine(MQTTClient):
         """ Triggered by topic 'test/1'.
         Reads a mission from the message payload and
         simply mirrors it tp the the drone specified in the class variable self.test_mission_drone"""
+        topic = 'mission'
+        try:
+            mission = json.loads(msg.payload)
+        except:
+            topic = 'error'
+            mission = "Invalid mission."
 
-        mission = json.loads(msg.payload)
-        self.publish("mission", mission, f"drone/{self.test_mission_drone}")
+        self.publish(topic, mission, f"drone/{self.test_mission_drone}")
 
     def mirror_test_message_move(self, client, userdata, msg):
         """ Triggered by topic 'test/2'. """
