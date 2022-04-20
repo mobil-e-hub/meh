@@ -230,9 +230,10 @@ Each MQTT message consists of two strings: A _topic_ and a _payload_. The topic 
 
 ### Initial message upon connection
 The entity connects to the MQTT broker using the respective credentials and an ID in the UUID v4 format. After the connection has been established, the entity must send a message with topic `[project]/[version]/[entity]/[id]/connected` and empty payload. This allows the optimization engine to add the entity to its registry, e.g., for mission planning.
+TODO: Last will/`disconnect` message?
 
 ### Updates of entity state
-Each entity is expected to send a message with topic `[project]/[version]/[entity]/[id]/state` and entity-specific payload whenever its state changes.
+Each entity is expected to send a message with topic `[project]/[version]/[entity]/[id]/state` and entity-specific payload whenever its state changes. During the execution of a mission, this should be a steady stream of messages for position updates, e.g., every 100 ms.
 
 #### Drone state
 TODO
