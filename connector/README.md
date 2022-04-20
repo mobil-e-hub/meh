@@ -53,6 +53,10 @@ Other registered clients are the Vue.app `'visualization'` and the Optimization 
 | **Error Handling:** | | | | |
 | `/opt/error` | WIP: no route for parcel found | opt | viz | Parcel Object | |
 | `/[Entity]/[id]/error/capacity/exceeded/[parcel]/[id]` | capacity full, could not receive new parcel | Entity | viz, opt | Entity Object | |
+| **Testing** | | | | |
+| `/test/1` | Mirror test mission | Entity | opt | JSON Mission | mirrors the mission in payload under the topic `drone/d01/mission` |
+| `/test/2` | request fix test mission - only move tasks | Entity | opt | - | mission send under topic under the topic `drone/d01/mission`|
+| `/test/3` | request fix test mission - all tasks | Entity | opt | - | mission send under topic under the topic `drone/d01/mission`|
 ---
 
 
