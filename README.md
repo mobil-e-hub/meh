@@ -220,3 +220,65 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 - [ ] Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
 - [ ] Clean up README files (top-level and modules)
 - [ ] Merge or delete old branches
+
+
+## Interaction of Drones and Platforms with the MQTT Broker
+Platforms are be either stationary (in this case, the platform is called a `hub` in MQTT topics/messages) or attached to a vehicle (in this case, it is called a `car`). Drones are always called `drone`. In the following, drones and platforms are called "entities" if an interaction applies to both types.
+
+### Message format
+Each MQTT message consists of two strings: A _topic_ and a _payload_. The topic is expected to have the format `[project]/[version]/[entity]/[id]/[args]`, where `project` is always `mobil-e-hub`, and `version` is `v1`. `args` must be non-empty, but can contain forward slashes. The payload is expected to be in JSON format.
+
+### Initial message upon connection
+The entity connects to the MQTT broker using the respective credentials and an ID in the UUID v4 format. After the connection has been established, the entity must send a message with topic `[project]/[version]/[entity]/[id]/connected` and empty payload. This allows the optimization engine to add the entity to its registry, e.g., for mission planning.
+
+### Updates of entity state
+Each entity is expected to send a message with topic `[project]/[version]/[entity]/[id]/state` and entity-specific payload whenever its state changes.
+
+#### Drone state
+TODO
+
+#### Car state
+TODO
+
+#### Hub state
+TODO
+
+
+### Missions
+Whenever a new parcel is placed, or a re-planning of an existing delivery is necessary, the optimization engine calculates the optimal route and sends out a `mission` to each entity which is part of the delivery, using the topic `[project]/[version]/[entity]/[id]/mission`. An entity which receives a mission replaces any existing mission, and immediately starts executing the new mission. Missions include movements and transactions. Note that the mission sent to an entity consists of _all_ deliveries that the entity is expected to participate in, as well as the movements in between (for cars and drones), and the return to a platform after the completion of all deliveries (for drones).
+
+#### Mission format
+TODO
+
+
+### Messages on behalf of other entities
+Since parcels do not have their own MQTT client, the entity which currently carries a parcel must also send and receive messages concerning the parcel. This means that, when receiving a parcel (either via a transaction or via manual placement, in case of a hub), the entity must send messages with the topic `[project]/[version]/parcel/[id]/#` at appropriate times.
+
+
+### Topics to subscribe to
+#### Permanent subscriptions
+- `[project]/[version]/[entity]/[id]/mission`
+
+#### Temporary subscriptions
+- `[project]/[version]/[entity]/[id]/transaction/[id]/ready`
+- `[project]/[version]/[entity]/[id]/transaction/[id]/unready`
+- `[project]/[version]/[entity]/[id]/transaction/[id]/execute`
+- `[project]/[version]/[entity]/[id]/transaction/[id]/complete`
+
+
+### Topics to send
+#### Permanently
+- `[project]/[version]/[entity]/[id]/connected`
+- `[project]/[version]/[entity]/[id]/state`
+- `[project]/[version]/[entity]/[id]/mission/complete`
+- `[project]/[version]/[entity]/[id]/mission/failed`
+- `[project]/[version]/[entity]/[id]/error`
+
+#### Temporarily
+- `[project]/[version]/parcel/[id]/placed`
+- `[project]/[version]/parcel/[id]/transfer`
+- `[project]/[version]/parcel/[id]/delivered`
+- `[project]/[version]/[entity]/[id]/transaction/[id]/ready`
+- `[project]/[version]/[entity]/[id]/transaction/[id]/unready`
+- `[project]/[version]/[entity]/[id]/transaction/[id]/execute`
+- `[project]/[version]/[entity]/[id]/transaction/[id]/complete`
