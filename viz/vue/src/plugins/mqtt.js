@@ -22,16 +22,21 @@ export default {
         });
         client.on('message', (topic, message) => {
             let [project, version, entity, id, ...args] = topic.split('/');
-            topic = { version, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${entity}/${id}/${args.join('/')}` } };
-            message = JSON.parse(message.toString());
+            topic = { version, entity, id, args, rest: args.join('/'), string: { long: topic, short: id ? `${entity}/${id}/${args.join('/')}` : `${entity}/${args.join('/')}` } };
+            try {
+                message = JSON.parse(message.toString());
+            } catch (e) {
+                message = "";
+                console.log(`Vue-app: Could not parse message from JSON payload.`);
+            }
 
-            console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short}.`)
-
+            console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short} .`);
             for (const [pattern, handler] of Object.entries(subscriptions)) {
                 if (mqttMatch(pattern, topic.string.short)) {
-                    handler(topic, message, { timestamp: Date.now() });
+                    handler(topic, message, {timestamp: Date.now()});
                 }
             }
+
         });
 
         app.prototype.$mqtt = {
