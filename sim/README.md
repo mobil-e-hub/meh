@@ -87,3 +87,63 @@ mission: {
     minimumDuration: float
 }
 ```
+
+### EntityStates
+
+#### DroneState
+
+```
+idle: 0,
+moving: 1,
+waitingForTransaction: 2,
+executingTransaction: 3,
+charging: 4- 3:
+```
+
+#### CarState
+```
+idle: 0,
+moving: 1,
+waitingForTransaction: 2,
+executingTransaction: 3,
+charging: 4
+```
+
+
+#### ParcelState
+```
+transportCreated: 0,
+waitingForTransport: 1,
+inTransport_InAir: 2,
+inTransport:3,
+delivered:4,
+completed:5,
+cancelled:6,
+failed:7
+```
+
+#### BusState
+```
+idle: 0,
+moving: 1,
+plannedStop: 2,
+transactionState: 3,
+charging: 4,
+```
+
+#### MissionState
+```
+notStarted: 0,
+moving: 1,
+waitingForTransaction: 2,
+charging: 3
+```
+
+#### TaskState
+```
+notStarted: 0,
+ongoing: 1,
+waitingForTransaction: 2,
+executingTransaction: 3,
+completed: 4
+```

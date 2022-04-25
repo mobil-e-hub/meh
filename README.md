@@ -153,20 +153,45 @@ TODO: Last will/`disconnect` message?
 In the case of a disconnect - both deliberate or accidental -  a disconnect message with the topic `[project]/[version]/[entity]/[id]/disconnected` should be send by the entity.
 
 In case of an accidental connection loss the _Last will_ MQTT feature can be used to ensure delivery of this message.
-TODO: different messages for Deliberate/ accidental disconnect ???
+TODO: different messages for deliberate/ accidental disconnect ???
+
 
 ### Updates of entity state
 Each entity is expected to send a message with topic `[project]/[version]/[entity]/[id]/state` and entity-specific payload whenever its state changes. During the execution of a mission, this should be a steady stream of messages for position updates, e.g., every 100 ms.
 In the following the expected payload contents for the different entities are explained:
 
 #### Drone state
-TODO
+- `id: string` 
+- `pos: (number, number, number)` = ("lon", "lat", "alt")
+- `speed: number`
+- `parcel: object` = (parcel object - null if no parcel loaded) 
+- `state: number`= [0-4], see DroneState description [here](./sim/README.md#EntityStates).
 
 #### Car state
-TODO
+- `id: string` 
+- `pos: (number, number, number)` = ("lon", "lat", "alt")
+- `speed: number`
+- `capacity: number`
+- `parcel: array` = (parcel object - empty if no parcel loaded)
+- `state: number`= [0-4], see CarState description [here](./sim/README.md#EntityStates).
+
 
 #### Hub state
-TODO
+- `id: string` 
+- `pos: string` = nodeID
+- `capacity: number`
+- `transactions: object` = (transaction objects - empty if no parcel loaded)
+- `parcel: object` = (parcel objects - empty if no parcel loaded)
+
+
+
+
+#### Parcel state
+**--!! Send by current carrier!!--**
+- `id: string` 
+- `carrier: object` = some entity
+- `destination: object` = some entity
+- `state: number`= [0-7], see ParcelState description [here](./sim/README.md#EntityStates).
 
 
 ### Missions
