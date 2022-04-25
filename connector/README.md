@@ -9,7 +9,7 @@ This module simply connects Azure EventGrid and MQTT broker by forwarding messag
 
 **Note that topics received from EventGrid must not be subscribed to (otherwise, there will be an infinite forwarding loop)!**
 
-## Communication with MQTT -
+## Communication with MQTT
 Communication between entities exclusively uses the private mosquitto MQTT broker `wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt`.
 
 All topics start with `mobil-e-hub/[version]/[entity]/[id]/`, and all messages are string representations of JSON objects.

@@ -198,8 +198,8 @@ In the following the expected payload contents for the different entities are ex
 Whenever a new parcel is placed, or a re-planning of an existing delivery is necessary, the optimization engine calculates the optimal route and sends out a `mission` to each entity which is part of the delivery, using the topic `[project]/[version]/[entity]/[id]/mission`. An entity which receives a mission replaces any existing mission, and immediately starts executing the new mission. Missions include movements and transactions. Note that the mission sent to an entity consists of _all_ deliveries that the entity is expected to participate in, as well as the movements in between (for cars and drones), and the return to a platform after the completion of all deliveries (for drones).
 
 #### Mission format
-TODO
-
+A detailed description of the Mission format can be found in the [wiki of this repo](../../wiki/Missions-structure).
+The optimization engine can send mock missions that can be triggered by a MQTT message with the topic `[project]/[version]/test/[1-3]` as explained [here](connector/README.md#Communication with MQTT).
 
 ### Messages on behalf of other entities
 Since parcels do not have their own MQTT client, the entity which currently carries a parcel must also send and receive messages concerning the parcel. This means that, when receiving a parcel (either via a transaction or via manual placement, in case of a hub), the entity must send messages with the topic `[project]/[version]/parcel/[id]/#` at appropriate times.
