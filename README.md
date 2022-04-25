@@ -62,8 +62,8 @@ An Nginx server forwards all requests from port 443 to the respective localhost 
 | `^~ /sockjs-node` | 4200 | SockJs Node | direct all remaining (not specified) locations to `/monitoring`  | |
 | `.../meh/sim/.*` | 3000 | Simulation |  |   |
 | `.../meh/opt/.*` | 3001 | Optimization engine |   |   |
-| `.../meh/wss/.*` | 3002 | Websocket (?) | was genau macht der?  | TODO |
-| `.../meh/connector` | 3004 | Connector | js module mqtt: bridge mqtt - Eventgrid  | TODO test |
+| `.../meh/wss/.*` | 3002 | Websocket  |  | |
+| `.../meh/connector` | 3004 | Connector | js module mqtt: bridge mqtt - Eventgrid  | |
 | `.../meh/viz/.*` | 8080 | vizualization | Vue app  |   |
 | `.../meh/git` | 8081 | updater.js | Webhook for master branch |  |
 
@@ -109,16 +109,15 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 ### Overview of Production Components
 #### Control Center ("Mobilitätssystem")
 - Written in Python
-- Can send/receive messages to/from EventGrid
+- Can send/receive messages to/from MQTT broker
 - Reacts to incoming status updates (of drones, cars, parcels, traffic, ...) with re-routing according to updated optimal delivery schedule
 - Runs permanently on InES server
 
 #### Visualization
 - Written in Vue.js
-- Is entirely independent from the rest of the system and runs as a static website (e.g. hosted on Github Pages)
-- Can receive messages from EventGrid
+- Runs on InES machine (previously deployed as a static website on Github Pages)
+- Can receive messages from MQTT broker
 - Shows current state of entire system (topology, drones, cars, hubs, parcels, ...) and KPIs (parcels delivered per hour, drone utilization, traffic jams, ...)
-
 
 ### Development / Simulation Components
 #### Simulation of drones / cars / parcels
@@ -136,94 +135,12 @@ The monitored components are defined in the file `app.components.ts` in the Moni
 
 ##### Python server
 - Runs on InES machine
-- Contains the Control Center ("Mobilitätssystem")
+- Contains the Control Center ("Mobilitätssystem") (- TODO the _Optimization Engine??_)
 
-##### Static Github Pages app
-- Hosted as a Github repo
-- Contains visualization and shop simulation frontend
-
-### TODO
-- [ ] Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
-- [ ] Add JSON schema for input validation of MQTT/EventGrid messages:
-  ```{
-  "$schema": "https://json-schema.org/draft/2019-09/schema",
-  "type": "array",
-  "items": {
-    "oneOf": [
-      {
-        "type": "object",
-        "properties": {
-          "eventType": {
-            "type": "string",
-            "const": "Microsoft.EventGrid.SubscriptionValidationEvent"
-          },
-          "topic": {
-            "type": "string"
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "validationCode": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "validationCode"
-            ]
-          }
-        },
-        "required": [
-          "eventType",
-          "data"
-        ]
-      },
-      {
-        "type": "object",
-        "properties": {
-          "eventType": {
-            "type": "string",
-            "const": "Portal_Echo"
-          }
-        },
-        "required": [
-          "eventType"
-        ]
-      },
-      {
-        "type": "object",
-        "properties": {
-          "eventType": {
-            "type": "string",
-            "const": "mobil-e-hub"
-          },
-          "dataVersion": {
-            "type": "string",
-            "enum": ["v1"]
-          },
-          "subject": {
-            "type": "string"
-          },
-          "data": {}
-        },
-        "required": [
-          "eventType",
-          "dataVersion",
-          "subject",
-          "data"
-        ],
-        "additionalProperties": false
-      }
-    ]
-  }
-
-
-- [ ] Rename connector module from `mqtt` to `connector` (folder, monitoring, console logs, ...)
-- [ ] Clean up README files (top-level and modules)
-- [ ] Merge or delete old branches
 
 
 ## Interaction of Drones and Platforms with the MQTT Broker
-Platforms are be either stationary (in this case, the platform is called a `hub` in MQTT topics/messages) or attached to a vehicle (in this case, it is called a `car`). Drones are always called `drone`. In the following, drones and platforms are called "entities" if an interaction applies to both types.
+Platforms are either stationary (in this case, the platform is called a `hub` in MQTT topics/messages) or attached to a vehicle (in this case, it is called a `car`). Drones are always called `drone`. In the following, drones and platforms are called "entities" if an interaction applies to both types.
 
 ### Message format
 Each MQTT message consists of two strings: A _topic_ and a _payload_. The topic is expected to have the format `[project]/[version]/[entity]/[id]/[args]`, where `project` is always `mobil-e-hub`, and `version` is `v1`. `args` must be non-empty, but can contain forward slashes. The payload is expected to be in JSON format.
@@ -232,8 +149,15 @@ Each MQTT message consists of two strings: A _topic_ and a _payload_. The topic 
 The entity connects to the MQTT broker using the respective credentials and an ID in the UUID v4 format. After the connection has been established, the entity must send a message with topic `[project]/[version]/[entity]/[id]/connected` and empty payload. This allows the optimization engine to add the entity to its registry, e.g., for mission planning.
 TODO: Last will/`disconnect` message?
 
+### Terminal message before disconnect - [WIP]
+In the case of a disconnect - both deliberate or accidental -  a disconnect message with the topic `[project]/[version]/[entity]/[id]/disconnected` should be send by the entity.
+
+In case of an accidental connection loss the _Last will_ MQTT feature can be used to ensure delivery of this message.
+TODO: different messages for Deliberate/ accidental disconnect ???
+
 ### Updates of entity state
 Each entity is expected to send a message with topic `[project]/[version]/[entity]/[id]/state` and entity-specific payload whenever its state changes. During the execution of a mission, this should be a steady stream of messages for position updates, e.g., every 100 ms.
+In the following the expected payload contents for the different entities are explained:
 
 #### Drone state
 TODO
@@ -283,3 +207,8 @@ Since parcels do not have their own MQTT client, the entity which currently carr
 - `[project]/[version]/[entity]/[id]/transaction/[id]/unready`
 - `[project]/[version]/[entity]/[id]/transaction/[id]/execute`
 - `[project]/[version]/[entity]/[id]/transaction/[id]/complete`
+
+
+
+### TODOs
+
