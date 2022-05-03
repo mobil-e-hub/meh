@@ -32,14 +32,20 @@ module.exports = class MQTTClient {
 
         this.mqtt.client.on('message', (topic, message) => {
             let [project, version, entity, id, ...args] = topic.split('/');
-            this.receive({
-                version,
-                entity,
-                id,
-                args,
-                rest: args.join('/'),
-                string: {long: topic, short: `${entity}/${id}/${args.join('/')}`}
-            }, JSON.parse(message.toString()));
+
+            try {
+                this.receive({
+                    version,
+                    entity,
+                    id,
+                    args,
+                    rest: args.join('/'),
+                    string: {long: topic, short: `${entity}/${id}/${args.join('/')}`}
+                }, JSON.parse(message.toString()));
+            } catch (e) {
+                 console.error(`> [${this.type}] MQTT message with topic ${topic} and message ${message} could not be parsed. ${e}.`);
+            }
+
         });
     }
 

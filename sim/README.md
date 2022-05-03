@@ -97,7 +97,7 @@ idle: 0,
 moving: 1,
 waitingForTransaction: 2,
 executingTransaction: 3,
-charging: 4- 3:
+charging: 4:
 ```
 
 #### CarState
