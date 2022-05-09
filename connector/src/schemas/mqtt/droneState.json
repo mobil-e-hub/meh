@@ -1,0 +1,33 @@
+{
+  "$id": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/schemas/mqtt/DroneState.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DroneState",
+  "description": "JSON Schema for state update messages from the entities of type drone. ",
+  "required": ["id", "position", "speed", "parcel", "state"],
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier of the entity."
+    },
+    "position": {
+      "type": "object",
+      "description": "The current location in the format {'lat': xx, 'lon': xx, 'alt': xx}",
+
+    },
+    "speed": {
+      "type": "number",
+      "description": "The (approximated) average speed that the entity moves at."
+    },
+    "parcel": {
+      "type": ["object", "null"],
+      "description": "Parcel object or null"
+    },
+    "state": {
+      "type": "number",
+      "description": "Current State of the Drone (idle / moving /... ) --> see: https://github.com/mobil-e-hub/meh/blob/master/sim/README.md#EntityStates"
+
+    },
+    "allowAdditionalProperties": false
+  }
+}

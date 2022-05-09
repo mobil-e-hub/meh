@@ -9,7 +9,7 @@ module.exports = class Hub {
 
     addParcel(parcel) {
         let success = Object.keys(this.parcels).length < this.capacity;
-          if(success) {
+        if(success) {
             this.parcels[parcel.id] = parcel;
         }
         return success;

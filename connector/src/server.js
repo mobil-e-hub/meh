@@ -126,7 +126,6 @@ app.post('/', validate({body: schemas.orchestrator.orderPlacedSchema}), async (r
         res.status(200).json({ success: true, message: `Message forwarded to MQTT with topic ${topic}.` });
     } 
     catch (error) {
-        //TODO replace with expressjs middleware error Handling  --> https://www.robinwieruch.de/node-express-error-handling/
         console.log(`> (connector) Invalid message received: ${JSON.stringify({ body: req.body, error })}`);
         return res.status(400).end();
     }
