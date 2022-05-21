@@ -501,6 +501,8 @@ class OptimizationEngine(MQTTClient):
 
     def get_node_id_by_location(self, location):
         """returns nodeID for a location {x,y,z}, converts dict to tuple first to match mapping"""
+        # print(f"self.mapping: {self.mapping}")
+        # print(f"location.items(): {location.items()}")
         return self.mapping[tuple(nodeID for (location, nodeID) in location.items())]
 
     # Methods for handling incoming MQTT messages
@@ -550,6 +552,10 @@ class OptimizationEngine(MQTTClient):
                 self.create_delivery_route(parcel)
             except ValueError as e:
                 self.publish('error', f"Could not deliver parcel: {msg.payload}.")
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+            except Exception as e:
+                self.publish('error', f"Internal Error.")
+                logging.error(f"[{self.logging_name}] - Error: {e}")
 
         elif entity == 'order':
             logging.warn(
