@@ -112,7 +112,7 @@ module.exports = class DroneSimulator extends MQTTClient {
             }
         }
         catch (err) {
-            console.log(`-- Caught Error: Drone/${topic.id} - ${err.message}`)
+            // console.log(`-- Caught Error: Drone/${topic.id} - ${err.message}`)
             this.publish(`drone/${topic.id}`, 'error', err.message)
         }
     }

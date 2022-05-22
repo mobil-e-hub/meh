@@ -28,6 +28,7 @@ class MQTTClient:
         self.project = os.environ.get("MQTT_ROOT")
         self.version = os.environ.get("MQTT_VERSION")
         self.root = f"{self.project}/{self.version}"
+        self.id = str(uuid4())[:4]
 
         self.subscriptions = {f"mobil-e-hub/{self.version}/#"}
         self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
@@ -70,8 +71,8 @@ class MQTTClient:
         self.client.unsubscribe(topic)
         self.subscriptions.discard(topic)
 
-    def publish(self, topic, message, sender='opt'):
-
+    def publish(self, topic, message, sender= ''):
+        sender = f'opt/{self.id}' if not sender else sender
         logging.debug(f"< [opt_engine] {self.root}/{sender}/{topic}: {message}")
         self.client.publish(f'{self.root}/{sender}/{topic}', json.dumps(message))
 
@@ -94,12 +95,13 @@ class MQTTClient:
             logging.warn(f"[{self.logging_name}] - Bad connection: Returned code=", rx)
 
     def on_disconnect(self, client, userdata, rc=0):
-        logging.debug(f"[{self.logging_name}] - Disconnected from Broker: result code " + str(rc))
-        client.loop_stop()
+        logging.warn(f"[{self.logging_name}] - Disconnected from Broker: result code " + str(rc))
+        if rc == 0:
+            client.loop_stop()
+
 
     def on_subscribe(self):
         logging.debug(f"[{self.logging_name}] -Subscription successful")
 
     def on_unsubscribe(self):
         logging.debug(f"[{self.logging_name}] - Unsubscription successful")
-
