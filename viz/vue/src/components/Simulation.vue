@@ -117,11 +117,11 @@
 
                                     <b-modal id="modal-place-order" title="Place order" @ok="clickPlaceOrderButton">
                                         <b-form-group label="Vendor" label-for="input-order-vendor">
-                                            <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values($store.state.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${$store.state.topology.addresses[c.address].name})` }))" required></b-form-select>
+                                            <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values($store.state.topology.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${$store.state.topology.topology.addresses[c.address].name})` }))" required></b-form-select>
                                         </b-form-group>
 
                                         <b-form-group label="Customer" label-for="input-order-customer">
-                                            <b-form-select id="input-order-customer" v-model="command.order.customer" :options="Object.values($store.state.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${$store.state.topology.addresses[c.address].name})` }))" required></b-form-select>
+                                            <b-form-select id="input-order-customer" v-model="command.order.customer" :options="Object.values($store.state.topology.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${$store.state.topology.topology.addresses[c.address].name})` }))" required></b-form-select>
                                         </b-form-group>
 
                                         <b-form-group label="Pick-up time" label-for="input-order-pickup">
