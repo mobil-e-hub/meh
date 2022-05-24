@@ -60,7 +60,8 @@ module.exports = {
         },
         drones: {
             d00: {id: 'd00', position: { x: 50, y: 50, z: 0 }},
-            d01: {id: 'd01', position: { x: -60, y: -60, z: 0 }},
+            // currently don't use id 'd01' to avoid confusion with the test missions for doks innovation
+            d03: {id: 'd01', position: { x: -60, y: -60, z: 0 }},
             d02: {id: 'd02', position: { x: -50, y: 50, z: 0 }},
         },
         cars: {
