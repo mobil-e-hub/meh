@@ -2,7 +2,7 @@ const random = require('random');
 const { v4: uuid } = require('uuid');
 
 // Internal modules
-const scenario = require("../assets/original_scenario");   // TODO reload this when the map changes!!!!
+const scenario = require("../assetsOLD/original_scenario");   // TODO reload this when the map changes!!!!
 
 module.exports = {
     random: {
@@ -56,7 +56,6 @@ module.exports = {
                 z: random.float(0, range),
             };
         },
-        // TODO refactor! --> doesnt belong here
         droneHub: () => {
             let d = Object.values(scenario.topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'air');
             return d[Math.floor(Math.random() * (d.length-1))];

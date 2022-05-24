@@ -44,6 +44,7 @@ class Drone {
             return false;
         }
         else {
+            //TODO catch exception if mission has no tasks
             let task = this.mission.tasks[0];
             switch (task.type) {
                 case 'move':

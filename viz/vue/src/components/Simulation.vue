@@ -200,6 +200,20 @@ import mapState from "vuex/dist/vuex.mjs";
 
 export default {
     name: 'Simulation',
+    beforeCreate() {
+      console.log('Simulation-Module: At this point, events and lifecycle have been initialized.')
+    },
+    created() {
+      console.log('Simulation-Module: At this point, this.property is now reactive and propertyComputed will update.')
+      this.ex_property = 'Example property updated.'
+    },
+    beforeMount() {
+      console.log(`At this point, vm.$el has not been created yet.`)
+    },
+    mounted() {
+      console.log(`At this point, vm.$el has been created and el has been replaced.`);
+      // console.log(this.$el.textContent) // Example component.
+    },
     data: function () {
         return {
           isStarted: false,
@@ -216,7 +230,7 @@ export default {
               pickup: null,
               dropoff: null
             },
-            selectedScenario: null,
+            selectedScenario: "dummy",
           },
 
         }

@@ -24,7 +24,7 @@
                 return this.$store.state.settings.map.displaySize.node * (this.$store.state.settings.map.zoom.topology ? this.$store.state.settings.map.zoom.factor : 1.0);
             },
             position: function() {
-                return this.node ? { cx: this.node.position.x, cy: this.node.position.y } : null;
+                return this.node ? { cx: this.node.position.lat, cy: this.node.position.long } : null;
             },
             displayPosition: function() {
                 return this.position ? {

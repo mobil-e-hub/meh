@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const mqttMatch = require('mqtt-match');
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
+const path = require('path');
 
 // Internal modules
 const DroneSimulator = require('./simulators/drone-simulator');
@@ -38,14 +39,12 @@ app.use(bodyParser.json());
 app.use(morgan('combined'));
 
 const server = app.listen(port, () => {
-    console.log(`< Server listening at http://localhost:${port}.`)
+    console.log(`< Server listening at http://localhost:${port}.`);
 });
 
 // Map and initial entities
-// const initScenario = require(scenarioPath + defaultScenario);
-
-const initScenario = require("../../assets/scenarios/" + defaultScenario)
-// console.log(`New Scenario is found?? => ${new_scenario}`)
+const initScenario = require(path.join(`${scenarioPath}`, `${defaultScenario}`));
+// console.log(`New Scenario is found?? => ${initScenario}`);
 
 // Simulators
 const hubSimulator = new HubSimulator(initScenario);
@@ -134,10 +133,14 @@ function matchTopic(pattern, topic) {
     return mqttMatch(pattern, topic);
 }
 
-function sendAvailableScenarios(path) {
-    const testFolder = __dirname + '/' + path;
+function sendAvailableScenarios(directory) {
+    console.log(`Send Avail Scenarios is called:`)
+    console.log(`${__dirname} -- ${directory}`)
+    const testFolder = path.join(__dirname, `${directory}`);
+    console.log(`${testFolder}`)
     const fs = require('fs');
 
+    console.log(`Send Avail Scenarios is called: ${testFolder}`)
     fs.readdir(testFolder, (err, files) => {
         if(err) {
             mqttClient.publish(`${mqttRoot}/error/no-scenarios`, "The scenarios could not be loaded.");

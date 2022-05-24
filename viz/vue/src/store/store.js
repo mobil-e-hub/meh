@@ -2,18 +2,32 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import topologyQ from '@a/scenarios/topology_quads.js'  //@a is webpack alias for meh/assets directory defined in the vue.config.js
+import topologyR from '@a/scenarios/topology_reallabor_1_v1.js'
+//const path = require('path');
+
 //Own modules
 // import topology from '../../assets/topology';  // old location TODO remove
 console.log(`Current path is: ${__dirname}`)
+console.log(`Alias import test: ${topologyR}`)
 // import topology_reallabor_1_v1 from '../../../../assets'
 // import topology_quads from "../../../../assets/"
 //import "~/assets/topology_reallabor_1_v1.json"
 
-const topology_quads = require('../../../../assets/topology_quads')
-const topology_reallabor = require('../../../../assets/topology_reallabor_1_v1')
+//paths to the topology files
+// const path_quads = path.join(__dirname, '../../../..' ,'/assets/scenarios/topology_quads');
+// const path_reallabor = path.join(__dirname, '../../../..' ,'/assets/scenarios/topology_reallabor_1_v1');
+// console.log(`Quads: ${path_quads}`)
+// console.log(`Reallabor: ${path_reallabor}`)
+//
+// const topology_quads = require(path_quads);
+// const topology_reallabor = require(path_reallabor);
 
-const topology = topology_quads
-console.log(top)
+
+
+const topologyQuads = topologyQ;
+const topologyReallabor = topologyR;
+console.log(top);
 
 
 // Setup
@@ -42,10 +56,11 @@ const resetEntityStates = () => {
 export default new Vuex.Store({
     state: {
         entities: resetEntityStates(),
-        topology: topology,
+        topology: topologyReallabor,
         settings: {
             map: {
-                origin: { x: 0, y: 0 },
+                // origin: { x: 0, y: 0 },   // TODO change for Reallabor and Quads
+                origin: {lat: 49.40, long:8.68},
                 zoom: {
                     factor: 4,
                     entities: true,
@@ -64,7 +79,8 @@ export default new Vuex.Store({
             },
             sideMenuVisible: false,
         },
-        scenarios: { },
+        //TODO undo debugging changes!
+        scenarios: {},//{"3drones_0car_0bus":false,"3drones_0car_1bus":false,"3drones_1car_0bus":false,"3drones_bus_better":false,"3drones_car_better":false,"3drones_ground_equal":false,"no-drones_1car_1bus":false,"no_route_exists":false,"original_scenario":true,"topology_quads":false,"topology_reallabor_1_v1":false},
         selectedScenario: " ",
         statistics: {
             //TODO store stuff for stats here

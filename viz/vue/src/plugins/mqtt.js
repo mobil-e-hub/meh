@@ -24,7 +24,12 @@ export default {
         client.on('message', (topic, message) => {
             let [project, version, entity, id, ...args] = topic.split('/');
             topic = { version, entity, id, args, rest: args.join('/'), string: { long: topic, short: `${entity}/${id}/${args.join('/')}` } };
-            message = JSON.parse(message.toString());
+            try {
+                message = JSON.parse(message.toString());
+            } catch (e) {
+                console.error(e)
+                message = ""
+            }
 
             // console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short}.`)
 

@@ -106,6 +106,7 @@ app.get('/ping', (req, res) => {
     res.status(200).json({ connector: 'pong' });
 });
 
+
 // Receive events from Orchestrator and forward them to MQTT broker
 // The only valid event received from Orchestrator is an order/placed event -> validate immediately
 app.post('/', validate({body: schemas.orchestrator.orderPlacedSchema}), async (req, res, next) => {

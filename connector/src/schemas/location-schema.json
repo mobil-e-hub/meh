@@ -1,0 +1,26 @@
+{
+  "$id": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/schemas/location-schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Geopgraphical Location",
+  "description": "A geographical coordinate on a planet (most commonly Earth).",
+  "required": [ "latitude", "longitude", "altitude" ],
+  "type": "object",
+  "properties": {
+    "lat": {
+      "type": "number",
+      "description": "Latitude",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "lon": {
+      "type": "number",
+      "description": "Longitude",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "alt": {
+      "type": "number",
+      "description": "Altitude"
+    }
+  }
+}

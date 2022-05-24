@@ -21,8 +21,9 @@ class OptimizationEngine(MQTTClient):
         MQTTClient.__init__(self)
 
         self.logging_name = "opt_engine"
-
-        path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..', 'assets/topology_quads.json'))
+        print(os.path.dirname(__file__))
+        print(os.path.join(os.path.dirname(__file__), "../../..", default_topology))
+        path = os.path.abspath(os.path.join(os.path.dirname(__file__),"../../..", default_topology))
         logging.debug(f"< [{self.logging_name}] - Joined path to topology is {path}")
 
         self.g_topo = load_topology(path)
