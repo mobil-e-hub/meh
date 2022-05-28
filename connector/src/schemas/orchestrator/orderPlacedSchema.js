@@ -1,6 +1,4 @@
 module.exports = {
-    "$id": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/schemas/orchestrator/OrderPlaced.json",
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "OrderPlaced",
     "description": "JSON Schema for order placed messages. ",
 	"type": "object",
