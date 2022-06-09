@@ -237,3 +237,211 @@ Since parcels do not have their own MQTT client, the entity which currently carr
 
 ### TODOs
 
+2a277e9d-aa5a-4fc2-a119-5e749c184a59
+
+338f36e9-bfbf-448e-9518-7acc20baf9e3
+
+d4c84cbb-4a3b-41f7-9079-5bf678198336
+
+ce276a8e-8e0d-4286-95b5-1b7ff37414f4
+
+39dd362a-cff1-4105-b961-4ad187fc1656
+
+5f9581f1-49d5-4479-b9d3-e179d1663d32
+
+a43791e0-121c-4dbb-9d17-19ce8c9e902f
+
+
+## Example: Complete MQTT Communication For A Simple Delivery
+### Task Description
+#### Involved Entities
+- Hub `aef6d0fd-d150-4435-9c73-3b3339b77582`
+- Drone `52715405-c8a0-4f53-8fb5-ffd54696200c`
+- Car `3406a877-6f20-4d27-bac5-08b62a44326a`
+- Parcel `1922193319441955`
+
+#### Task
+The Parcel is manually placed on the Hub, then picked up by the Drone and dropped off to the car. The car carries the parcel to another point, where it is picked up again by the drone, and dropped off back to the Hub.
+
+#### Illustration
+![meh-scenario-1 drawio](https://user-images.githubusercontent.com/71136528/172788658-dcaf794d-825d-4b0a-9945-e1507dd1af5c.png)
+
+### Topology
+TODO
+
+### Communication
+#### meh/v1/order/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed
+```
+{
+  'id': '1922193319441955',
+  'carrier': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
+  'destination': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' }
+}
+```
+
+#### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission
+```
+{
+  'id': '209ce34a-8187-4cf6-b22c-5f0a8cff9c0f',
+  'tasks': [
+    { 
+      'type': 'dropoff', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': '646068b9-7814-4e08-a05e-752581b374a6',
+        'from': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
+        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'parcel': '1922193319441955'
+      }
+    },
+    { 
+      'type': 'pickup', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': '54e08383-2fff-485b-b7d8-f4b444383d89',
+        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'to': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
+        'parcel': '1922193319441955'
+      }
+    }
+  ]
+}
+```
+
+#### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/mission
+```
+{
+  'id': '2dc1eda2-2c81-4ea3-b187-a19a3d6d0aa1',
+  'tasks': [
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 0.0, 'long': 0.0, 'alt': 0.0 },
+      'minimumDuration': 10
+    },
+    { 
+      'type': 'pickup', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': '646068b9-7814-4e08-a05e-752581b374a6',
+        'from': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
+        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'parcel': '1922193319441955'
+      }
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 },
+      'minimumDuration': 10
+    },
+    { 
+      'type': 'dropoff', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': 'e786533c-9b72-4dfe-81ed-f1a80f2ed42e',
+        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'to': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
+        'parcel': '1922193319441955'
+      }
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 1.0, 'long': 1.0, 'alt': 0.0 },
+      'minimumDuration': 10
+    },
+    { 
+      'type': 'pickup', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': 'e474e964-d5f1-4e73-b256-6e59eb4bda78',
+        'from': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
+        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'parcel': '1922193319441955'
+      }
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 },
+      'minimumDuration': 10
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 0.0, 'long': 0.0, 'alt': 0.0 },
+      'minimumDuration': 10
+    },
+    { 
+      'type': 'dropoff', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': '54e08383-2fff-485b-b7d8-f4b444383d89',
+        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'to': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
+        'parcel': '1922193319441955'
+      }
+    }
+  ]
+}
+```
+
+#### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/mission
+```
+{
+  'id': 'fc0adcef-a123-417b-b61c-0a99f4789aee',
+  'tasks': [
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 },
+      'minimumDuration': 10
+    },
+    { 
+      'type': 'pickup', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': 'e786533c-9b72-4dfe-81ed-f1a80f2ed42e',
+        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'to': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
+        'parcel': '1922193319441955'
+      }
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 2.0, 'long': 0.0, 'alt': 0.0 },
+      'minimumDuration': 3
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 2.0, 'long': 1.0, 'alt': 0.0 },
+      'minimumDuration': 3
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 2.0, 'long': 0.0, 'alt': 0.0 },
+      'minimumDuration': 3
+    },
+    { 
+      'type': 'dropoff', 
+      'state': 'TaskState.notStarted',
+      'transaction': {
+        'id': 'e474e964-d5f1-4e73-b256-6e59eb4bda78',
+        'from': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
+        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
+        'parcel': '1922193319441955'
+      }
+    },
+    {
+      'type': 'move',
+      'state': 'TaskState.notStarted',
+      'destination': { 'lat': 2.0, 'long': 1.0, 'alt': 0.0 },
+      'minimumDuration': 0
+    }
+  ]
+}
+```
