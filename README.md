@@ -270,7 +270,8 @@ The Parcel is manually placed on the Hub, then picked up by the Drone and droppe
 TODO
 
 ### Communication
-#### meh/v1/order/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed
+#### Parcel Placement (sent from Orchestrator)
+##### meh/v1/order/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed
 ```
 {
   'id': '1922193319441955',
@@ -279,7 +280,8 @@ TODO
 }
 ```
 
-#### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission
+#### Missions (sent from Optimization Engine)
+##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission
 ```
 {
   'id': '209ce34a-8187-4cf6-b22c-5f0a8cff9c0f',
@@ -308,7 +310,7 @@ TODO
 }
 ```
 
-#### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/mission
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/mission
 ```
 {
   'id': '2dc1eda2-2c81-4ea3-b187-a19a3d6d0aa1',
@@ -387,7 +389,7 @@ TODO
 }
 ```
 
-#### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/mission
+##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/mission
 ```
 {
   'id': 'fc0adcef-a123-417b-b61c-0a99f4789aee',
@@ -445,3 +447,39 @@ TODO
   ]
 }
 ```
+
+#### Entity State Updates (sent from respective entities)
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/state
+
+##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/state
+
+#### First Transaction (from hub to drone)
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/ready
+
+##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/646068b9-7814-4e08-a05e-752581b374a6/execute
+
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/complete
+
+#### Second Transaction (from drone to car)
+##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/ready
+
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/execute
+
+##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/complete
+
+#### Third Transaction (from car to drone)
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/ready
+
+##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/execute
+
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/complete
+
+#### Fourth Transaction (from drone to hub)
+##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/ready
+
+##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/execute
+
+##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/complete
+
+#### Delivery Confirmation (sent from hub)
+##### meh/v1/parcel/1922193319441955/delivered
