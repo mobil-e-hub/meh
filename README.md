@@ -237,10 +237,6 @@ Since parcels do not have their own MQTT client, the entity which currently carr
 
 ### TODOs
 
-2a277e9d-aa5a-4fc2-a119-5e749c184a59
-
-338f36e9-bfbf-448e-9518-7acc20baf9e3
-
 d4c84cbb-4a3b-41f7-9079-5bf678198336
 
 ce276a8e-8e0d-4286-95b5-1b7ff37414f4
@@ -252,22 +248,60 @@ ce276a8e-8e0d-4286-95b5-1b7ff37414f4
 a43791e0-121c-4dbb-9d17-19ce8c9e902f
 
 
-## Example: Complete MQTT Communication For A Simple Delivery
+## Example: Complete MQTT Communication For A Simple Delivery (WIP)
 ### Task Description
-#### Involved Entities
-- Hub `aef6d0fd-d150-4435-9c73-3b3339b77582`
-- Drone `52715405-c8a0-4f53-8fb5-ffd54696200c`
-- Car `3406a877-6f20-4d27-bac5-08b62a44326a`
-- Parcel `1922193319441955`
-
 #### Task
 The Parcel is manually placed on the Hub, then picked up by the Drone and dropped off to the car. The car carries the parcel to another point, where it is picked up again by the drone, and dropped off back to the Hub.
 
+#### Involved Entities
+- Hub `aef6d0fd-d150-4435-9c73-3b3339b77582`, placed at node `n00`
+- Drone `52715405-c8a0-4f53-8fb5-ffd54696200c`, starting at (0.5, 0, 0)
+- Car `3406a877-6f20-4d27-bac5-08b62a44326a`, starting at node (1.5, 0, 0)
+- Parcel `1922193319441955`, to be placed at the hub
+
 #### Illustration
-![meh-scenario-1 drawio](https://user-images.githubusercontent.com/71136528/172788658-dcaf794d-825d-4b0a-9945-e1507dd1af5c.png)
+![meh-scenario-1 drawio (1)](https://user-images.githubusercontent.com/71136528/172798485-28dc5ee6-1548-4608-98ce-282d7fbb2f9d.png)
 
 ### Topology
-TODO
+In production, nodes and egdes will also have UUIDs!
+```
+{
+  'topology': {
+    'nodes': {
+      'n00': { 'id': 'n00', 'position': { 'lat': 0.0, 'long': 0.0, 'alt': 0.0 }, 'type': 'air' },
+      'n01': { 'id': 'n01', 'position': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 }, 'type': 'parking' },
+      'n02': { 'id': 'n02', 'position': { 'lat': 2.0, 'long': 0.0, 'alt': 0.0 }, 'type': 'parking' },
+      'n03': { 'id': 'n03', 'position': { 'lat': 2.0, 'long': 1.0, 'alt': 0.0 }, 'type': 'parking' },
+      'n04': { 'id': 'n04', 'position': { 'lat': 1.0, 'long': 1.0, 'alt': 0.0 }, 'type': 'parking' }
+     },
+    'edges': {
+      'e00': { 'id': 'e00', 'from': 'n00', 'to': 'n01', 'type': 'air', 'distance': 1.0 },
+      'e01': { 'id': 'e01', 'from': 'n01', 'to': 'n00', 'type': 'air', 'distance': 1.0 },
+      'e02': { 'id': 'e02', 'from': 'n01', 'to': 'n02', 'type': 'air', 'distance': 1.0 },
+      'e03': { 'id': 'e03', 'from': 'n02', 'to': 'n03', 'type': 'air', 'distance': 1.0 },
+      'e04': { 'id': 'e04', 'from': 'n03', 'to': 'n04', 'type': 'air', 'distance': 1.0 },
+      'e05': { 'id': 'e05', 'from': 'n04', 'to': 'n01', 'type': 'air', 'distance': 1.0 },
+      'e06': { 'id': 'e06', 'from': 'n01', 'to': 'n04', 'type': 'air', 'distance': 1.0 }
+    }
+  },
+  'addresses': {
+    '2a277e9d-aa5a-4fc2-a119-5e749c184a59': { 'id': '2a277e9d-aa5a-4fc2-a119-5e749c184a59', 'position': { 'lat': 0.0, 'long': 0.0, 'alt': 0.0 }, 'name': 'Hubstr. 1' }
+  },
+  'customers': {
+    '338f36e9-bfbf-448e-9518-7acc20baf9e3': { 'id': '338f36e9-bfbf-448e-9518-7acc20baf9e3', 'name': 'Sample Customer', 'address': '2a277e9d-aa5a-4fc2-a119-5e749c184a59' }
+  },
+  'entities': {
+    'hubs': {
+      'aef6d0fd-d150-4435-9c73-3b3339b77582': { 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582', 'position': 'n00' }
+    },
+    'drones': {
+      '52715405-c8a0-4f53-8fb5-ffd54696200c': { 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c', 'position': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 } }
+    },
+    'cars': {
+      '3406a877-6f20-4d27-bac5-08b62a44326a': { 'id': '3406a877-6f20-4d27-bac5-08b62a44326a', 'position': { 'lat': 2.0, 'long': 0.0, 'alt': 0.0 } }
+    }
+  }
+```
 
 ### Communication
 #### Parcel Placement (sent from Orchestrator)
@@ -450,36 +484,111 @@ TODO
 
 #### Entity State Updates (sent from respective entities)
 ##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/state
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/state
+```
+{
+  ...
+}
+```
 
 #### First Transaction (from hub to drone)
 ##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/ready
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/646068b9-7814-4e08-a05e-752581b374a6/execute
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/complete
+```
+{
+  ...
+}
+```
 
 #### Second Transaction (from drone to car)
 ##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/ready
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/execute
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/complete
+```
+{
+  ...
+}
+```
 
 #### Third Transaction (from car to drone)
 ##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/ready
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/execute
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/complete
+```
+{
+  ...
+}
+```
 
 #### Fourth Transaction (from drone to hub)
 ##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/ready
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/execute
+```
+{
+  ...
+}
+```
 
 ##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/complete
+```
+{
+  ...
+}
+```
 
 #### Delivery Confirmation (sent from hub)
 ##### meh/v1/parcel/1922193319441955/delivered
+```
+{
+  ...
+}
+```
