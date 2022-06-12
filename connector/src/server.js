@@ -34,12 +34,27 @@ const schemas = {
     orchestrator: {
         orderPlacedSchema: require("./schemas/orchestrator/orderPlacedSchema"),
         statusUpdateSchema: require("./schemas/orchestrator/statusUpdateSchema")
+    },
+    mqtt: {
+        droneState: require("./schemas/mqtt/droneState"),
+        carState: require("./schemas/mqtt/carState"),
+        hubState: require("./schemas/mqtt/hubState"),
+        parcelState: require("./schemas/mqtt/parcelState")
     }
 }
 
+// mapping from entity topic to the corresponding state message JSON schema
+const state_schemata = {
+    'drone': 'droneState',
+    'car': 'carState',
+    'hub': 'hubState',
+    'parcel': 'parcelState'
+};
+
 // Topics to listen to from MQTT broker (make sure that they are disjoint from topics received from Orchestrator!)
 const subscriptionTopics = [
-    'parcel/+/status'
+    'parcel/+/status',
+    '+/+/state'
 ];
 
 function validationErrorMiddleware(error, request, response, next) {
@@ -106,10 +121,6 @@ app.get('/ping', (req, res) => {
     res.status(200).json({ connector: 'pong' });
 });
 
-// TODO: - move async to function?
-//      - where exactly to place next() calls?
-//      - split into seperate files -> Error handling ()
-//       - move schema out of src folder
 
 // Receive events from Orchestrator and forward them to MQTT broker
 // The only valid event received from Orchestrator is an order/placed event -> validate immediately
@@ -138,18 +149,30 @@ mqttClient.on('message', async (topic, message) => {
         topic = args.join('/');
         message = JSON.parse(message.toString());
 
-        // TODO: Validate message format against schema
-        // if (!schemaValidator.validate(message, schemas.mqtt.statusUpdateSchema).valid) {
-        //     console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
-        //     return;
-        // }
+        let entity_type = args[0];
+        if (entity_type in state_schemata && args[2] == "state") {
 
-        // Forward message to Orchestrator
-        headers = { 
+                //find corresponding state SCHEMA
+                let status_schema = state_schemata[entity_type]
+
+                if (!schemaValidator.validate(message, schemas.mqtt[status_schema]).valid) {
+                    console.warn(`> (connector) Invalid entity state update received from MQTT broker: ${JSON.stringify(message)}`);
+                    return;
+                }
+        }
+
+        if (args[0] != "parcel" || args[2] != "status") { // TODO parcel/+/state (unsere topic - sim) or parcel/+/status (von bridging-it?)
+            // stop if message is not parcel state, only these are forwarded to the orchestrator
+            console.info(`> (connector) No forwarding since message has topic other than parcel/+/status: ${topic}, message: ${JSON.stringify(message)}`);
+            return;
+        }
+
+        // Forward message to Orchestrator -> topic is ".../parcel/+/state
+        let headers = {
             'Ocp-Apim-Subscription-Key': orchestrator.subscriptionKey 
         };
         
-        body = {
+        let body = {
             boxId: message.id,
             transportId: message.orderId,
             location: { platformId: message.carrier },
@@ -157,15 +180,15 @@ mqttClient.on('message', async (topic, message) => {
         }
 
         if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
-            console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+            console.warn(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
             return;
         }
 
-        result = await axios.post(orchestrator.url, body, { headers });
+        let result = await axios.post(orchestrator.url, body, { headers });
         console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}.`);
     }
     catch (err) {
-        console.log(`  (connector) Could not forward message ${JSON.stringify(body)} from MQTT to Orchestrator: ${err}!`);
+        console.log(`  (connector) Could not forward message ${JSON.stringify(message)} from MQTT to Orchestrator: ${err}!`);
         // console.log(`  (connector) Could not forward ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}: ${err}!`);
     }
 });

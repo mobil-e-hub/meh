@@ -1,19 +1,18 @@
-{
-  "$id": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/schemas/mqtt/DroneState.json",
+module.exports = {
+  "$id": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/schemas/mqtt/EntityState.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "DroneState",
-  "description": "JSON Schema for state update messages from the entities of type drone. ",
+  "title": "EntityState",
+  "description": "Example / Dummy JSON Schema for state update messages from the entities.",
   "required": ["id", "position", "speed", "parcel", "state"],
   "type": "object",
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique identifier of the entity."
+      "description": "Unique identifier of the box."
     },
     "position": {
       "type": "object",
-      "description": "The current location in the format {'lat': xx, 'lon': xx, 'alt': xx}",
-
+      "description": "The current location in the format {'lat': xx, 'lon': xx, 'alt': xx}"
     },
     "speed": {
       "type": "number",
