@@ -1,9 +1,6 @@
 // External modules
 const express = require('express');
 const cors = require('cors');
-const _ = require('lodash');
-const morgan = require('morgan');
-const mqttMatch = require('mqtt-match');
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
 const { Validator, ValidationError } = require('express-json-validator-middleware');
@@ -167,7 +164,7 @@ mqttClient.on('message', async (topic, message) => {
             return;
         }
 
-        // Forward message to Orchestrator -> topic is ".../parcel/+/state
+        // Forward message to Orchestrator
         let headers = {
             'Ocp-Apim-Subscription-Key': orchestrator.subscriptionKey 
         };
