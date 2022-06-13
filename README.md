@@ -237,8 +237,6 @@ Since parcels do not have their own MQTT client, the entity which currently carr
 
 ### TODOs
 
-d4c84cbb-4a3b-41f7-9079-5bf678198336
-
 ce276a8e-8e0d-4286-95b5-1b7ff37414f4
 
 39dd362a-cff1-4105-b961-4ad187fc1656
@@ -304,291 +302,322 @@ In production, nodes and egdes will also have UUIDs!
 ```
 
 ### Communication
-#### Parcel Placement (sent from Orchestrator)
-##### meh/v1/order/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed
-```
+#### Order Placement (sent from Orchestrator)
+As soon as a customer completes an order in the shop system, the shop notifies the orchestrator which then sends an orderPlaced message:
+##### HTTP call from Orchestrator to MQTT Connector
+`POST https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector`
+```json
 {
-  'id': '1922193319441955',
-  'carrier': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
-  'destination': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' }
+    "boxId": "1922193319441955",
+    "transportId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+    "partnerId": "d4c84cbb-4a3b-41f7-9079-5bf678198336",
+    "timestamp": "2022-01-27T19:00:00Z",
+    "startLocation": {
+        "platformId": "aef6d0fd-d150-4435-9c73-3b3339b77582"
+    },
+    "destinationLocation": {
+        "platformId": "aef6d0fd-d150-4435-9c73-3b3339b77582"
+    }
 }
 ```
 
+This message is converted into an MQTT message and sent to the broker:
+##### MQTT message from MQTT Connector 
+`meh/v1/order/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed`
+```json
+{
+    "id": "1922193319441955",
+    "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+    "carrier": null,
+    "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
+}
+```
+This means that the order is in the system, and we're now waiting for the corresponding box to be placed in a hub.
+
+As soon as the hub detects a box, it sends a message:
+#### Parcel Placement (sent from Hub)
+`meh/v1/parcel/1922193319441955/placed` (no content)
+
+The optimization engine receives this message, looks up the box ID in the list of orders and creates missions:
 #### Missions (sent from Optimization Engine)
-##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission
-```
+##### Hub mission
+`meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission`
+```json
 {
-  'id': '209ce34a-8187-4cf6-b22c-5f0a8cff9c0f',
-  'tasks': [
+  "id": "209ce34a-8187-4cf6-b22c-5f0a8cff9c0f",
+  "tasks": [
     { 
-      'type': 'dropoff', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': '646068b9-7814-4e08-a05e-752581b374a6',
-        'from': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
-        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'parcel': '1922193319441955'
+      "type": "dropoff", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "646068b9-7814-4e08-a05e-752581b374a6",
+        "from": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "parcel": "1922193319441955"
       }
     },
     { 
-      'type': 'pickup', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': '54e08383-2fff-485b-b7d8-f4b444383d89',
-        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'to': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
-        'parcel': '1922193319441955'
+      "type": "pickup", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "54e08383-2fff-485b-b7d8-f4b444383d89",
+        "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "to": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "parcel": "1922193319441955"
       }
     }
   ]
 }
 ```
 
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/mission
-```
+##### Drone mission
+`meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/mission`
+```json
 {
-  'id': '2dc1eda2-2c81-4ea3-b187-a19a3d6d0aa1',
-  'tasks': [
+  "id": "2dc1eda2-2c81-4ea3-b187-a19a3d6d0aa1",
+  "tasks": [
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 0.0, 'long': 0.0, 'alt': 0.0 },
-      'minimumDuration': 10
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 0.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
     },
     { 
-      'type': 'pickup', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': '646068b9-7814-4e08-a05e-752581b374a6',
-        'from': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
-        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'parcel': '1922193319441955'
+      "type": "pickup", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "646068b9-7814-4e08-a05e-752581b374a6",
+        "from": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "parcel": "1922193319441955"
       }
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 },
-      'minimumDuration': 10
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 1.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
     },
     { 
-      'type': 'dropoff', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': 'e786533c-9b72-4dfe-81ed-f1a80f2ed42e',
-        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'to': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
-        'parcel': '1922193319441955'
+      "type": "dropoff", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "e786533c-9b72-4dfe-81ed-f1a80f2ed42e",
+        "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "to": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+        "parcel": "1922193319441955"
       }
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 1.0, 'long': 1.0, 'alt': 0.0 },
-      'minimumDuration': 10
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 1.0, "long": 1.0, "alt": 0.0 },
+      "minimumDuration": 10
     },
     { 
-      'type': 'pickup', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': 'e474e964-d5f1-4e73-b256-6e59eb4bda78',
-        'from': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
-        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'parcel': '1922193319441955'
+      "type": "pickup", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "e474e964-d5f1-4e73-b256-6e59eb4bda78",
+        "from": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+        "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "parcel": "1922193319441955"
       }
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 },
-      'minimumDuration': 10
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 1.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 0.0, 'long': 0.0, 'alt': 0.0 },
-      'minimumDuration': 10
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 0.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
     },
     { 
-      'type': 'dropoff', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': '54e08383-2fff-485b-b7d8-f4b444383d89',
-        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'to': { 'type': 'hub, 'id': 'aef6d0fd-d150-4435-9c73-3b3339b77582' },
-        'parcel': '1922193319441955'
+      "type": "dropoff", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "54e08383-2fff-485b-b7d8-f4b444383d89",
+        "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "to": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "parcel": "1922193319441955"
       }
     }
   ]
 }
 ```
 
-##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/mission
-```
+##### Car mission
+`meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/mission`
+```json
 {
-  'id': 'fc0adcef-a123-417b-b61c-0a99f4789aee',
-  'tasks': [
+  "id": "fc0adcef-a123-417b-b61c-0a99f4789aee",
+  "tasks": [
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 1.0, 'long': 0.0, 'alt': 0.0 },
-      'minimumDuration': 10
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 1.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
     },
     { 
-      'type': 'pickup', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': 'e786533c-9b72-4dfe-81ed-f1a80f2ed42e',
-        'from': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'to': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
-        'parcel': '1922193319441955'
+      "type": "pickup", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "e786533c-9b72-4dfe-81ed-f1a80f2ed42e",
+        "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "to": { "type": "car, "id"": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+        "parcel": "1922193319441955"
       }
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 2.0, 'long': 0.0, 'alt': 0.0 },
-      'minimumDuration': 3
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 2.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 3
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 2.0, 'long': 1.0, 'alt': 0.0 },
-      'minimumDuration': 3
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 2.0, "long": 1.0, "alt": 0.0 },
+      "minimumDuration": 3
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 2.0, 'long': 0.0, 'alt': 0.0 },
-      'minimumDuration': 3
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 2.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 3
     },
     { 
-      'type': 'dropoff', 
-      'state': 'TaskState.notStarted',
-      'transaction': {
-        'id': 'e474e964-d5f1-4e73-b256-6e59eb4bda78',
-        'from': { 'type': 'car, 'id': '3406a877-6f20-4d27-bac5-08b62a44326a' },
-        'to': { 'type': 'drone, 'id': '52715405-c8a0-4f53-8fb5-ffd54696200c' },
-        'parcel': '1922193319441955'
+      "type": "dropoff", 
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "e474e964-d5f1-4e73-b256-6e59eb4bda78",
+        "from": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+        "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "parcel": "1922193319441955"
       }
     },
     {
-      'type': 'move',
-      'state': 'TaskState.notStarted',
-      'destination': { 'lat': 2.0, 'long': 1.0, 'alt': 0.0 },
-      'minimumDuration': 0
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 2.0, "long": 1.0, "alt": 0.0 },
+      "minimumDuration": 0
     }
   ]
 }
 ```
 
 #### Entity State Updates (sent from respective entities)
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/state
-```
+##### Drone state update
+`meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/state`
+```json
 {
-  ...
+  "id": "52715405-c8a0-4f53-8fb5-ffd54696200c",
+  "position": {
+    "lat": 1.0,
+    "lon": 0.0,
+    "alt": 0.0
+  },
+  "speed": 10,
+  "parcel": null,
+  "state": "0"
 }
 ```
+These messages are sent continuously while the drone moves.
 
-##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/state
-```
+##### Car state update 
+`meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/state`
+```json
 {
-  ...
+  "id": "3406a877-6f20-4d27-bac5-08b62a44326a",
+  "position": {
+    "lat": 2.0,
+    "lon": 0.0,
+    "alt": 0.0
+  },
+  "speed": 10,
+  "parcel": null,
+  "capacity": 1, 
+  "state": "0"
 }
 ```
+These messages are sent continuously while the car moves.
 
 #### First Transaction (from hub to drone)
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/ready
-```
-{
-  ...
-}
-```
+- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/ready` (no content)
+- `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/646068b9-7814-4e08-a05e-752581b374a6/execute` (no content)
+- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/complete` (no content)
 
-##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/646068b9-7814-4e08-a05e-752581b374a6/execute
-```
+After the transaction is complete, the receiving entity (drone) updates the `carrier` property of the parcel and sends a parcelTransfer message:
+`meh/v1/parcel/1922193319441955/transfer`
+```json
 {
-  ...
+  "id": "1922193319441955",
+  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "carrier": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+  "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
 ```
-
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/complete
-```
-{
-  ...
-}
-```
+Moreover, the drone checks if the current carrier of the parcel is the same as its destination. If so, it sends a parcelDelivered message (see below).
 
 #### Second Transaction (from drone to car)
-##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/ready
-```
-{
-  ...
-}
-```
+- `meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/ready` (no content)
+- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/execute` (no content)
+- `meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/complete` (no content)
 
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/execute
-```
+After the transaction is complete, the receiving entity (car) updates the `carrier` property of the parcel and sends a parcelTransfer message:
+`meh/v1/parcel/1922193319441955/transfer`
+```json
 {
-  ...
-}
-```
-
-##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/complete
-```
-{
-  ...
+  "id": "1922193319441955",
+  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "carrier": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+  "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
 ```
 
 #### Third Transaction (from car to drone)
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/ready
-```
-{
-  ...
-}
-```
+- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/ready` (no content)
+- `meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/execute` (no content)
+- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/complete` (no content)
 
-##### meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/execute
-```
+After the transaction is complete, the receiving entity (drone) updates the `carrier` property of the parcel and sends a parcelTransfer message:
+`meh/v1/parcel/1922193319441955/transfer`
+```json
 {
-  ...
-}
-```
-
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/complete
-```
-{
-  ...
+  "id": "1922193319441955",
+  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "carrier": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+  "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
 ```
 
 #### Fourth Transaction (from drone to hub)
-##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/ready
-```
+- `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/ready` (no content)
+- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/execute` (no content)
+- `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/complete` (no content)
+
+After the transaction is complete, the receiving entity (hub) updates the `carrier` property of the parcel and sends a parcelTransfer message:
+`meh/v1/parcel/1922193319441955/transfer`
+```json
 {
-  ...
+  "id": "1922193319441955",
+  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "carrier": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+  "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
 ```
 
-##### meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/execute
-```
+Afterwards, the hub checks if the current carrier of the parcel is the same as its destination. If so, it sends a parcelDelivered message:
+`meh/v1/parcel/1922193319441955/delivered`
+```json
 {
-  ...
-}
-```
-
-##### meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/complete
-```
-{
-  ...
-}
-```
-
-#### Delivery Confirmation (sent from hub)
-##### meh/v1/parcel/1922193319441955/delivered
-```
-{
-  ...
+  "id": "1922193319441955",
+  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "carrier": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+  "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
 ```

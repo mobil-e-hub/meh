@@ -31,6 +31,9 @@ const version = process.env.VERSION || 'v1';
 // JSON schema validation
 const { validate } = new Validator();
 const schemas = {
+    mqtt: {
+        parcelSchema: require('./schemas/mqtt/parcelState.json')
+    },
     orchestrator: {
         orderPlacedSchema: require("./schemas/orchestrator/orderPlacedSchema"),
         statusUpdateSchema: require("./schemas/orchestrator/statusUpdateSchema")
@@ -109,22 +112,29 @@ app.get('/ping', (req, res) => {
 // TODO: - move async to function?
 //      - where exactly to place next() calls?
 //      - split into seperate files -> Error handling ()
-//       - move schema out of src folder
 
 // Receive events from Orchestrator and forward them to MQTT broker
 // The only valid event received from Orchestrator is an order/placed event -> validate immediately
 app.post('/', validate({body: schemas.orchestrator.orderPlacedSchema}), async (req, res, next) => {
     try {
-        const message = req.body;
-        const topic = `${root}/${version}/order/${message.transportId}/placed`;
+        const topic = `${root}/${version}/order/${req.body.transportId}/placed`;
+        const message = {
+            id: req.body.boxId,
+            orderId: req.body.transportId,
+            carrier: null,
+            destination: {
+                type: 'hub',
+                id: req.body.destinationLocation.platformId
+            }
+        }
 
         mqttClient.publish(topic, JSON.stringify(message));
-    
+
         console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from Orchestrator to MQTT`);
 
         // There's no need to return anything except status 200. Return json just for human readability (e.g., from Postman))
         res.status(200).json({ success: true, message: `Message forwarded to MQTT with topic ${topic}.` });
-    } 
+    }
     catch (error) {
         console.log(`> (connector) Invalid message received: ${JSON.stringify({ body: req.body, error })}`);
         return res.status(400).end();
@@ -138,34 +148,39 @@ mqttClient.on('message', async (topic, message) => {
         topic = args.join('/');
         message = JSON.parse(message.toString());
 
-        // TODO: Validate message format against schema
-        // if (!schemaValidator.validate(message, schemas.mqtt.statusUpdateSchema).valid) {
-        //     console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
-        //     return;
-        // }
+        const body = null;
+
+        if (mqttMatch('parcel/+/delivered', topic.string)) {
+            // Convert into statusUpdate format
+            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+                const body = {
+                    boxId: message.id,
+                    transportId: message.orderId,
+                    location: { platformId: message.carrier.id },
+                    state: ''
+                }
+
+                if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
+                    console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+                    return;
+                }
+            }
+            else {
+                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+                return;
+            }
+        }
+        else if (false) {
+            // TODO: add other messages for forwarding to the Orchestrator
+        }
+
 
         // Forward message to Orchestrator
-        headers = { 
-            'Ocp-Apim-Subscription-Key': orchestrator.subscriptionKey 
-        };
-        
-        body = {
-            boxId: message.id,
-            transportId: message.orderId,
-            location: { platformId: message.carrier },
-            state: message.state
-        }
-
-        if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
-            console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
-            return;
-        }
-
-        result = await axios.post(orchestrator.url, body, { headers });
+        const result = await axios.post(orchestrator.url, body, { headers: { 'Ocp-Apim-Subscription-Key': orchestrator.subscriptionKey } });
         console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}.`);
     }
     catch (err) {
-        console.log(`  (connector) Could not forward message ${JSON.stringify(body)} from MQTT to Orchestrator: ${err}!`);
-        // console.log(`  (connector) Could not forward ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}: ${err}!`);
+        // console.log(`  (connector) Could not forward message ${JSON.stringify(body)} from MQTT to Orchestrator: ${err}!`);
+        console.log(`  (connector) Could not forward ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator: ${err}!`);
     }
 });

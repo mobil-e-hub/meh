@@ -3,11 +3,21 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ParcelState",
   "description": "JSON Schema for state update messages from the entities of type parcel (sent by the carrying entity). ",
-  "required": ["id", "carrier", "destination"],
+  "required": [
+    "id",
+    "orderId",
+    "carrier",
+    "destination"
+  ],
   "type": "object",
   "properties": {
     "id": {
       "type": "string",
+      "description": "Unique identifier of the parcel."
+    },
+    "orderId": {
+      "type": "string",
+      "format": "uuid",
       "description": "Unique identifier of the parcel."
     },
     "carrier": {
@@ -16,6 +26,7 @@
       "properties": {
         "id": {
           "type": "string",
+          "format": "uuid",
           "description": "Unique identifier of the carrier entity."
         },
         "type": {
@@ -30,6 +41,7 @@
       "properties": {
         "id": {
           "type": "string",
+          "format": "uuid",
           "description": "Unique identifier of the carrier entity."
         },
         "type": {
