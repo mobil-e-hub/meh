@@ -3,8 +3,8 @@ module.exports = {
     "description": "JSON Schema for order placed messages. ",
     "type": "object",
     "properties": {
-        "boxId": {"type": "string", "pattern": "^\\d{18}$"},
-        "transportId": {"type": "string", "format": "uuid"},
+        "boxId": {"type": "string", "format": "uuid"},
+        "transportId": {"type": "string", "pattern": "^\\d{18}$"},
         "partnerId": {"type": "string", "format": "uuid"},
         "timestamp": {"type": "string", "format": "date-time"},
         "startLocation": {

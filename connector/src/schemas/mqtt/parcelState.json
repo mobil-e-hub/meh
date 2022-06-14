@@ -17,8 +17,8 @@
     },
     "orderId": {
       "type": "string",
-      "format": "uuid",
-      "description": "Unique identifier of the parcel."
+      "pattern": "^\\d{18}$",
+      "description": "Unique identifier of the order."
     },
     "carrier": {
       "type": "object",
@@ -31,6 +31,7 @@
         },
         "type": {
           "type": "string",
+          "enum": ["hub", "drone", "car"],
           "description": "The entity type of the carrier"
         }
       }
@@ -46,6 +47,7 @@
         },
         "type": {
           "type": "string",
+          "enum": ["hub", "drone", "car"],
           "description": "The entity type of the carrier"
         }
       }

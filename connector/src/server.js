@@ -150,14 +150,94 @@ mqttClient.on('message', async (topic, message) => {
 
         const body = null;
 
-        if (mqttMatch('parcel/+/delivered', topic.string)) {
+        if (mqttMatch('parcel/+/placed', topic)) {
+            // Convert into statusUpdate format
+            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+                const body = {
+                    boxId: message.id,
+                    transportId: "123456789123456789", // TODO: How do we get the transportId here? The hub where the box is placed does not know anything about the transport...
+                    location: { platformId: message.carrier.id },
+                    state: 'WaitingForTransport'
+                }
+
+                if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
+                    console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+                    return;
+                }
+            }
+            else {
+                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+                return;
+            }
+        }
+        else if (mqttMatch('parcel/+/transfer', topic)) {
             // Convert into statusUpdate format
             if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
                 const body = {
                     boxId: message.id,
                     transportId: message.orderId,
                     location: { platformId: message.carrier.id },
-                    state: ''
+                    state: message.carrier.type === 'drone' ? 'InTransportInAir' : (message.carrier.type === 'car' ? 'InTransport' : 'WaitingForTransport')
+                }
+
+                if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
+                    console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+                    return;
+                }
+            }
+            else {
+                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+                return;
+            }
+        }
+        else if (mqttMatch('parcel/+/delivered', topic)) {
+            // Convert into statusUpdate format
+            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+                const body = {
+                    boxId: message.id,
+                    transportId: message.orderId,
+                    location: { platformId: message.carrier.id },
+                    state: 'Delivered'
+                }
+
+                if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
+                    console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+                    return;
+                }
+            }
+            else {
+                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+                return;
+            }
+        }
+        else if (mqttMatch('parcel/+/collected', topic)) {
+            // Convert into statusUpdate format
+            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+                const body = {
+                    boxId: message.id,
+                    transportId: message.orderId,
+                    location: { platformId: message.carrier.id },
+                    state: 'Completed'
+                }
+
+                if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
+                    console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+                    return;
+                }
+            }
+            else {
+                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+                return;
+            }
+        }
+        else if (mqttMatch('parcel/+/removed', topic)) {
+            // Convert into statusUpdate format
+            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+                const body = {
+                    boxId: message.id,
+                    transportId: message.orderId,
+                    location: { platformId: message.carrier.id },
+                    state: 'Failed'
                 }
 
                 if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {

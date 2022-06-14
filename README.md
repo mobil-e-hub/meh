@@ -255,7 +255,7 @@ The Parcel is manually placed on the Hub, then picked up by the Drone and droppe
 - Hub `aef6d0fd-d150-4435-9c73-3b3339b77582`, placed at node `n00`
 - Drone `52715405-c8a0-4f53-8fb5-ffd54696200c`, starting at (0.5, 0, 0)
 - Car `3406a877-6f20-4d27-bac5-08b62a44326a`, starting at node (1.5, 0, 0)
-- Parcel `1922193319441955`, to be placed at the hub
+- Parcel `a64bcadb-6967-4407-ba06-8abf2182a1d0`, to be placed at the hub
 
 #### Illustration
 ![meh-scenario-1 drawio (1)](https://user-images.githubusercontent.com/71136528/172798485-28dc5ee6-1548-4608-98ce-282d7fbb2f9d.png)
@@ -308,8 +308,8 @@ As soon as a customer completes an order in the shop system, the shop notifies t
 `POST https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector`
 ```json
 {
-    "boxId": "1922193319441955",
-    "transportId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+    "boxId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+    "transportId": "1922193319441955",
     "partnerId": "d4c84cbb-4a3b-41f7-9079-5bf678198336",
     "timestamp": "2022-01-27T19:00:00Z",
     "startLocation": {
@@ -323,11 +323,11 @@ As soon as a customer completes an order in the shop system, the shop notifies t
 
 This message is converted into an MQTT message and sent to the broker:
 ##### MQTT message from MQTT Connector 
-`meh/v1/order/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed`
+`meh/v1/order/1922193319441955/placed`
 ```json
 {
-    "id": "1922193319441955",
-    "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+    "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+    "orderId": "1922193319441955",
     "carrier": null,
     "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
@@ -336,9 +336,21 @@ This means that the order is in the system, and we're now waiting for the corres
 
 As soon as the hub detects a box, it sends a message:
 #### Parcel Placement (sent from Hub)
-`meh/v1/parcel/1922193319441955/placed` (no content)
+`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed` (no content)
 
-The optimization engine receives this message, looks up the box ID in the list of orders and creates missions:
+This message is converted by the connector into an HTTP message for the orchestrator
+
+`POST orchstreator.url`
+```json
+{
+  "boxId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "transportId": "123456789123456789",
+  "location": { "platformId": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+  "state": "WaitingForTransport"
+}
+```
+
+The optimization engine receives the parcelPlaced message, looks up the box ID in the list of orders and creates missions:
 #### Missions (sent from Optimization Engine)
 ##### Hub mission
 `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission`
@@ -353,7 +365,7 @@ The optimization engine receives this message, looks up the box ID in the list o
         "id": "646068b9-7814-4e08-a05e-752581b374a6",
         "from": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
         "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
-        "parcel": "1922193319441955"
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     },
     { 
@@ -363,7 +375,7 @@ The optimization engine receives this message, looks up the box ID in the list o
         "id": "54e08383-2fff-485b-b7d8-f4b444383d89",
         "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
         "to": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
-        "parcel": "1922193319441955"
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     }
   ]
@@ -389,7 +401,7 @@ The optimization engine receives this message, looks up the box ID in the list o
         "id": "646068b9-7814-4e08-a05e-752581b374a6",
         "from": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
         "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
-        "parcel": "1922193319441955"
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     },
     {
@@ -405,7 +417,7 @@ The optimization engine receives this message, looks up the box ID in the list o
         "id": "e786533c-9b72-4dfe-81ed-f1a80f2ed42e",
         "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
         "to": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
-        "parcel": "1922193319441955"
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     },
     {
@@ -421,7 +433,7 @@ The optimization engine receives this message, looks up the box ID in the list o
         "id": "e474e964-d5f1-4e73-b256-6e59eb4bda78",
         "from": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
         "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
-        "parcel": "1922193319441955"
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     },
     {
@@ -443,7 +455,7 @@ The optimization engine receives this message, looks up the box ID in the list o
         "id": "54e08383-2fff-485b-b7d8-f4b444383d89",
         "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
         "to": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
-        "parcel": "1922193319441955"
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     }
   ]
@@ -468,8 +480,8 @@ The optimization engine receives this message, looks up the box ID in the list o
       "transaction": {
         "id": "e786533c-9b72-4dfe-81ed-f1a80f2ed42e",
         "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
-        "to": { "type": "car, "id"": "3406a877-6f20-4d27-bac5-08b62a44326a" },
-        "parcel": "1922193319441955"
+        "to": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     },
     {
@@ -497,7 +509,7 @@ The optimization engine receives this message, looks up the box ID in the list o
         "id": "e474e964-d5f1-4e73-b256-6e59eb4bda78",
         "from": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
         "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
-        "parcel": "1922193319441955"
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
       }
     },
     {
@@ -552,15 +564,28 @@ These messages are sent continuously while the car moves.
 - `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/complete` (no content)
 
 After the transaction is complete, the receiving entity (drone) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/1922193319441955/transfer`
+`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
-  "id": "1922193319441955",
-  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "orderId": "1922193319441955",
   "carrier": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
   "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
 ```
+
+This message is converted by the connector into an HTTP message for the orchestrator
+
+`POST orchstreator.url`
+```json
+{
+  "boxId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "transportId": "1922193319441955",
+  "location": { "platformId": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+  "state": "InTransportInAir"
+}
+```
+
 Moreover, the drone checks if the current carrier of the parcel is the same as its destination. If so, it sends a parcelDelivered message (see below).
 
 #### Second Transaction (from drone to car)
@@ -569,13 +594,25 @@ Moreover, the drone checks if the current carrier of the parcel is the same as i
 - `meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/complete` (no content)
 
 After the transaction is complete, the receiving entity (car) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/1922193319441955/transfer`
+`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
-  "id": "1922193319441955",
-  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "orderId": "1922193319441955",
   "carrier": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
   "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
+}
+```
+
+This message is converted by the connector into an HTTP message for the orchestrator
+
+`POST orchstreator.url`
+```json
+{
+  "boxId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "transportId": "1922193319441955",
+  "location": { "platformId": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+  "state": "InTransport"
 }
 ```
 
@@ -585,13 +622,25 @@ After the transaction is complete, the receiving entity (car) updates the `carri
 - `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/complete` (no content)
 
 After the transaction is complete, the receiving entity (drone) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/1922193319441955/transfer`
+`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
-  "id": "1922193319441955",
-  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "orderId": "1922193319441955",
   "carrier": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
   "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
+}
+```
+
+This message is converted by the connector into an HTTP message for the orchestrator
+
+`POST orchstreator.url`
+```json
+{
+  "boxId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "transportId": "1922193319441955",
+  "location": { "platformId": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+  "state": "InTransportInAir"
 }
 ```
 
@@ -601,23 +650,59 @@ After the transaction is complete, the receiving entity (drone) updates the `car
 - `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/complete` (no content)
 
 After the transaction is complete, the receiving entity (hub) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/1922193319441955/transfer`
+`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
-  "id": "1922193319441955",
-  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "orderId": "1922193319441955",
   "carrier": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
   "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
 }
 ```
 
 Afterwards, the hub checks if the current carrier of the parcel is the same as its destination. If so, it sends a parcelDelivered message:
-`meh/v1/parcel/1922193319441955/delivered`
+`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/delivered`
 ```json
 {
-  "id": "1922193319441955",
-  "orderId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "orderId": "1922193319441955",
   "carrier": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
   "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
+}
+```
+
+This message is converted by the connector into an HTTP message for the orchestrator
+
+`POST orchstreator.url`
+```json
+{
+  "boxId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "transportId": "1922193319441955",
+  "location": { "platformId": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+  "state": "Delivered"
+}
+```
+
+#### Pick-up from the hub
+When the customer picks the parcel up at the hub (i.e., physically removes the parcel from the hub), the hub sends a parcelCollected message:
+`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/collected`
+```json
+{
+  "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "orderId": "1922193319441955",
+  "carrier": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+  "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
+}
+```
+
+This message is converted by the connector into an HTTP message for the orchestrator
+
+`POST orchstreator.url`
+```json
+{
+  "boxId": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+  "transportId": "1922193319441955",
+  "location": { "platformId": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+  "state": "Completed"
 }
 ```
