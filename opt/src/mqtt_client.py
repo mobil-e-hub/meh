@@ -32,20 +32,21 @@ class MQTTClient:
 
         self.subscriptions = {f"mobil-e-hub/{self.version}/#"}
         self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
-
         self.topic = "opt"
 
         self.client = mqtt.Client(self.client_name, transport='websockets')
-        self.client.ws_set_options(path=self.MQTT_PATH)
-        self.client.tls_set()
 
-        self.client.username_pw_set(username=self.MQTT_USERNAME, password=self.MQTT_PASSWORD)
+        if self.MQTT_BROKER.startswith('ines'):
+            self.client.ws_set_options(path=self.MQTT_PATH)  # only needed to specify path to INES broker
+
+            # only use TLS if INES Broker is used!
+            self.client.tls_set()
+            self.client.username_pw_set(username=self.MQTT_USERNAME, password=self.MQTT_PASSWORD)
+
         logger = logging.getLogger(__name__)
         self.client.enable_logger(logger)
-
         self.client.on_connect = self.on_connect
         self.client.on_disconnect = self.on_disconnect
-
         # Register a default message handler
         self.client.on_message = self.on_message
 
