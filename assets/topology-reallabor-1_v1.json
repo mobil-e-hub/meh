@@ -6,7 +6,7 @@
         "position": {
           "lat": 49.40279,
           "long": 8.68937,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "air",
         "description": "kh-hub"
@@ -16,7 +16,7 @@
         "position": {
           "lat": 49.40297,
           "long": 8.68862,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "air",
         "description": "kh-drone-shuttle"
@@ -26,7 +26,7 @@
         "position": {
           "lat": 49.40315,
           "long": 8.68892,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "parking",
         "description": "kh-shuttle"
@@ -36,7 +36,7 @@
         "position": {
           "lat": 49.40298,
           "long": 8.68932,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "air",
         "description": "kh-drone-shuttle-alt"
@@ -46,7 +46,7 @@
         "position": {
           "lat": 49.36217,
           "long": 8.68606,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "air",
         "description": "lab-drone-shuttle"
@@ -56,7 +56,7 @@
         "position": {
           "lat": 49.36221,
           "long": 8.68565,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "parking",
         "description": "lab-shuttle"
@@ -66,7 +66,7 @@
         "position": {
           "lat": 49.36229,
           "long": 8.68662,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "air",
         "description": "lab-hub"
@@ -76,7 +76,7 @@
         "position": {
           "lat": 49.36217,
           "long": 8.68627,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "type": "air",
         "description": "lab-drone-shuttle-alt"
@@ -88,175 +88,175 @@
         "from": "n00",
         "to": "n01",
         "type": "air",
-        "distance": 10
+        "distance": 58.0
       },
       "e01": {
         "id": "e01",
         "from": "n00",
         "to": "n02",
         "type": "air",
-        "distance": 10
+        "distance": 51.67
       },
       "e02": {
         "id": "e02",
         "from": "n00",
         "to": "n03",
         "type": "air",
-        "distance": 10
+        "distance": 21.44
       },
       "e03": {
         "id": "e03",
         "from": "n01",
         "to": "n00",
         "type": "air",
-        "distance": 10
+        "distance": 58.0
       },
       "e04": {
         "id": "e04",
         "from": "n01",
         "to": "n02",
         "type": "air",
-        "distance": 10
+        "distance": 29.58
       },
       "e05": {
         "id": "e05",
         "from": "n01",
         "to": "n03",
         "type": "air",
-        "distance": 10
+        "distance": 50.82
       },
       "e06": {
         "id": "e06",
         "from": "n02",
         "to": "n00",
         "type": "air",
-        "distance": 10
+        "distance": 51.67
       },
       "e07": {
         "id": "e07",
         "from": "n02",
         "to": "n01",
         "type": "air",
-        "distance": 10
+        "distance": 29.58
       },
       "e08": {
         "id": "e08",
         "from": "n02",
         "to": "n03",
         "type": "air",
-        "distance": 10
+        "distance": 34.65
       },
       "e09": {
         "id": "e09",
         "from": "n03",
         "to": "n00",
         "type": "air",
-        "distance": 10
+        "distance": 21.44
       },
       "e10": {
         "id": "e10",
         "from": "n03",
         "to": "n01",
         "type": "air",
-        "distance": 10
+        "distance": 50.82
       },
       "e11": {
         "id": "e11",
         "from": "n03",
         "to": "n02",
         "type": "air",
-        "distance": 10
+        "distance": 34.65
       },
       "e12": {
         "id": "e12",
         "from": "n02",
         "to": "n05",
         "type": "road",
-        "distance": 1000
+        "distance": 5453.8
       },
       "e13": {
         "id": "e13",
         "from": "n04",
         "to": "n05",
         "type": "air",
-        "distance": 10
+        "distance": 30.11
       },
       "e14": {
         "id": "e14",
         "from": "n04",
         "to": "n06",
         "type": "air",
-        "distance": 10
+        "distance": 42.81
       },
       "e15": {
         "id": "e15",
         "from": "n04",
         "to": "n07",
         "type": "air",
-        "distance": 10
+        "distance": 15.25
       },
       "e16": {
         "id": "e16",
         "from": "n05",
         "to": "n04",
         "type": "air",
-        "distance": 10
+        "distance": 30.11
       },
       "e17": {
         "id": "e17",
         "from": "n05",
         "to": "n06",
         "type": "air",
-        "distance": 10
+        "distance": 71.02
       },
       "e18": {
         "id": "e18",
         "from": "n05",
         "to": "n07",
         "type": "air",
-        "distance": 10
+        "distance": 45.26
       },
       "e19": {
         "id": "e19",
         "from": "n06",
         "to": "n04",
         "type": "air",
-        "distance": 10
+        "distance": 42.81
       },
       "e20": {
         "id": "e20",
         "from": "n06",
         "to": "n05",
         "type": "air",
-        "distance": 10
+        "distance": 71.02
       },
       "e21": {
         "id": "e21",
         "from": "n06",
         "to": "n07",
         "type": "air",
-        "distance": 10
+        "distance": 28.71
       },
       "e22": {
         "id": "e22",
         "from": "n07",
         "to": "n04",
         "type": "air",
-        "distance": 10
+        "distance": 15.25
       },
       "e23": {
         "id": "e23",
         "from": "n07",
         "to": "n05",
         "type": "air",
-        "distance": 10
+        "distance": 45.26
       },
       "e24": {
         "id": "e24",
         "from": "n07",
         "to": "n06",
         "type": "air",
-        "distance": 10
+        "distance": 28.71
       }
     },
     "addresses": {
@@ -265,16 +265,16 @@
         "position": {
           "lat": 49.40226,
           "long": 8.68848,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "name": "Landhausstr. 25, 69115 Heidelberg"
       },
       "a01": {
         "id": "a01",
         "position": {
-          "lat": 49.36260,
+          "lat": 49.3626,
           "long": 8.68672,
-          "alt": 0.00000
+          "alt": 0.0
         },
         "name": "Im Breitspiel 16, 69126 Heidelberg"
       }
@@ -309,7 +309,7 @@
         "position": {
           "lat": 49.40279,
           "long": 8.68937,
-          "alt": 0.00000
+          "alt": 0.0
         }
       },
       "d01": {
@@ -317,7 +317,7 @@
         "position": {
           "lat": 49.36229,
           "long": 8.68662,
-          "alt": 0.00000
+          "alt": 0.0
         }
       }
     },

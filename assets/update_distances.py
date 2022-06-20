@@ -3,8 +3,8 @@ from openrouteservice import client
 import json
 import logging
 
-""" 
-Python Script that reads a given JSON meh-topology , retrieves the nodes and their coordinates 
+"""
+Python Script that reads a given JSON meh-topology , retrieves the nodes and their coordinates
 and updates the edge lengths with the real distance in meters in JSON file.
 - For road edges: query ORS => https://openrouteservice.org/services/
 - For air edges: calculate beeline (geodesic) distance using the geopy library
@@ -16,7 +16,7 @@ and updates the edge lengths with the real distance in meters in JSON file.
 """
 
 ##### Parameters
-file_path = "topology_reallabor_1_v1.json"
+file_path = "topology-reallabor-1_v1.json"
 ors_key = "5b3ce3597851110001cf624873c91b921870496a8a06924ca3131d14"
 decimal_places = 2  # number of digits after decimal point for rounding of computed distance value (in meter)
 log_level = logging.INFO
