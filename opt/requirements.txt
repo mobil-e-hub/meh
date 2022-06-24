@@ -3,4 +3,6 @@ flask==1.1.2
 python-dotenv==0.17.0
 paho-mqtt==1.5.1
 networkx==2.5.1
-
+jinja2==3.0.3
+itsdangerous==2.0.1
+werkzeug==2.0.3
