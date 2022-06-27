@@ -37,7 +37,7 @@ class MQTTClient:
 
         if self.MQTT_BROKER.startswith('ines'):
             self.MQTT_PATH = os.environ.get("MQTT_BROKER_PATH_INES")
-            logging.debug(f" > {self.logging_name}: INES MQTT broker selected, use  TLS and path: {self.MQTT_PATH}")
+            logging.debug(f" > opt_engine: INES MQTT broker selected, use  TLS and path: {self.MQTT_PATH}")
             self.client.ws_set_options(path=self.MQTT_PATH)  # only needed to specify path to INES broker
 
             # only use TLS if INES Broker is used!
