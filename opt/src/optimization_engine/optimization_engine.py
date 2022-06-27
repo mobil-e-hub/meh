@@ -1,4 +1,5 @@
 import time
+from json.decoder import JSONDecodeError
 from typing import List
 import json
 import logging
@@ -19,6 +20,7 @@ class OptimizationEngine(MQTTClient):
         MQTTClient.__init__(self)
 
         self.logging_name = "opt_engine"
+        self.FLAG_SCRIPTED = False
 
         self.g_topo = load_topology('assets/topology.json')
         self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
@@ -103,6 +105,11 @@ class OptimizationEngine(MQTTClient):
 
         self.publish("mission", m03, f"drone/{self.test_mission_drone}")
 
+    def send_scripted_mission(self, parcel):
+        # TODO remove and find correct test mission
+        logging.warn(f"Scripted mission called for parcel {parcel}")
+        pass
+
     def create_delivery_route(self, parcel):
         """finds route for given parcel, assigns entities to handle the sub-routes and sends them their missions"""
 
@@ -129,9 +136,7 @@ class OptimizationEngine(MQTTClient):
 
     def reject_parcel(self, parcel):
         """Called when no delivery route for a parcel can be found -> doesn't exist"""
-        logging.warn("")
-        # TODO what to do here?? --> send MQTT message
-        #   - can this even happen? parcels sanity checked before???
+        # TODO
         pass
 
     def find_route(self, parcel):
@@ -527,6 +532,8 @@ class OptimizationEngine(MQTTClient):
         self.subscribe_and_add_callback("test/2", self.mirror_test_message_move)
         self.subscribe_and_add_callback("test/3", self.mirror_test_message_all_tasks)
 
+        self.subscribe_and_add_callback("opt/scripted/#", self.on_message_scripted)
+
     def subscribe_and_add_callback(self, topic, callback_function):
         self.subscribe(f"{self.project}/{self.version}/{topic}")
         self.client.message_callback_add(f"{self.project}/{self.version}/{topic}", callback_function)
@@ -535,6 +542,24 @@ class OptimizationEngine(MQTTClient):
         [_, _, entity, id_, *args] = split_topic(msg.topic)
         self.update_state(entity, id_, msg.payload)
         logging.debug(f"[{self.logging_name}] - Updated state of {entity}/{id_}: {msg.payload}")
+
+    def on_message_scripted(self, client, userdata, msg):
+        """ Sets the self.FLAG_SCRIPTED value or returns its current value via MQTT. """
+        [_, _, entity, id_, *args] = split_topic(msg.topic)
+        if args[0] not in ['enable', 'disable', 'status']:
+            logging.warn(f"[{self.logging_name}] - Received invalid scripted flag instructions: {msg.topic}")
+            # self.publish('error', f"Invalid instructions: {msg.topic} ")
+        else:
+            if args[0] == 'status':
+                self.publish('scripted/current', f"{self.FLAG_SCRIPTED}")
+            elif args[0] == 'enable':
+                self.FLAG_SCRIPTED = True
+                self.publish('scripted/current', f"{self.FLAG_SCRIPTED}")
+            elif args[0] == 'disable':
+                self.FLAG_SCRIPTED = False
+                self.publish('scripted/current', f"{self.FLAG_SCRIPTED}")
+            else:
+                logging.error(f"[{self.logging_name}] - Invalid scripted instruction processed: {msg.topic}")
 
     def on_message_parcel_delivered(self, client, userdata, msg):
         # TODO handle parcel delivered
@@ -546,10 +571,20 @@ class OptimizationEngine(MQTTClient):
         [_, _, entity, id_, *args] = split_topic(msg.topic)
 
         if entity == 'parcel':
+            try:
+                state = json.loads(msg.payload)
+                parcel = Parcel(id=state['id'], carrier=state['carrier'],
+                                destination=state['destination'])
+            except JSONDecodeError as e:
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+                if not self.FLAG_SCRIPTED: return
 
-            state = json.loads(msg.payload)
-            parcel = Parcel(id=state['id'], carrier=state['carrier'],
-                            destination=state['destination'])
+            # If flag set: send scripted Mission Instructions:
+            if self.FLAG_SCRIPTED:
+                logging.warn(f"[{self.logging_name}] - FLAG_SCRIPTED is set: preset Mission instructions are used.")
+                self.send_scripted_mission(parcel)
+                return
+
             try:
                 self.create_delivery_route(parcel)
             except ValueError as e:
