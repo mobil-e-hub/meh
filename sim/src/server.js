@@ -37,7 +37,7 @@ const server = app.listen(port, () => {
 });
 
 // Map and initial entities
-const scenario = require('../assets/3drones_1car_0bus');
+const scenario = require('../assets/testrun.js');
 
 
 // Simulators

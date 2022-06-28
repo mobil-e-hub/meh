@@ -1,0 +1,75 @@
+{
+  "id": "2dc1eda2-2c81-4ea3-b187-a19a3d6d0aa1",
+  "tasks": [
+    {
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 0.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
+    },
+    {
+      "type": "pickup",
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "646068b9-7814-4e08-a05e-752581b374a6",
+        "from": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
+      }
+    },
+    {
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 1.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
+    },
+    {
+      "type": "dropoff",
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "e786533c-9b72-4dfe-81ed-f1a80f2ed42e",
+        "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "to": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
+      }
+    },
+    {
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 1.0, "long": 1.0, "alt": 0.0 },
+      "minimumDuration": 10
+    },
+    {
+      "type": "pickup",
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "e474e964-d5f1-4e73-b256-6e59eb4bda78",
+        "from": { "type": "car", "id": "3406a877-6f20-4d27-bac5-08b62a44326a" },
+        "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
+      }
+    },
+    {
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 1.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
+    },
+    {
+      "type": "move",
+      "state": "TaskState.notStarted",
+      "destination": { "lat": 0.0, "long": 0.0, "alt": 0.0 },
+      "minimumDuration": 10
+    },
+    {
+      "type": "dropoff",
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "54e08383-2fff-485b-b7d8-f4b444383d89",
+        "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "to": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
+      }
+    }
+  ]
+}

@@ -20,10 +20,10 @@ class OptimizationEngine(MQTTClient):
         MQTTClient.__init__(self)
 
         self.logging_name = "opt_engine"
-        self.FLAG_SCRIPTED = False
+        self.FLAG_SCRIPTED = True
 
-        self.g_topo = load_topology('assets/topology.json')
-        self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
+        self.g_topo = load_topology('assets/testrun/testrun_topology.json')
+        self.mapping = load_mapping('assets/testrun/testrun_topology.json')  # hub_id <-> node_id
         self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
 
         self.hubs = {}
@@ -50,6 +50,89 @@ class OptimizationEngine(MQTTClient):
         self.test_mission_drone = 'd01'
         self.test_mission_hub1 = 'h01'
         self.test_mission_hub2 = 'h02'
+
+        # parameters for scripted mission for the MeH-testrun (June2022)
+        # coordinates for move tasks are set in the json file with the corresponding mission
+        self.testrun_hub_id = 'aef6d0fd-d150-4435-9c73-3b3339b77582'
+        self.testrun_drone_id = '52715405-c8a0-4f53-8fb5-ffd54696200c'
+        self.testrun_car_id = '3406a877-6f20-4d27-bac5-08b62a44326a'
+        self.testrun_parcel_id = 'a64bcadb-6967-4407-ba06-8abf2182a1d0'
+
+        # TODO revert to 1, 0 solely for faster testing
+        self.expected_number_hubs = 0
+        self.expected_number_cars = 0
+        self.expected_number_drones = 0
+
+
+    def on_message_placed(self, client, userdata, msg):
+        """handles placed messages from parcels and orders"""
+        [_, _, entity, id_, *args] = split_topic(msg.topic)
+
+        if entity == 'parcel':
+            try:
+                state = json.loads(msg.payload)
+                parcel = Parcel(id=state['id'], carrier=state['carrier'],
+                                destination=state['destination'])
+            except JSONDecodeError as e:
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+                if not self.FLAG_SCRIPTED: return
+
+            # If flag set: send scripted Mission Instructions:
+            if self.FLAG_SCRIPTED:
+                logging.warn(f"[{self.logging_name}] - FLAG_SCRIPTED is set: preset Mission instructions are used.")
+                if self.check_number_registered_entities(self.expected_number_drones, self.expected_number_cars,
+                                                         self.expected_number_hubs):
+                    self.send_scripted_mission(parcel)
+                else:
+                    logging.warn(f"[{self.logging_name}] - CHECK FAILED: wrong number of entities registered.")
+                return
+
+            try:
+                self.create_delivery_route(parcel)
+            except ValueError as e:
+                self.publish('error', f"Could not deliver parcel: {msg.payload}.")
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+            except Exception as e:
+                self.publish('error', f"Internal Error.")
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+
+        elif entity == 'order':
+            logging.warn(
+                f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
+                f"Not yet Implemented")
+        else:
+            logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
+        pass
+
+    def send_scripted_mission(self, parcel):
+        # TODO remove and find correct test mission
+        logging.warn(f"Scripted mission called for parcel {parcel}")
+
+        # TODO load json missions
+        f = open('assets/testrun/mission_hub.json')
+        mission_hub = json.load(f)
+        f = open('assets/testrun/mission_drone.json')
+        mission_drone = json.load(f)
+        f = open('assets/testrun/mission_car.json')
+        mission_car = json.load(f)
+
+        print(f"Type: {type(mission_car)}")
+
+        # TODO first: send out to given IDs
+        # TODO after: send out to the three registered entities ;)
+
+        self.publish("mission", mission_hub, f"hub/{self.testrun_hub_id}")
+        self.publish("mission", mission_drone, f"drone/{self.testrun_drone_id}")
+        self.publish("mission", mission_car, f"car/{self.testrun_car_id}")
+
+    def check_number_registered_entities(self, num_drones, num_cars, num_hubs):
+        """Used for MeH-testrun scripted mission,
+        checks number of registered entities against the functions input parameters
+        """
+        print(f"H: {self.hubs}")
+        print(f"D: {self.drones}")
+        print(f"C: {self.cars}")
+        return len(self.hubs) == num_hubs and len(self.drones) == num_drones and len(self.cars) == num_cars
 
     def mirror_test_mission(self, client, userdata, msg):
         """ Triggered by topic 'test/1'.
@@ -105,10 +188,6 @@ class OptimizationEngine(MQTTClient):
 
         self.publish("mission", m03, f"drone/{self.test_mission_drone}")
 
-    def send_scripted_mission(self, parcel):
-        # TODO remove and find correct test mission
-        logging.warn(f"Scripted mission called for parcel {parcel}")
-        pass
 
     def create_delivery_route(self, parcel):
         """finds route for given parcel, assigns entities to handle the sub-routes and sends them their missions"""
@@ -564,42 +643,6 @@ class OptimizationEngine(MQTTClient):
     def on_message_parcel_delivered(self, client, userdata, msg):
         # TODO handle parcel delivered
         [_, _, entity, id_, *args] = split_topic(msg.topic)
-        pass
-
-    def on_message_placed(self, client, userdata, msg):
-        """handles placed messages from parcels and orders"""
-        [_, _, entity, id_, *args] = split_topic(msg.topic)
-
-        if entity == 'parcel':
-            try:
-                state = json.loads(msg.payload)
-                parcel = Parcel(id=state['id'], carrier=state['carrier'],
-                                destination=state['destination'])
-            except JSONDecodeError as e:
-                logging.error(f"[{self.logging_name}] - Error: {e}")
-                if not self.FLAG_SCRIPTED: return
-
-            # If flag set: send scripted Mission Instructions:
-            if self.FLAG_SCRIPTED:
-                logging.warn(f"[{self.logging_name}] - FLAG_SCRIPTED is set: preset Mission instructions are used.")
-                self.send_scripted_mission(parcel)
-                return
-
-            try:
-                self.create_delivery_route(parcel)
-            except ValueError as e:
-                self.publish('error', f"Could not deliver parcel: {msg.payload}.")
-                logging.error(f"[{self.logging_name}] - Error: {e}")
-            except Exception as e:
-                self.publish('error', f"Internal Error.")
-                logging.error(f"[{self.logging_name}] - Error: {e}")
-
-        elif entity == 'order':
-            logging.warn(
-                f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
-                f"Not yet Implemented")
-        else:
-            logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
 
     def on_message_cap_exceeded(self, client, userdata, msg):

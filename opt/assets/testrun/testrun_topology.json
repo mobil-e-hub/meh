@@ -1,0 +1,37 @@
+{
+  "topology": {
+    "nodes": {
+      "n00": { "id": "n00", "position": { "lat": 0.0, "long": 0.0, "alt": 0.0 }, "type": "air" },
+      "n01": { "id": "n01", "position": { "lat": 1.0, "long": 0.0, "alt": 0.0 }, "type": "parking" },
+      "n02": { "id": "n02", "position": { "lat": 2.0, "long": 0.0, "alt": 0.0 }, "type": "parking" },
+      "n03": { "id": "n03", "position": { "lat": 2.0, "long": 1.0, "alt": 0.0 }, "type": "parking" },
+      "n04": { "id": "n04", "position": { "lat": 1.0, "long": 1.0, "alt": 0.0 }, "type": "parking" }
+     },
+    "edges": {
+      "e00": { "id": "e00", "from": "n00", "to": "n01", "type": "air", "distance": 1.0 },
+      "e01": { "id": "e01", "from": "n01", "to": "n00", "type": "air", "distance": 1.0 },
+      "e02": { "id": "e02", "from": "n01", "to": "n02", "type": "air", "distance": 1.0 },
+      "e03": { "id": "e03", "from": "n02", "to": "n03", "type": "air", "distance": 1.0 },
+      "e04": { "id": "e04", "from": "n03", "to": "n04", "type": "air", "distance": 1.0 },
+      "e05": { "id": "e05", "from": "n04", "to": "n01", "type": "air", "distance": 1.0 },
+      "e06": { "id": "e06", "from": "n01", "to": "n04", "type": "air", "distance": 1.0 }
+    }
+  },
+  "addresses": {
+    "2a277e9d-aa5a-4fc2-a119-5e749c184a59": { "id": "2a277e9d-aa5a-4fc2-a119-5e749c184a59", "position": { "lat": 0.0, "long": 0.0, "alt": 0.0 }, "name": "Hubstr. 1" }
+  },
+  "customers": {
+    "338f36e9-bfbf-448e-9518-7acc20baf9e3": { "id": "338f36e9-bfbf-448e-9518-7acc20baf9e3", "name": "Sample Customer", "address": "2a277e9d-aa5a-4fc2-a119-5e749c184a59" }
+  },
+  "entities": {
+    "hubs": {
+      "aef6d0fd-d150-4435-9c73-3b3339b77582": { "id": "aef6d0fd-d150-4435-9c73-3b3339b77582", "position": "n00" }
+    },
+    "drones": {
+      "52715405-c8a0-4f53-8fb5-ffd54696200c": { "id": "52715405-c8a0-4f53-8fb5-ffd54696200c", "position": { "lat": 1.0, "long": 0.0, "alt": 0.0 } }
+    },
+    "cars": {
+      "3406a877-6f20-4d27-bac5-08b62a44326a": { "id": "3406a877-6f20-4d27-bac5-08b62a44326a", "position": { "lat": 2.0, "long": 0.0, "alt": 0.0 } }
+    }
+  }
+}
