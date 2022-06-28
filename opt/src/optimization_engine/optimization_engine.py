@@ -82,7 +82,7 @@ class OptimizationEngine(MQTTClient):
                 logging.warn(f"[{self.logging_name}] - FLAG_SCRIPTED is set: preset Mission instructions are used.")
                 if self.check_number_registered_entities(self.expected_number_drones, self.expected_number_cars,
                                                          self.expected_number_hubs):
-                    self.send_scripted_mission(parcel)
+                    self.send_scripted_mission(id_)
                 else:
                     logging.warn(f"[{self.logging_name}] - CHECK FAILED: wrong number of entities registered.")
                 return
@@ -116,8 +116,6 @@ class OptimizationEngine(MQTTClient):
         f = open('assets/testrun/mission_car.json')
         mission_car = json.load(f)
 
-        print(f"Type: {type(mission_car)}")
-
         # TODO first: send out to given IDs
         # TODO after: send out to the three registered entities ;)
 
@@ -129,9 +127,6 @@ class OptimizationEngine(MQTTClient):
         """Used for MeH-testrun scripted mission,
         checks number of registered entities against the functions input parameters
         """
-        print(f"H: {self.hubs}")
-        print(f"D: {self.drones}")
-        print(f"C: {self.cars}")
         return len(self.hubs) == num_hubs and len(self.drones) == num_drones and len(self.cars) == num_cars
 
     def mirror_test_mission(self, client, userdata, msg):
