@@ -73,7 +73,7 @@ class OptimizationEngine(MQTTClient):
                 state = json.loads(msg.payload)
                 parcel = Parcel(id=state['id'], carrier=state['carrier'],
                                 destination=state['destination'])
-            except JSONDecodeError as e:
+            except (JSONDecodeError, KeyError) as e:
                 logging.error(f"[{self.logging_name}] - Error: {e}")
                 if not self.FLAG_SCRIPTED: return
 
