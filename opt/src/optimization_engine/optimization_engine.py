@@ -11,9 +11,9 @@ from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Rou
     TaskState, Route, Position
 from mqtt_client import MQTTClient
 
-import modes.test_0 as mode_test_0
+from modes import test_0 as mode_test_0
 
-modes = { (test, 0): mode_test_0 }
+modes = { ('test', 0): mode_test_0 }
 
 
 class OptimizationEngine(MQTTClient):
@@ -21,21 +21,23 @@ class OptimizationEngine(MQTTClient):
     and sends mission with delivery instructions to suitable entities."""
 
     def __init__(self):
-        MQTTClient.__init__(self)
+        super().__init__()
         self.logging_name = "opt"
 
-        # Subscribe to topics which are independent of execution mode
-        self.subscribe_and_add_callback("+/+/mode/+/+", self.on_message_mode)
+        self.publish('state', '')
 
-        # Set initial execution mode
-        self.mode = None
-        self.set_mode(('test', 0))
+        # Subscribe to topics which are independent of execution mode
+#         self.subscribe_and_add_callback("+/+/mode/+/+", self.on_message_mode)
+#
+#         # Set initial execution mode
+#         self.mode = None
+#         self.set_mode(('test', 0))
 
 
 
     def set_mode(self, mode):
         self.publish('state', { 'mode': mode })
-        
+
         if self.mode is not None:
             # Clean up current mode
             modes[self.mode].deactivate(self)
