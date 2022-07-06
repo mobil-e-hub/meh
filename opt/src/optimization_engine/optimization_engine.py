@@ -11,9 +11,9 @@ from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Rou
     TaskState, Route, Position
 from mqtt_client import MQTTClient
 
-from modes import test_0 as mode_test_0
-
-modes = { ('test', 0): mode_test_0 }
+# from modes import test_0 as mode_test_0
+#
+# modes = { ('test', 0): mode_test_0 }
 
 
 class OptimizationEngine(MQTTClient):
@@ -24,29 +24,27 @@ class OptimizationEngine(MQTTClient):
         super().__init__()
         self.logging_name = "opt"
 
-        self.publish('state', '')
-
         # Subscribe to topics which are independent of execution mode
-#         self.subscribe_and_add_callback("+/+/mode/+/+", self.on_message_mode)
-#
-#         # Set initial execution mode
-#         self.mode = None
-#         self.set_mode(('test', 0))
+        self.subscribe_and_add_callback("+/+/mode/+/+", self.on_message_mode)
+
+        # Set initial execution mode
+        self.mode = None
+        self.set_mode(('test', 0))
 
 
 
     def set_mode(self, mode):
         self.publish('state', { 'mode': mode })
 
-        if self.mode is not None:
-            # Clean up current mode
-            modes[self.mode].deactivate(self)
-
-        self.mode = mode
-        mode = modes[mode]
-
-        # Initialize new mode
-        mode.activate(self)
+#         if self.mode is not None:
+#             # Clean up current mode
+#             modes[self.mode].deactivate(self)
+#
+#         self.mode = mode
+#         mode = modes[mode]
+#
+#         # Initialize new mode
+#         mode.activate(self)
 
 #         self.FLAG_SCRIPTED = True
 #         self.g_topo = load_topology('assets/testrun/testrun_topology.json')
