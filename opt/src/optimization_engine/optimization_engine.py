@@ -31,12 +31,11 @@ class OptimizationEngine(MQTTClient):
         self.mode = None
         self.set_mode(('test', 0))
 
-        self.FLAG_SCRIPTED = True
-        self.g_topo = load_topology('assets/testrun/testrun_topology.json')
-        self.mapping = load_mapping('assets/testrun/testrun_topology.json')  # hub_id <-> node_id
-        self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
 
-    def set_mode(mode):
+
+    def set_mode(self, mode):
+        self.publish('state', { 'mode': mode })
+        
         if self.mode is not None:
             # Clean up current mode
             modes[self.mode].deactivate(self)
@@ -47,8 +46,9 @@ class OptimizationEngine(MQTTClient):
         # Initialize new mode
         mode.activate(self)
 
-#         self.g_topo = load_topology('assets/topology.json')
-#         self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
+#         self.FLAG_SCRIPTED = True
+#         self.g_topo = load_topology('assets/testrun/testrun_topology.json')
+#         self.mapping = load_mapping('assets/testrun/testrun_topology.json')  # hub_id <-> node_id
 #         self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
 #
 #         self.hubs = {}
