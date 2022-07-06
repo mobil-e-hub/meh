@@ -10,6 +10,10 @@ from optimization_engine.datastructures import Hub, Drone, Car, Bus, Parcel, Rou
     TaskState, Route, Position
 from mqtt_client import MQTTClient
 
+import modes.test_0 as mode_test_0
+
+modes = { (test, 0): mode_test_0 }
+
 
 class OptimizationEngine(MQTTClient):
     """The optimization engine finds delivery routes for new parcels added to the system
@@ -17,37 +21,63 @@ class OptimizationEngine(MQTTClient):
 
     def __init__(self):
         MQTTClient.__init__(self)
+        self.logging_name = "opt"
 
-        self.logging_name = "opt_engine"
+        # Subscribe to topics which are independent of execution mode
+        self.subscribe_and_add_callback("+/+/mode/+/+", self.on_message_mode)
 
-        self.g_topo = load_topology('assets/topology.json')
-        self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
-        self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
+        # Set initial execution mode
+        self.mode = None
+        self.set_mode(('test', 0))
 
-        self.hubs = {}
-        self.drones = {}
-        self.cars = {}
-        self.buses = {}
-        self.parcels = {}
-        self.orders = {}
-        # addresses / customers
+    def on_message_mode(self, client, userdata, msg):
+        try:
+            [_, _, entity, id_, _, *mode] = split_topic(msg.topic)
+            self.set_mode(tuple(mode))
+            logging.debug(f"[{self.logging_name}] - Mode changed to {mode}")
+        except Error as e:
+            logging.debug(f"[{self.logging_name}] - Mode could not be changed ({e})")
 
-        self.add_message_callbacks()
+    def set_mode(mode):
+        if self.mode is not None:
+            # Clean up current mode
+            modes[self.mode].deactivate(self)
 
-        # parameters for the test_missions send in response to mqtt-topic: /test/[1-3]
-        self.test_mission_positions = [
-            Position(51.25673, 9.54357, 0),
-            Position(51.25680, 9.54393, 0),
-            Position(51.25703, 9.54386, 0),
-            Position(51.25696, 9.54351, 0),
-            Position(51.25673, 9.54357, 0),
-            Position(51.25661523618747, 9.543280467304413, 0),
-            # Position (51.25699626809572, 9.54323274214318) # Punkt I
-        ]
-        self.test_mission_parcel = 'p01'
-        self.test_mission_drone = 'd01'
-        self.test_mission_hub1 = 'h01'
-        self.test_mission_hub2 = 'h02'
+        self.mode = mode
+        mode = modes[mode]
+
+        # Initialize new mode
+        mode.activate(self)
+
+#         self.g_topo = load_topology('assets/topology.json')
+#         self.mapping = load_mapping('assets/topology.json')  # hub_id <-> node_id
+#         self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
+#
+#         self.hubs = {}
+#         self.drones = {}
+#         self.cars = {}
+#         self.buses = {}
+#         self.parcels = {}
+#         self.orders = {}
+#         # addresses / customers
+#
+#         # Subscribe to all topics which are needed for optimization and administration
+#         self.add_message_callbacks()
+#
+#         # parameters for the test_missions send in response to mqtt-topic: /test/[1-3]
+#         self.test_mission_positions = [
+#             Position(51.25673, 9.54357, 0),
+#             Position(51.25680, 9.54393, 0),
+#             Position(51.25703, 9.54386, 0),
+#             Position(51.25696, 9.54351, 0),
+#             Position(51.25673, 9.54357, 0),
+#             Position(51.25661523618747, 9.543280467304413, 0),
+#             # Position (51.25699626809572, 9.54323274214318) # Punkt I
+#         ]
+#         self.test_mission_parcel = 'p01'
+#         self.test_mission_drone = 'd01'
+#         self.test_mission_hub1 = 'h01'
+#         self.test_mission_hub2 = 'h02'
 
     def mirror_test_mission(self, client, userdata, msg):
         """ Triggered by topic 'test/1'.

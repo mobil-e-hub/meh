@@ -30,7 +30,7 @@ class MQTTClient:
         self.root = f"{self.project}/{self.version}"
         self.id = str(uuid4())[:4]
 
-        self.subscriptions = {f"mobil-e-hub/{self.version}/#"}
+        self.subscriptions = { f"mobil-e-hub/{self.version}/#" }
         self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
         self.topic = "opt"
 
