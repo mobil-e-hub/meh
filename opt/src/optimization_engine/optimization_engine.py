@@ -1,4 +1,5 @@
 import time
+from json.decoder import JSONDecodeError
 from typing import List
 import json
 import logging
@@ -30,13 +31,10 @@ class OptimizationEngine(MQTTClient):
         self.mode = None
         self.set_mode(('test', 0))
 
-    def on_message_mode(self, client, userdata, msg):
-        try:
-            [_, _, entity, id_, _, *mode] = split_topic(msg.topic)
-            self.set_mode(tuple(mode))
-            logging.debug(f"[{self.logging_name}] - Mode changed to {mode}")
-        except Error as e:
-            logging.debug(f"[{self.logging_name}] - Mode could not be changed ({e})")
+        self.FLAG_SCRIPTED = True
+        self.g_topo = load_topology('assets/testrun/testrun_topology.json')
+        self.mapping = load_mapping('assets/testrun/testrun_topology.json')  # hub_id <-> node_id
+        self.pred, self.dist = nx.floyd_warshall_predecessor_and_distance(self.g_topo)
 
     def set_mode(mode):
         if self.mode is not None:
@@ -78,6 +76,92 @@ class OptimizationEngine(MQTTClient):
 #         self.test_mission_drone = 'd01'
 #         self.test_mission_hub1 = 'h01'
 #         self.test_mission_hub2 = 'h02'
+
+    def on_message_mode(self, client, userdata, msg):
+        try:
+            [_, _, entity, id_, _, *mode] = split_topic(msg.topic)
+            self.set_mode(tuple(mode))
+            logging.debug(f"[{self.logging_name}] - Mode changed to {mode}")
+        except Error as e:
+            logging.debug(f"[{self.logging_name}] - Mode could not be changed ({e})")
+
+        # parameters for scripted mission for the MeH-testrun (June2022)
+        # coordinates for move tasks are set in the json file with the corresponding mission
+        self.testrun_hub_id = 'aef6d0fd-d150-4435-9c73-3b3339b77582'
+        self.testrun_drone_id = '52715405-c8a0-4f53-8fb5-ffd54696200c'
+        self.testrun_car_id = '3406a877-6f20-4d27-bac5-08b62a44326a'
+        self.testrun_parcel_id = 'a64bcadb-6967-4407-ba06-8abf2182a1d0'
+
+        # TODO revert to 1, 0 solely for faster testing
+        self.expected_number_hubs = 0
+        self.expected_number_cars = 0
+        self.expected_number_drones = 0
+
+
+    def on_message_placed(self, client, userdata, msg):
+        """handles placed messages from parcels and orders"""
+        [_, _, entity, id_, *args] = split_topic(msg.topic)
+
+        if entity == 'parcel':
+            try:
+                state = json.loads(msg.payload)
+                parcel = Parcel(id=state['id'], carrier=state['carrier'],
+                                destination=state['destination'])
+            except (JSONDecodeError, KeyError) as e:
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+                if not self.FLAG_SCRIPTED: return
+
+            # If flag set: send scripted Mission Instructions:
+            if self.FLAG_SCRIPTED:
+                logging.warn(f"[{self.logging_name}] - FLAG_SCRIPTED is set: preset Mission instructions are used.")
+                if self.check_number_registered_entities(self.expected_number_drones, self.expected_number_cars,
+                                                         self.expected_number_hubs):
+                    self.send_scripted_mission(id_)
+                else:
+                    logging.warn(f"[{self.logging_name}] - CHECK FAILED: wrong number of entities registered.")
+                return
+
+            try:
+                self.create_delivery_route(parcel)
+            except ValueError as e:
+                self.publish('error', f"Could not deliver parcel: {msg.payload}.")
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+            except Exception as e:
+                self.publish('error', f"Internal Error.")
+                logging.error(f"[{self.logging_name}] - Error: {e}")
+
+        elif entity == 'order':
+            logging.warn(
+                f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
+                f"Not yet Implemented")
+        else:
+            logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
+        pass
+
+    def send_scripted_mission(self, parcel):
+        # TODO remove and find correct test mission
+        logging.warn(f"Scripted mission called for parcel {parcel}")
+
+        # TODO load json missions
+        f = open('assets/testrun/mission_hub.json')
+        mission_hub = json.load(f)
+        f = open('assets/testrun/mission_drone.json')
+        mission_drone = json.load(f)
+        f = open('assets/testrun/mission_car.json')
+        mission_car = json.load(f)
+
+        # TODO first: send out to given IDs
+        # TODO after: send out to the three registered entities ;)
+
+        self.publish("mission", mission_hub, f"hub/{self.testrun_hub_id}")
+        self.publish("mission", mission_drone, f"drone/{self.testrun_drone_id}")
+        self.publish("mission", mission_car, f"car/{self.testrun_car_id}")
+
+    def check_number_registered_entities(self, num_drones, num_cars, num_hubs):
+        """Used for MeH-testrun scripted mission,
+        checks number of registered entities against the functions input parameters
+        """
+        return len(self.hubs) == num_hubs and len(self.drones) == num_drones and len(self.cars) == num_cars
 
     def mirror_test_mission(self, client, userdata, msg):
         """ Triggered by topic 'test/1'.
@@ -159,9 +243,7 @@ class OptimizationEngine(MQTTClient):
 
     def reject_parcel(self, parcel):
         """Called when no delivery route for a parcel can be found -> doesn't exist"""
-        logging.warn("")
-        # TODO what to do here?? --> send MQTT message
-        #   - can this even happen? parcels sanity checked before???
+        # TODO
         pass
 
     def find_route(self, parcel):
@@ -557,6 +639,8 @@ class OptimizationEngine(MQTTClient):
         self.subscribe_and_add_callback("test/2", self.mirror_test_message_move)
         self.subscribe_and_add_callback("test/3", self.mirror_test_message_all_tasks)
 
+        self.subscribe_and_add_callback("opt/scripted/#", self.on_message_scripted)
+
     def subscribe_and_add_callback(self, topic, callback_function):
         self.subscribe(f"{self.project}/{self.version}/{topic}")
         self.client.message_callback_add(f"{self.project}/{self.version}/{topic}", callback_function)
@@ -566,35 +650,27 @@ class OptimizationEngine(MQTTClient):
         self.update_state(entity, id_, msg.payload)
         logging.debug(f"[{self.logging_name}] - Updated state of {entity}/{id_}: {msg.payload}")
 
+    def on_message_scripted(self, client, userdata, msg):
+        """ Sets the self.FLAG_SCRIPTED value or returns its current value via MQTT. """
+        [_, _, entity, id_, *args] = split_topic(msg.topic)
+        if args[0] not in ['enable', 'disable', 'status']:
+            logging.warn(f"[{self.logging_name}] - Received invalid scripted flag instructions: {msg.topic}")
+            # self.publish('error', f"Invalid instructions: {msg.topic} ")
+        else:
+            if args[0] == 'status':
+                self.publish('scripted/current', f"{self.FLAG_SCRIPTED}")
+            elif args[0] == 'enable':
+                self.FLAG_SCRIPTED = True
+                self.publish('scripted/current', f"{self.FLAG_SCRIPTED}")
+            elif args[0] == 'disable':
+                self.FLAG_SCRIPTED = False
+                self.publish('scripted/current', f"{self.FLAG_SCRIPTED}")
+            else:
+                logging.error(f"[{self.logging_name}] - Invalid scripted instruction processed: {msg.topic}")
+
     def on_message_parcel_delivered(self, client, userdata, msg):
         # TODO handle parcel delivered
         [_, _, entity, id_, *args] = split_topic(msg.topic)
-        pass
-
-    def on_message_placed(self, client, userdata, msg):
-        """handles placed messages from parcels and orders"""
-        [_, _, entity, id_, *args] = split_topic(msg.topic)
-
-        if entity == 'parcel':
-
-            state = json.loads(msg.payload)
-            parcel = Parcel(id=state['id'], carrier=state['carrier'],
-                            destination=state['destination'])
-            try:
-                self.create_delivery_route(parcel)
-            except ValueError as e:
-                self.publish('error', f"Could not deliver parcel: {msg.payload}.")
-                logging.error(f"[{self.logging_name}] - Error: {e}")
-            except Exception as e:
-                self.publish('error', f"Internal Error.")
-                logging.error(f"[{self.logging_name}] - Error: {e}")
-
-        elif entity == 'order':
-            logging.warn(
-                f"[{self.logging_name}] - Should Create Delivery Route for Order: {entity}/{id_} - {msg.payload} -  "
-                f"Not yet Implemented")
-        else:
-            logging.warn(f"[{self.logging_name}] - Could not match PLACED-message: {entity}/{id_} - {msg.payload}")
         pass
 
     def on_message_cap_exceeded(self, client, userdata, msg):

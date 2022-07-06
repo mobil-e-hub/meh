@@ -1,0 +1,25 @@
+{
+  "id": "209ce34a-8187-4cf6-b22c-5f0a8cff9c0f",
+  "tasks": [
+    {
+      "type": "dropoff",
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "646068b9-7814-4e08-a05e-752581b374a6",
+        "from": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "to": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
+      }
+    },
+    {
+      "type": "pickup",
+      "state": "TaskState.notStarted",
+      "transaction": {
+        "id": "54e08383-2fff-485b-b7d8-f4b444383d89",
+        "from": { "type": "drone", "id": "52715405-c8a0-4f53-8fb5-ffd54696200c" },
+        "to": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+        "parcel": "a64bcadb-6967-4407-ba06-8abf2182a1d0"
+      }
+    }
+  ]
+}

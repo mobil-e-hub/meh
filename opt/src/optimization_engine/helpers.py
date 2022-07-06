@@ -14,8 +14,8 @@ def load_topology(path):
     f = open(path)
     data = json.load(f)
 
-    nodes = data["nodes"]
-    edges = data["edges"]
+    nodes = data["topology"]["nodes"]
+    edges = data["topology"]["edges"]
 
     g = nx.MultiGraph()    # undirected graph --> walk edges in both directions
     # g = nx.MultiDiGraph()  # directed graph --> walk edges only in declared direction
@@ -38,8 +38,8 @@ def load_mapping(path):
     f = open(path)
     data = json.load(f)
 
-    nodes = data["nodes"]
-    mapping = {(value['position']['x'], value['position']['y'], value['position']['z']):
+    nodes = data["topology"]["nodes"]
+    mapping = {(value['position']['lat'], value['position']['long'], value['position']['alt']):
                    key for key, value in nodes.items()}
 
     return mapping

@@ -1,21 +1,24 @@
 {
   "name": "meh-viz-vue",
   "version": "1.0.0",
+  "private": true,
   "description": "Visualization (Vue web app) for mobil-e-Hub",
-  "main": "src/app.js",
+  "author": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "setup:mac": "npm install",
-    "start:mac": "vue serve src/app.js",
     "build:mac": "vue build src/app.js",
+    "build:windows": "vue build src/app.js",
+    "setup:mac": "npm install",
     "setup:windows": "npm install",
+    "start:mac": "vue serve src/app.js",
     "start:windows": "title vue_app && vue serve src/app.js",
-    "build:windows": "vue build src/app.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "main": "src/app.js",
   "dependencies": {
     "axios": "^0.21.2",
     "bootstrap": "^4.6.0",
     "bootstrap-vue": "^2.21.2",
+    "core-js": "^3.8.3",
     "dotenv": "^8.2.0",
     "lodash": "^4.17.20",
     "mqtt": "^4.2.8",
@@ -23,19 +26,43 @@
     "random": "^2.2.0",
     "socket.io-client": "^4.0.1",
     "uuid": "^8.3.2",
-    "vue": "^2.6.12",
+    "vue": "^2.6.14",
     "vuex": "^3.6.2"
   },
-  "author": "",
-  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "jquery": "^3.5.1",
+    "vue-material-icon": "^1.0.1",
+    "vue-template-compiler": "^2.6.14"
+  },
   "eslintConfig": {
     "rules": {
       "no-undef": "off",
       "no-unused-vars": "off"
+    },
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
     }
   },
-  "devDependencies": {
-    "jquery": "^3.5.1",
-    "vue-material-icon": "^1.0.1"
-  }
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "_id": "meh-viz-vue@1.0.0",
+  "license": "ISC",
+  "readme": "ERROR: No README data found!"
 }
