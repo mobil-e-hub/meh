@@ -5,7 +5,7 @@ import logging
 from dotenv import load_dotenv
 
 # Internal modules
-from optimization_engine.optimization_engine import OptimizationEngine
+from mqtt_client import OptimizationEngineMQTTClient
 
 # Environment variables
 load_dotenv()
@@ -15,8 +15,7 @@ port = int(os.environ.get('OPT_PORT', 3001))
 app = Flask(__name__)
 
 if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-    opt = OptimizationEngine()  # inherits from MQTTClient
-    opt.begin_client()
+    opt = OptimizationEngineMQTTClient(mode=('showcase', '0'))  # inherits from MQTTClient
 
 # Endpoints
 @app.route('/')
@@ -26,14 +25,17 @@ def base():
               <br> <b>/ping:</b> Health-Check
               <br> <b>/ping/mqtt:</b> MQTT Health-Check'''
 
+
 @app.route('/ping')
 def ping():
-    return {'opt': 'pong'}
+    return {'opt': 'pong', 'version': 1}
+
 
 @app.route('/ping/mqtt')
 def ping_mqtt():
     opt.publish('pong', 'optimization-engine')
     return {'mqtt': 'pong'}
+
 
 # Startup
 app.run(port=port, use_reloader=True)
