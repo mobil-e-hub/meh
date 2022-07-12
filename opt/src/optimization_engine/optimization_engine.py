@@ -188,7 +188,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 	def on_message_parcel_delivered(self, client, userdata, msg):
 		try:
 			project, version, entity, id_, *args = str(msg.topic).split('/')
-			parcel = json.loads(json.loads(msg.payload))
+			parcel = json.loads(msg.payload)
 
 			logging.debug(parcel)
 
