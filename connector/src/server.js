@@ -185,12 +185,12 @@ mqttClient.on('message', async (topic, message) => {
                 }
 
                 if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
-                    console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
+                    console.log(`> (connector) Could not transform message: ${message}`);
                     return;
                 }
             }
             else {
-                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+                console.log(`> (connector) Invalid event received from MQTT broker: ${message}`);
                 return;
             }
         }
