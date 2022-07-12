@@ -28,7 +28,7 @@ def base():
 
 @app.route('/ping')
 def ping():
-    return {'opt': 'pong', 'version': 1}
+    return {'opt': 'pong', 'version': 2}
 
 
 @app.route('/ping/mqtt')
