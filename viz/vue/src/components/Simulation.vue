@@ -59,49 +59,29 @@
                                         <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
                                     </b-button>
                                 </b-col>
+                            </b-row>
+                        </b-container>
+                    </div>
+                </b-col>
+            </b-row>
 
+            <b-row>
+                <b-col>
+                    <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
+                        <div class="card-header">
+                            <b>showcase 0: Parcel delivered</b>
+                        </div>
+                        <b-container fluid>
+                            <b-row class="my-2">
                                 <b-col>
-                                    <b-button v-b-modal.modal-send-message variant="link" title="Send message">
-                                        <b-icon icon="terminal-fill" aria-hidden="true"></b-icon>
-                                    </b-button>
-
-                                    <b-modal id="modal-send-message" title="Send message" @ok="clickSendButton">
-                                        <b-form-group label="Sender" label-for="input-message-sender">
-                                            <b-form-input id="input-message-sender" v-model="command.message.sender" placeholder="from/visualization/..."></b-form-input>
-                                        </b-form-group>
-
-                                        <b-form-group label="Topic" label-for="input-message-topic">
-                                            <b-form-input id="input-message-topic" v-model="command.message.topic" placeholder="status" required></b-form-input>
-                                        </b-form-group>
-
-                                        <b-form-group label="Message" label-for="input-message-message">
-                                            <b-form-input id="input-message-message" v-model="command.message.message" placeholder="{ data: 'Hello World' }" required></b-form-input>
-                                        </b-form-group>
-                                    </b-modal>
+                                  <b-form-group label="Parcel" label-for="input-parcel">
+                                      <b-form-input id="input-parcel" v-model="showcase0.delivered.parcel" placeholder="155a85b5-2437-486f-860b-f686692e970f"></b-form-input>
+                                  </b-form-group>
                                 </b-col>
-
                                 <b-col>
-                                    <b-button v-b-modal.modal-place-order variant="link" title="Place order">
-                                        <b-icon icon="bag-plus-fill" aria-hidden="true"></b-icon>
+                                    <b-button variant="link" title="Deliver parcel" @click="clickDeliverParcelButton">
+                                        <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
                                     </b-button>
-
-                                    <b-modal id="modal-place-order" title="Place order" @ok="clickPlaceOrderButton">
-                                        <b-form-group label="Vendor" label-for="input-order-vendor">
-                                            <b-form-select id="input-order-vendor" v-model="command.order.vendor" :options="Object.values($store.state.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${$store.state.topology.addresses[c.address].name})` }))" required></b-form-select>
-                                        </b-form-group>
-
-                                        <b-form-group label="Customer" label-for="input-order-customer">
-                                            <b-form-select id="input-order-customer" v-model="command.order.customer" :options="Object.values($store.state.topology.customers).map(c => ({ value: c.id, text: `${c.name} (${$store.state.topology.addresses[c.address].name})` }))" required></b-form-select>
-                                        </b-form-group>
-
-                                        <b-form-group label="Pick-up time" label-for="input-order-pickup">
-                                            <b-form-select id="input-order-pickup" v-model="command.order.pickup" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>
-                                        </b-form-group>
-
-                                        <b-form-group label="Drop-off time" label-for="input-order-dropoff">
-                                            <b-form-select id="input-order-dropoff" v-model="command.order.dropoff" :options="Array.from({length: 24}, (x, h) => ({ value: h, text: `${h}:00` }))" required></b-form-select>
-                                        </b-form-group>
-                                    </b-modal>
                                 </b-col>
                             </b-row>
                         </b-container>
@@ -252,8 +232,11 @@ export default {
           },
           showcase0: {
             placed: {
-              hub: null,
-              parcel: null
+              hub: '27162bf8-810c-4e48-94f3-a8d3c8c7331a',
+              parcel: '155a85b5-2437-486f-860b-f686692e970f'
+            },
+            delivered: {
+              parcel: '155a85b5-2437-486f-860b-f686692e970f'
             }
           }
         }
@@ -300,8 +283,11 @@ export default {
           });
         },
         clickPlaceParcelButton: function() {
-          this.$mqtt.publish(`hub/${this.showcase0.placed.hub}/parcel/${this.showcase0.placed.parcel}/placed`, {});
+          this.$mqtt.publish(`hub/${this.showcase0.placed.hub}/parcel/${this.showcase0.placed.parcel}/placed`, {}, '');
         },
+        clickDeliverParcelButton: function() {
+          this.$mqtt.publish(`parcel/${this.showcase0.placed.parcel}/delivered`, {}, '');
+        }
     },
 
 }
