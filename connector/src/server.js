@@ -43,7 +43,9 @@ const schemas = {
 // Topics to listen to from MQTT broker (make sure that they are disjoint from topics received from Orchestrator!)
 const subscriptionTopics = [
     'parcel/+/transfer',
-    'parcel/+/delivered'
+    'parcel/+/delivered',
+    'parcel/+/collected',
+    'parcel/+/removed'
 ];
 
 function validationErrorMiddleware(error, request, response, next) {
@@ -151,27 +153,7 @@ mqttClient.on('message', async (topic, message) => {
 
         const body = null;
 
-        if (mqttMatch('parcel/+/placed', topic)) {
-            // Convert into statusUpdate format
-            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
-                const body = {
-                    boxId: message.id,
-                    transportId: "123456789123456789", // TODO: How do we get the transportId here? The hub where the box is placed does not know anything about the transport...
-                    location: { platformId: message.carrier.id },
-                    state: 'WaitingForTransport'
-                }
-
-                if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
-                    console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
-                    return;
-                }
-            }
-            else {
-                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
-                return;
-            }
-        }
-        else if (mqttMatch('parcel/+/transfer', topic)) {
+        if (mqttMatch('parcel/+/transfer', topic)) {
             // Convert into statusUpdate format
             if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
                 const body = {

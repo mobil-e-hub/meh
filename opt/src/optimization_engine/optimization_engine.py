@@ -29,7 +29,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		self.callbacks = {
 			'+/+/status': self.on_message_status,
 			'order/+/placed': self.on_message_order_placed,
-			'parcel/+/placed': self.on_message_parcel_placed,
+			'hub/+/parcel/+/placed': self.on_message_parcel_placed,
 			'parcel/+/delivered': self.on_message_parcel_delivered
 		}
 
@@ -77,11 +77,15 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 
 	def on_message_parcel_placed(self, client, userdata, msg):
 		try:
-			project, version, entity, id_, *args = str(msg.topic).split('/')
-			logging.debug(f'Orders: {self.orders}')
-			parcel = next(filter(lambda order: order['id'] == id_, self.orders.values()))
+			project, version, _, hub_id, entity, parcel_id, *args = str(msg.topic).split('/')
+			parcel = next(filter(lambda order: order['id'] == parcel_id, self.orders.values()))
+			parcel['carrier'] = { 'type': 'hub', 'id': hub_id }
 			self.send_missions(parcel)
 			logging.debug(f'Parcel placed ({id_})!')
+			self.publish(f'parcel/{parcel_id}/transfer', json.dumps(parcel))
+		except StopIteration as e:
+			logging.warn(f'Placed parcel not found in orders!')
+			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
 		except BaseException as e:
 			logging.warn(f'Could not send missions ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
