@@ -210,7 +210,7 @@ export default {
           this.$mqtt.publish('reset');
         },
         clickSendButton: function() {
-          this.$mqtt.publish(this.command.message.topic, this.command.message.message, this.command.message.sender);
+          this.$mqtt.publish(this.command.message.topic, JSON.parse(this.command.message.message), this.command.message.sender);
         },
         clickTestButton: function() {
           this.$mqtt.publish('test', {} );
