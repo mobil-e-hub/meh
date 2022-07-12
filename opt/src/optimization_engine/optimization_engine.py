@@ -84,7 +84,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			self.send_missions(parcel)
 
 			logging.debug(f'Parcel placed ({parcel})!')
-			self.publish(f'parcel/{parcel_id}/transfer', json.dumps(parcel))
+			self.publish(f'parcel/{parcel_id}/transfer', parcel)
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
@@ -180,9 +180,9 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			]
 		}
 
-		self.publish(f'hub/{hub["id"]}/mission', json.dumps(hub_mission))
-		self.publish(f'car/{car["id"]}/mission', json.dumps(car_mission))
-		self.publish(f'drone/{drone["id"]}/mission', json.dumps(drone_mission))
+		self.publish(f'hub/{hub["id"]}/mission', hub_mission)
+		self.publish(f'car/{car["id"]}/mission', car_mission)
+		self.publish(f'drone/{drone["id"]}/mission', drone_mission)
 
 	def on_message_parcel_delivered(self, client, userdata, msg):
 		try:

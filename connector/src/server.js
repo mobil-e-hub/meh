@@ -149,8 +149,7 @@ mqttClient.on('message', async (topic, message) => {
     try {
         let [root, version, ...args] = topic.split('/');
         topic = args.join('/');
-        console.log(`Message: ${message}, parsed: ${JSON.parse(message)}`)
-        message = JSON.parse(JSON.parse(message));
+        message = JSON.parse(message);
 
         const body = null;
 
@@ -158,20 +157,16 @@ mqttClient.on('message', async (topic, message) => {
             // Convert into statusUpdate format
             const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
             if (validationResult.valid) {
-                console.log(1);
-                console.log(typeof message);
                 const body = {
                     boxId: message.id,
                     transportId: message.orderId,
                     location: { platformId: message.carrier.id },
                     state: message.carrier.type === 'drone' ? 'InTransportInAir' : (message.carrier.type === 'car' ? 'InTransport' : 'WaitingForTransport')
                 }
-                console.log(2);
                 if (!schemaValidator.validate(body, schemas.orchestrator.statusUpdateSchema).valid) {
                     console.log(`> (connector) Could not transform message: ${JSON.stringify(message)}`);
                     return;
                 }
-                console.log(3);
             }
             else {
                 console.log(`> (connector) Invalid event received from MQTT broker: ${message}. Validation result: ${JSON.stringify(validationResult)}`);
@@ -242,7 +237,6 @@ mqttClient.on('message', async (topic, message) => {
             // TODO: add other messages for forwarding to the Orchestrator
         }
 
-        console.log(4);
         // Forward message to Orchestrator
         const result = await axios.post(orchestrator.url, body, { headers: { 'Ocp-Apim-Subscription-Key': orchestrator.subscriptionKey } });
         console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}.`);
