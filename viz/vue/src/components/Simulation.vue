@@ -79,6 +79,11 @@
                                   </b-form-group>
                                 </b-col>
                                 <b-col>
+                                  <b-form-group label="Parcel" label-for="input-message">
+                                      <b-form-input id="input-message" v-model="showcase0.delivered.message" placeholder="..."></b-form-input>
+                                  </b-form-group>
+                                </b-col>
+                                <b-col>
                                     <b-button variant="link" title="Deliver parcel" @click="clickDeliverParcelButton">
                                         <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
                                     </b-button>
@@ -236,7 +241,8 @@ export default {
               parcel: '155a85b5-2437-486f-860b-f686692e970f'
             },
             delivered: {
-              parcel: '155a85b5-2437-486f-860b-f686692e970f'
+              parcel: '155a85b5-2437-486f-860b-f686692e970f',
+              message: '{"id":"155a85b5-2437-486f-860b-f686692e970f","orderId":"123456789098765432","carrier":{"type":"hub","id":"27162bf8-810c-4e48-94f3-a8d3c8c7331a"},"destination":{"type":"hub","id":"27162bf8-810c-4e48-94f3-a8d3c8c7331a"}}'
             }
           }
         }
@@ -286,7 +292,7 @@ export default {
           this.$mqtt.publish(`hub/${this.showcase0.placed.hub}/parcel/${this.showcase0.placed.parcel}/placed`, {}, '');
         },
         clickDeliverParcelButton: function() {
-          this.$mqtt.publish(`parcel/${this.showcase0.placed.parcel}/delivered`, {}, '');
+          this.$mqtt.publish(`parcel/${this.showcase0.delivered.parcel}/delivered`, JSON.parse(this.showcase0.delivered.message), '');
         }
     },
 
