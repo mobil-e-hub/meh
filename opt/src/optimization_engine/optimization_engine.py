@@ -81,10 +81,11 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
 			parcel = next(filter(lambda order: order['id'] == parcel_id, self.orders.values()))
 			parcel['carrier'] = { 'type': 'hub', 'id': hub_id }
-			self.send_missions(parcel)
 
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
+
+			self.send_missions(parcel)
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')

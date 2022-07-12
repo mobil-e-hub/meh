@@ -175,7 +175,8 @@ mqttClient.on('message', async (topic, message) => {
         }
         else if (mqttMatch('parcel/+/delivered', topic)) {
             // Convert into statusUpdate format
-            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+            const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
+            if (validationResult.valid) {
                 const body = {
                     boxId: message.id,
                     transportId: message.orderId,
@@ -195,7 +196,8 @@ mqttClient.on('message', async (topic, message) => {
         }
         else if (mqttMatch('parcel/+/collected', topic)) {
             // Convert into statusUpdate format
-            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+            const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
+            if (validationResult.valid) {
                 const body = {
                     boxId: message.id,
                     transportId: message.orderId,
@@ -215,7 +217,8 @@ mqttClient.on('message', async (topic, message) => {
         }
         else if (mqttMatch('parcel/+/removed', topic)) {
             // Convert into statusUpdate format
-            if (schemaValidator.validate(message, schemas.mqtt.parcelSchema).valid) {
+            const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
+            if (validationResult.valid) {
                 const body = {
                     boxId: message.id,
                     transportId: message.orderId,
