@@ -277,9 +277,11 @@ export default {
           });
         },
         clickPlaceParcelButton: function() {
+          alert('Placed!');
           this.$mqtt.publish(`hub/${this.showcase0.placed.hub}/parcel/${this.showcase0.placed.parcel}/placed`, {}, '');
         },
         clickDeliverParcelButton: function() {
+          alert('Delivered!');
           this.$mqtt.publish(`parcel/${this.showcase0.delivered.parcel}/delivered`, JSON.parse(this.showcase0.delivered.message), '');
         }
     },
