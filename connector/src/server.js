@@ -241,7 +241,7 @@ mqttClient.on('message', async (topic, message) => {
         }
 
         // Forward message to Orchestrator
-        const result = await axios.post(orchestrator.url, body, { headers: { 'Ocp-Apim-Subscription-Key': orchestrator.subscriptionKey } });
+        const result = await axios.post(orchestrator.url, body, { headers: { 'Ocp-Apim-Subscription-Key': orchestrator.subscriptionKey, 'Content-Type': 'application/json' } });
         console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from MQTT to Orchestrator as ${JSON.stringify(body)}.`);
     }
     catch (err) {

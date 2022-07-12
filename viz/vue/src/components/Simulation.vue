@@ -44,7 +44,7 @@
                   </div>
                   <b-container fluid>
                       <b-row class="my-2">
-                          <b-col cols="11">
+                          <b-col cols="10">
                             <b-row>
                               <b-form-group label="Hub" label-for="input-hub">
                                 <b-form-input id="input-hub" v-model="showcase0.placed.hub" placeholder="27162bf8-810c-4e48-94f3-a8d3c8c7331a"></b-form-input>
