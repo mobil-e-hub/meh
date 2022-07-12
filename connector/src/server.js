@@ -159,6 +159,7 @@ mqttClient.on('message', async (topic, message) => {
             const validationResult = schemaValidator.validate(JSON.parse(message), schemas.mqtt.parcelSchema);
             if (validationResult.valid) {
                 console.log(1);
+                console.log(typeof message);
                 const body = {
                     boxId: message.id,
                     transportId: message.orderId,
