@@ -151,13 +151,13 @@ mqttClient.on('message', async (topic, message) => {
         topic = args.join('/');
         message = JSON.parse(message);
 
-        const body = null;
+        let body = null;
 
         if (mqttMatch('parcel/+/transfer', topic)) {
             // Convert into statusUpdate format
             const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
             if (validationResult.valid) {
-                const body = {
+                body = {
                     boxId: message.id,
                     transportId: message.orderId,
                     location: { platformId: message.carrier.id },
@@ -177,7 +177,7 @@ mqttClient.on('message', async (topic, message) => {
             // Convert into statusUpdate format
             const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
             if (validationResult.valid) {
-                const body = {
+                body = {
                     boxId: message.id,
                     transportId: message.orderId,
                     location: { platformId: message.carrier.id },
@@ -198,7 +198,7 @@ mqttClient.on('message', async (topic, message) => {
             // Convert into statusUpdate format
             const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
             if (validationResult.valid) {
-                const body = {
+                body = {
                     boxId: message.id,
                     transportId: message.orderId,
                     location: { platformId: message.carrier.id },
@@ -219,7 +219,7 @@ mqttClient.on('message', async (topic, message) => {
             // Convert into statusUpdate format
             const validationResult = schemaValidator.validate(message, schemas.mqtt.parcelSchema);
             if (validationResult.valid) {
-                const body = {
+                body = {
                     boxId: message.id,
                     transportId: message.orderId,
                     location: { platformId: message.carrier.id },
