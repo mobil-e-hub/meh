@@ -83,7 +83,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			parcel['carrier'] = { 'type': 'hub', 'id': hub_id }
 			self.send_missions(parcel)
 
-			logging.debug(f'Parcel placed ({id_})!')
+			logging.debug(f'Parcel placed ({parcel_id})!')
 			self.publish(f'parcel/{parcel_id}/transfer', json.dumps(parcel))
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
