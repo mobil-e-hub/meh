@@ -169,7 +169,7 @@ mqttClient.on('message', async (topic, message) => {
                 }
             }
             else {
-                console.log(`> (connector) Invalid event received from MQTT broker: ${JSON.stringify(message)}`);
+                console.log(`> (connector) Invalid event received from MQTT broker: ${message}`);
                 return;
             }
         }
