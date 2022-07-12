@@ -43,14 +43,14 @@
                       <b>showcase 0: Parcel placed</b>
                   </div>
                   <div class="card-body">
-                    <b-form @submit="clickPlaceParcelButton">
+                    <b-form @submit.prevent="clickPlaceParcelButton">
                       <b-form-group label="Hub" label-for="input-hub">
                         <b-form-input id="input-hub" v-model="showcase0.placed.hub" placeholder="27162bf8-810c-4e48-94f3-a8d3c8c7331a"></b-form-input>
                       </b-form-group>
                       <b-form-group label="Parcel" label-for="input-parcel">
                         <b-form-input id="input-parcel" v-model="showcase0.placed.parcel" placeholder="155a85b5-2437-486f-860b-f686692e970f"></b-form-input>
                       </b-form-group>
-                      <b-button type="submit" variant="link" title="Place parcel" @click="clickPlaceParcelButton">
+                      <b-button type="submit" variant="link" title="Place parcel">
                         <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
                       </b-button>
                     </b-form>
@@ -60,34 +60,26 @@
             </b-row>
 
             <b-row>
-                <b-col>
-                    <div class="card" style="margin-bottom: 10px;">
-                        <div class="card-header">
-                            <b>showcase 0: Parcel delivered</b>
-                        </div>
-                        <b-container fluid>
-                            <b-row class="my-2">
-                                <b-col cols="10">
-                                  <b-row>
-                                    <b-form-group label="Parcel" label-for="input-parcel">
-                                      <b-form-input id="input-parcel" v-model="showcase0.delivered.parcel" placeholder="155a85b5-2437-486f-860b-f686692e970f"></b-form-input>
-                                    </b-form-group>
-                                  </b-row>
-                                  <b-row>
-                                    <b-form-group label="Message" label-for="input-message">
-                                      <b-form-input id="input-message" v-model="showcase0.delivered.message" placeholder="..."></b-form-input>
-                                    </b-form-group>
-                                  </b-row>
-                                </b-col>
-                                <b-col>
-                                    <b-button variant="link" title="Deliver parcel" @click="clickDeliverParcelButton">
-                                        <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
-                                    </b-button>
-                                </b-col>
-                            </b-row>
-                        </b-container>
-                    </div>
-                </b-col>
+              <b-col>
+                <div class="card" style="margin-bottom: 10px;">
+                  <div class="card-header">
+                    <b>showcase 0: Parcel delivered</b>
+                  </div>
+                  <div class="card-body">
+                    <b-form @submit.prevent="clickDeliverParcelButton">
+                      <b-form-group label="Parcel" label-for="input-parcel">
+                        <b-form-input id="input-parcel" v-model="showcase0.delivered.parcel" placeholder="155a85b5-2437-486f-860b-f686692e970f"></b-form-input>
+                      </b-form-group>
+                      <b-form-group label="Message" label-for="input-message">
+                        <b-form-input id="input-message" v-model="showcase0.delivered.message" placeholder="..."></b-form-input>
+                      </b-form-group>
+                      <b-button type="submit" variant="link" title="Deliver parcel">
+                        <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
+                      </b-button>
+                    </b-form>
+                  </div>
+                </div>
+              </b-col>
             </b-row>
 
             <b-row>
