@@ -149,14 +149,14 @@ mqttClient.on('message', async (topic, message) => {
     try {
         let [root, version, ...args] = topic.split('/');
         topic = args.join('/');
+        console.log(`Message: ${message}, parsed: ${JSON.parse(message)}`)
         message = JSON.parse(message);
-        console.log(message);
 
         const body = null;
 
         if (mqttMatch('parcel/+/transfer', topic)) {
             // Convert into statusUpdate format
-            const validationResult = schemaValidator.validate(JSON.stringify(message), schemas.mqtt.parcelSchema);
+            const validationResult = schemaValidator.validate(JSON.parse(message), schemas.mqtt.parcelSchema);
             if (validationResult.valid) {
                 console.log(1);
                 const body = {
