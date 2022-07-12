@@ -37,7 +37,8 @@
 <!--            </b-row>-->
 
             <b-row>
-              <div class="card" style="margin-bottom: 10px;">
+              <b-col>
+                <div class="card" style="margin-bottom: 10px;">
                   <div class="card-header">
                       <b>showcase 0: Parcel placed</b>
                   </div>
@@ -63,6 +64,7 @@
                       </b-row>
                   </b-container>
               </div>
+              </b-col>
             </b-row>
 
             <b-row>
