@@ -2,39 +2,39 @@
     <div>
         <h4 class="mb-2">Simulation</h4>
         <b-container fluid>
-            <b-row class="my-2">
-                <b-col>
-                    <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
-                        <div class="card-header">
-                          <b>Control Simulation</b>
-                        </div>
-                        <b-container fluid>
+<!--            <b-row class="my-2">-->
+<!--                <b-col>-->
+<!--                    <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">-->
+<!--                        <div class="card-header">-->
+<!--                          <b>Control Simulation</b>-->
+<!--                        </div>-->
+<!--                        <b-container fluid>-->
 
-                            <b-row class="my-2">
-                                <b-col>
-                                    <b-button variant="link" title="Start simulation" @click="publishStart">
-                                        <b-icon v-if="isPaused" icon="play-fill" aria-hidden="true"></b-icon>
-                                        <b-icon v-if="!isPaused" icon="pause-fill" aria-hidden="true"></b-icon>
-                                    </b-button>
-                                </b-col>
+<!--                            <b-row class="my-2">-->
+<!--                                <b-col>-->
+<!--                                    <b-button variant="link" title="Start simulation" @click="publishStart">-->
+<!--                                        <b-icon v-if="isPaused" icon="play-fill" aria-hidden="true"></b-icon>-->
+<!--                                        <b-icon v-if="!isPaused" icon="pause-fill" aria-hidden="true"></b-icon>-->
+<!--                                    </b-button>-->
+<!--                                </b-col>-->
 
-                                <b-col>
-                                    <b-button variant="link" title="Stop simulation" @click="publishStop">
-                                        <b-icon icon="stop-fill" aria-hidden="true"></b-icon>
-                                    </b-button>
-                                </b-col>
+<!--                                <b-col>-->
+<!--                                    <b-button variant="link" title="Stop simulation" @click="publishStop">-->
+<!--                                        <b-icon icon="stop-fill" aria-hidden="true"></b-icon>-->
+<!--                                    </b-button>-->
+<!--                                </b-col>-->
 
-                                <b-col>
-                                    <b-button variant="link" title="Reset simulation" @click="publishReset">
-                                        <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>
-                                    </b-button>
-                                </b-col>
+<!--                                <b-col>-->
+<!--                                    <b-button variant="link" title="Reset simulation" @click="publishReset">-->
+<!--                                        <b-icon icon="arrow-counterclockwise" aria-hidden="true"></b-icon>-->
+<!--                                    </b-button>-->
+<!--                                </b-col>-->
 
-                            </b-row>
-                        </b-container>
-                    </div>
-                </b-col>
-            </b-row>
+<!--                            </b-row>-->
+<!--                        </b-container>-->
+<!--                    </div>-->
+<!--                </b-col>-->
+<!--            </b-row>-->
 
             <b-row>
                 <b-col>
@@ -48,6 +48,8 @@
                                   <b-form-group label="Hub" label-for="input-hub">
                                       <b-form-input id="input-hub" v-model="showcase0.placed.hub" placeholder="27162bf8-810c-4e48-94f3-a8d3c8c7331a"></b-form-input>
                                   </b-form-group>
+                                </b-col>
+                                <b-col>
                                   <b-form-group label="Parcel" label-for="input-parcel">
                                       <b-form-input id="input-parcel" v-model="showcase0.placed.parcel" placeholder="155a85b5-2437-486f-860b-f686692e970f"></b-form-input>
                                   </b-form-group>
@@ -171,55 +173,55 @@
             </b-row>
 
 
-            <div class="card" style="width: 20rem; margin-top: 10px;">
-                <div class="card-header">
-                    <b>Statistics Table (Dummy)</b>
-                </div>
-                <div class="table-responsive">
+<!--            <div class="card" style="width: 20rem; margin-top: 10px;">-->
+<!--                <div class="card-header">-->
+<!--                    <b>Statistics Table (Dummy)</b>-->
+<!--                </div>-->
+<!--                <div class="table-responsive">-->
 
-                    <table class="card-table table">
-                        <thead>
-                        <tr>
-                            <th scope="col">Entity</th>
-                            <th scope="col">Engaged</th>
-                            <th scope="col">Avg. wait</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>Drones</td>
-                              <td> _x / {{numberOfDrones}}</td>
-                            <td>_10 min</td>
-                        </tr>
-                        <tr>
-                            <td>Cars</td>
-                              <td> _x / {{numberOfCars}}</td>
-                            <td>_20 min</td>
-                        </tr>
-                        <tr>
-                            <td>Buses</td>
-                              <td> _x / {{numberOfBuses}}</td>
-                            <td>_50 min</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Parcel
-                                <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>
-                            </td>
-                              <td> _{{numberOfParcels}} </td>
-                            <td>_42 min</td>
-                        </tr>
-                        <tr>
-                            <td>Parcel
-                                <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>
-                            </td>
-                              <td> _{{numberOfParcels}} </td>
-                            <td>_2 h</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<!--                    <table class="card-table table">-->
+<!--                        <thead>-->
+<!--                        <tr>-->
+<!--                            <th scope="col">Entity</th>-->
+<!--                            <th scope="col">Engaged</th>-->
+<!--                            <th scope="col">Avg. wait</th>-->
+<!--                        </tr>-->
+<!--                        </thead>-->
+<!--                        <tbody>-->
+<!--                        <tr>-->
+<!--                            <td>Drones</td>-->
+<!--                              <td> _x / {{numberOfDrones}}</td>-->
+<!--                            <td>_10 min</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td>Cars</td>-->
+<!--                              <td> _x / {{numberOfCars}}</td>-->
+<!--                            <td>_20 min</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td>Buses</td>-->
+<!--                              <td> _x / {{numberOfBuses}}</td>-->
+<!--                            <td>_50 min</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td>-->
+<!--                                Parcel-->
+<!--                                <b-badge variant="info" class="badge-circle badge-md badge-floating border-white">transit</b-badge>-->
+<!--                            </td>-->
+<!--                              <td> _{{numberOfParcels}} </td>-->
+<!--                            <td>_42 min</td>-->
+<!--                        </tr>-->
+<!--                        <tr>-->
+<!--                            <td>Parcel-->
+<!--                                <b-badge variant="success" class="badge-circle badge-md badge-floating border-white">done</b-badge>-->
+<!--                            </td>-->
+<!--                              <td> _{{numberOfParcels}} </td>-->
+<!--                            <td>_2 h</td>-->
+<!--                        </tr>-->
+<!--                        </tbody>-->
+<!--                    </table>-->
+<!--                </div>-->
+<!--            </div>-->
         </b-container>
     </div>
 </template>
