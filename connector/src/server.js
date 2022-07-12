@@ -42,7 +42,8 @@ const schemas = {
 
 // Topics to listen to from MQTT broker (make sure that they are disjoint from topics received from Orchestrator!)
 const subscriptionTopics = [
-    'parcel/+/+'
+    'parcel/+/transfer',
+    'parcel/+/delivered'
 ];
 
 function validationErrorMiddleware(error, request, response, next) {
