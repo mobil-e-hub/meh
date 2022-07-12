@@ -154,13 +154,13 @@ class OptimizationEngineMQTTClient:
                 self.subscribe_and_add_callback(topic, callback)
 
     def subscribe_and_add_callback(self, topic, callback):
-        self.callbacks[topic] = callback
+        # self.callbacks[topic] = callback
         self.client.subscribe(f'{self.root}/{topic}')
         self.client.message_callback_add(f'{self.root}/{topic}', callback)
         logging.debug(f'Subscribed to {self.root}/{topic}.')
 
     def unsubscribe_and_remove_callback(self, topic):
-        del self.callbacks[topic]
+        # del self.callbacks[topic]
         self.client.unsubscribe(f'{self.root}/{topic}')
         self.client.message_callback_remove(f'{self.root}/{topic}')
 
