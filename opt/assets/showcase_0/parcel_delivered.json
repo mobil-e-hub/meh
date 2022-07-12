@@ -3,10 +3,10 @@
   "orderId": "123456789098765432",
   "carrier": {
     "type": "hub",
-    "id": ""
+    "id": "27162bf8-810c-4e48-94f3-a8d3c8c7331a"
   },
   "destination": {
     "type": "hub",
-    "id": ""
+    "id": "27162bf8-810c-4e48-94f3-a8d3c8c7331a"
   }
 }

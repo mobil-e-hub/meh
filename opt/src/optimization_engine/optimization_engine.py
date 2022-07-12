@@ -63,23 +63,27 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			self.cars[id_] = status
 
 	def on_message_order_placed(self, client, userdata, msg):
-		project, version, entity, id_, *args = str(msg.topic).split('/')
-		order = json.loads(msg.payload)
+		try:
+			project, version, entity, id_, *args = str(msg.topic).split('/')
+			order = json.loads(msg.payload)
 
-		self.orders[id_] = order
+			self.orders[id_] = order
 
-		logging.debug(f'Order placed!')
-		logging.debug(f'self.orders = {self.orders}')
+			logging.debug(f'Order placed!')
+			logging.debug(f'self.orders = {self.orders}')
+		except BaseException as e:
+			logging.warn(f'Could not store order ({repr(e)})!')
+			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 	def on_message_parcel_placed(self, client, userdata, msg):
-		project, version, entity, id_, *args = str(msg.topic).split('/')
-
 		try:
+			project, version, entity, id_, *args = str(msg.topic).split('/')
+			logging.debug(f'Orders: {self.orders}')
 			parcel = next(filter(lambda order: order['id'] == id_, self.orders.values()))
 			self.send_missions(parcel)
 			logging.debug(f'Parcel placed ({id_})!')
 		except BaseException as e:
-			logging.warn(f'Could not send missions ({e})!')
+			logging.warn(f'Could not send missions ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 	def send_missions(self, parcel):
@@ -178,6 +182,8 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		try:
 			project, version, entity, id_, *args = str(msg.topic).split('/')
 			parcel = json.loads(msg.payload)
+
+			logging.debug(parcel)
 
 			del self.orders[parcel['orderId']]
 			logging.debug(f'Parcel delivered ({id_})!')
