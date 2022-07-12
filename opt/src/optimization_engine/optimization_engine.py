@@ -78,9 +78,11 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 	def on_message_parcel_placed(self, client, userdata, msg):
 		try:
 			project, version, _, hub_id, entity, parcel_id, *args = str(msg.topic).split('/')
+			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
 			parcel = next(filter(lambda order: order['id'] == parcel_id, self.orders.values()))
 			parcel['carrier'] = { 'type': 'hub', 'id': hub_id }
 			self.send_missions(parcel)
+
 			logging.debug(f'Parcel placed ({id_})!')
 			self.publish(f'parcel/{parcel_id}/transfer', json.dumps(parcel))
 		except StopIteration as e:
