@@ -37,7 +37,7 @@
 <!--            </b-row>-->
 
             <b-row>
-              <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
+              <div class="card" style="margin-bottom: 10px;">
                   <div class="card-header">
                       <b>showcase 0: Parcel placed</b>
                   </div>
@@ -67,7 +67,7 @@
 
             <b-row>
                 <b-col>
-                    <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
+                    <div class="card" style="margin-bottom: 10px;">
                         <div class="card-header">
                             <b>showcase 0: Parcel delivered</b>
                         </div>
@@ -96,7 +96,7 @@
 
             <b-row>
                 <b-col>
-                    <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
+                    <div class="card" style="margin-bottom: 10px;">
                         <div class="card-header">
                             <b>Send Messages</b>
                         </div>
