@@ -37,32 +37,32 @@
 <!--            </b-row>-->
 
             <b-row>
-                <b-col>
-                    <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
-                        <div class="card-header">
-                            <b>showcase 0: Parcel placed</b>
-                        </div>
-                        <b-container fluid>
-                            <b-row class="my-2">
-                                <b-col>
-                                  <b-form-group label="Hub" label-for="input-hub">
-                                      <b-form-input id="input-hub" v-model="showcase0.placed.hub" placeholder="27162bf8-810c-4e48-94f3-a8d3c8c7331a"></b-form-input>
-                                  </b-form-group>
-                                </b-col>
-                                <b-col>
-                                  <b-form-group label="Parcel" label-for="input-parcel">
-                                      <b-form-input id="input-parcel" v-model="showcase0.placed.parcel" placeholder="155a85b5-2437-486f-860b-f686692e970f"></b-form-input>
-                                  </b-form-group>
-                                </b-col>
-                                <b-col>
-                                    <b-button variant="link" title="Place parcel" @click="clickPlaceParcelButton">
-                                        <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
-                                    </b-button>
-                                </b-col>
+              <div class="card" style="width: 20em; height: 110px; margin-bottom: 10px;">
+                  <div class="card-header">
+                      <b>showcase 0: Parcel placed</b>
+                  </div>
+                  <b-container fluid>
+                      <b-row class="my-2">
+                          <b-col>
+                            <b-row>
+                              <b-form-group label="Hub" label-for="input-hub">
+                                <b-form-input id="input-hub" v-model="showcase0.placed.hub" placeholder="27162bf8-810c-4e48-94f3-a8d3c8c7331a"></b-form-input>
+                            </b-form-group>
                             </b-row>
-                        </b-container>
-                    </div>
-                </b-col>
+                            <b-row>
+                              <b-form-group label="Parcel" label-for="input-parcel">
+                                <b-form-input id="input-parcel" v-model="showcase0.placed.parcel" placeholder="155a85b5-2437-486f-860b-f686692e970f"></b-form-input>
+                            </b-form-group>
+                            </b-row>
+                          </b-col>
+                          <b-col>
+                              <b-button variant="link" title="Place parcel" @click="clickPlaceParcelButton">
+                                  <b-icon icon="arrow-right-circle-fill" aria-hidden="true"></b-icon>
+                              </b-button>
+                          </b-col>
+                      </b-row>
+                  </b-container>
+              </div>
             </b-row>
 
             <b-row>
