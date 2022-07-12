@@ -155,7 +155,9 @@ mqttClient.on('message', async (topic, message) => {
 
         if (mqttMatch('parcel/+/transfer', topic)) {
             // Convert into statusUpdate format
-            if (schemaValidator.validate(JSON.stringify(message), schemas.mqtt.parcelSchema).valid) {
+            const validationResult = schemaValidator.validate(JSON.stringify(message), schemas.mqtt.parcelSchema);
+            console.log(`> (connector) Invalid message: ${validationResult}`)
+            if (validationResult.valid) {
                 const body = {
                     boxId: message.id,
                     transportId: message.orderId,
