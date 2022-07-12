@@ -33,7 +33,11 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			'parcel/+/delivered': self.on_message_parcel_delivered
 		}
 
-		self.hubs = {}
+		self.hubs = {
+			'27162bf8-810c-4e48-94f3-a8d3c8c7331a': {
+				'id': '27162bf8-810c-4e48-94f3-a8d3c8c7331a'
+			}
+		}
 		self.cars = {
 			'c00': {
 				'id': 'c00'

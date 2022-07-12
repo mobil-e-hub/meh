@@ -1,0 +1,12 @@
+{
+  "id": "155a85b5-2437-486f-860b-f686692e970f",
+  "orderId": "123456789098765432",
+  "carrier": {
+    "type": "hub",
+    "id": ""
+  },
+  "destination": {
+    "type": "hub",
+    "id": ""
+  }
+}
