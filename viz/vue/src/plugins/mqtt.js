@@ -43,7 +43,12 @@ export default {
             broker: options.broker,
             root: options.root,
             publish: (topic, message='', sender=`visualization/${id}`) => {
-                client.publish(`${options.root}/${sender}/${topic}`, JSON.stringify(message));
+                if (sender) {
+                    client.publish(`${options.root}/${sender}/${topic}`, JSON.stringify(message));
+                }
+                else {
+                    client.publish(`${options.root}/${topic}`, JSON.stringify(message));
+                }
             },
             subscribe: (topic, handler) => {
                 subscriptions[topic] = handler;
