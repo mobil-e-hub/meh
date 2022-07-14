@@ -22,7 +22,7 @@
         },
         computed: {
             filteredMessages() {
-                return this.messages.slice(0, 100).map(m => `${m.timestamp} ${m.topic.string.short}: ${JSON.stringify(m.message)}`).filter( str =>  str.includes(this.query));
+                return this.messages.slice(0, 100).map(m => `${m.timestamp.toLocaleString()} ${m.topic.string.short}: ${JSON.stringify(m.message)}`).filter( str =>  str.includes(this.query));
             },
         }
     }

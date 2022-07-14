@@ -30,8 +30,8 @@
                 <b-nav-form>
                     <b-button-toolbar>
                         <!--Start/stop listening to messages-->
-                        <b-button variant="link" :title="$mqtt.isListening() ? 'Stop listening' : 'Start listening'" @click="toggleListening">
-                            <b-icon icon="record-circle-fill" :variant="$mqtt.isListening() ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
+                        <b-button variant="link" :title="true ? 'Stop listening' : 'Start listening'" @click="">
+                            <b-icon icon="record-circle-fill" :variant="true ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
 
@@ -302,16 +302,6 @@ export default {
         },
         toggleSidebar: function() {
           this.$store.commit('toggleSideMenu');
-        },
-        toggleListening: function() {
-          if (this.$mqtt.listening) {
-            alert('stop');
-            this.$mqtt.stopListening()
-          }
-          else {
-            alert('start');
-            this.$mqtt.startListening()
-          }
         }
     },
     computed: {

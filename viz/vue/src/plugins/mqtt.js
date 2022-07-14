@@ -15,7 +15,6 @@ export default {
                 password: options.password
             });
         const subscriptions = {};
-        let listening = false;
         console.log(`Vue-app: ATTEMPT: connected to broker ${options.broker} with root ${options.root}.`)
         client.on('connect', () => {
             console.log(`Vue-app: connected to broker ${options.broker} with root ${options.root}.`)
@@ -23,8 +22,6 @@ export default {
             listening = true;
         });
         client.on('message', (topic, message) => {
-            if (!listening) { return; }
-
             let [project, version, entity, id, ...args] = topic.split('/');
             topic = { version, entity, id, args, rest: args.join('/'), string: { long: topic, short: id ? `${entity}/${id}/${args.join('/')}` : `${entity}/${args.join('/')}` } };
             try {
@@ -59,16 +56,6 @@ export default {
             },
             unsubscribe: (topic) => {
                 delete subscriptions[topic];
-            },
-            stopListening: () => {
-                listening = false;
-            },
-            startListening: () => {
-                alert(1);
-                listening = true;
-            },
-            isListening: () => {
-                return listening;
             }
         };
     }
