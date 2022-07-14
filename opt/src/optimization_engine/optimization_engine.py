@@ -70,10 +70,10 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 
 	def on_message_parcel_placed(self, client, userdata, msg):
 		try:
-			project, version, _, hub_id, entity, parcel_id, *args = str(msg.topic).split('/')
+			project, version, _, car_id, entity, parcel_id, *args = str(msg.topic).split('/')
 			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
 			parcel = next(filter(lambda order: order['id'] == parcel_id, self.orders.values()))
-			parcel['carrier'] = { 'type': 'hub', 'id': hub_id }
+			parcel['carrier'] = { 'type': 'car', 'id': car_id }
 
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
@@ -126,12 +126,6 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		car_mission = {
 			"id": str(uuid4()),
 			"tasks": [
-				{
-					"type": "move",
-					"state": "TaskState.notStarted",
-					"destination": position_2,
-					"minimumDuration": 10
-				},
 				{
 					"type": "dropoff",
 					"state": "TaskState.notStarted",
