@@ -305,9 +305,11 @@ export default {
         },
         toggleListening: function() {
           if (this.$mqtt.listening) {
+            alert('stop');
             this.$mqtt.stopListening()
           }
           else {
+            alert('start');
             this.$mqtt.startListening()
           }
         }
