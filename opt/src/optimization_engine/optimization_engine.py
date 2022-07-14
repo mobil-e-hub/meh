@@ -30,7 +30,9 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			'+/+/status': self.on_message_status,
 			'order/+/placed': self.on_message_order_placed,
 			'hub/+/parcel/+/placed': self.on_message_parcel_placed,
-			'parcel/+/delivered': self.on_message_parcel_delivered
+			'parcel/+/delivered': self.on_message_parcel_delivered,
+			'+/+/opt-control/clear-entities': self.on_message_clear_entities,
+			'+/+/opt-control/add-dummy-entities': self.on_message_add_dummy_entities
 		}
 
 		self.hubs = {
@@ -197,3 +199,16 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		except BaseException as e:
 			logging.warn(f'Error: {e}!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
+
+	def on_message_clear_entities(self, client, userdata, msg):
+		self.hubs = {}
+		self.drones = {}
+		self.cars = {}
+
+	def on_message_add_dummy_entities(self, client, userdata, msg):
+		if not self.hubs:
+			self.hubs = { '27162bf8-810c-4e48-94f3-a8d3c8c7331a': { 'id': '27162bf8-810c-4e48-94f3-a8d3c8c7331a' } }
+		if not self.drones:
+			self.drones = { 'd00': { 'id': 'd00' } }
+		if not self.cars:
+			self.cars = {'c00': {'id': 'c00'} }

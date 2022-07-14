@@ -83,6 +83,24 @@
             </b-row>
 
             <b-row>
+              <b-col>
+                <div class="card" style="margin-bottom: 10px;">
+                  <div class="card-header">
+                    <b>showcase 0: Optimization Engine</b>
+                  </div>
+                  <div class="card-body">
+                    <b-button variant="link" title="Clear entities">
+                      <b-icon icon="arrow-right-circle-fill" aria-hidden="true" @click="clearEntities"></b-icon>
+                    </b-button>
+                    <b-button variant="link" title="Add dummy entities">
+                      <b-icon icon="arrow-right-circle-fill" aria-hidden="true" @click="addDummyEntities"></b-icon>
+                    </b-button>
+                  </div>
+                </div>
+              </b-col>
+            </b-row>
+
+            <b-row>
                 <b-col>
                     <div class="card" style="margin-bottom: 10px;">
                         <div class="card-header">
@@ -277,12 +295,16 @@ export default {
           });
         },
         clickPlaceParcelButton: function() {
-          alert('Placed!');
           this.$mqtt.publish(`hub/${this.showcase0.placed.hub}/parcel/${this.showcase0.placed.parcel}/placed`, {}, '');
         },
         clickDeliverParcelButton: function() {
-          alert('Delivered!');
           this.$mqtt.publish(`parcel/${this.showcase0.delivered.parcel}/delivered`, JSON.parse(this.showcase0.delivered.message), '');
+        },
+        clearEntities: function() {
+          this.$mqtt.publish(`opt-control/clear-entities`, {});
+        },
+        addDummyEntities: function() {
+          this.$mqtt.publish(`opt-control/add-dummy-entities`, {});
         }
     },
 
