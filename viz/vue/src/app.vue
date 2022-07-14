@@ -30,8 +30,8 @@
                 <b-nav-form>
                     <b-button-toolbar>
                         <!--Start/stop listening to messages-->
-                        <b-button variant="link" :title="true ? 'Stop listening' : 'Start listening'" @click="">
-                            <b-icon icon="record-circle-fill" :variant="true ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
+                        <b-button variant="link" :title="listening ? 'Stop listening' : 'Start listening'" @click="toggleListening">
+                            <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
 
@@ -216,7 +216,8 @@ export default {
                 avgDroneWaitTime:0,
                 waitingCars: 0,
             },
-            currentTime: Date.now()
+            currentTime: Date.now(),
+            listening: true
         }
     },
     components: {
@@ -297,11 +298,15 @@ export default {
         },
         showToast: function(title, message, variant='default') {
             if (this.display.areToastsEnabled) {
-                this.$bvToast.toast(message, {title: title, autoHideDelay: 3000, toaster: 'b-toaster-bottom-left', variant: variant});
+                this.$bvToast.toast(message, {title: title, autoHideDelay: 5000, toaster: 'b-toaster-bottom-left', variant: variant});
             }
         },
         toggleSidebar: function() {
           this.$store.commit('toggleSideMenu');
+        },
+        toggleListening: function() {
+          this.listening = !this.listening;
+          this.$mqtt.setListening(this.listening);
         }
     },
     computed: {
