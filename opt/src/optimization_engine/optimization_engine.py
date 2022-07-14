@@ -35,34 +35,25 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			'+/+/opt-control/add-dummy-entities': self.on_message_add_dummy_entities
 		}
 
-		self.hubs = {
-			'27162bf8-810c-4e48-94f3-a8d3c8c7331a': {
-				'id': '27162bf8-810c-4e48-94f3-a8d3c8c7331a'
-			}
-		}
-		self.cars = {
-			'c00': {
-				'id': 'c00'
-			}
-		}
-		self.drones = {
-			'd00': {
-				'id': 'd00'
-			}
-		}
+		self.hubs = {}
+		self.cars = {}
+		self.drones = {}
 		self.orders = {}
 
 	def on_message_status(self, client, userdata, msg):
-		project, version, entity, id_, *args = str(msg.topic).split('/')
-		status = json.loads(msg.payload)
-		# print(f'OptimizationEngineShowcase0 received status message {entity}/{id_}/{args} - {message}!')
+		try:
+			project, version, entity, id_, *args = str(msg.topic).split('/')
+			status = json.loads(msg.payload)
 
-		if entity == 'hub':
-			self.hubs[id_] = status
-		elif entity == 'drone':
-			self.drones[id_] = status
-		elif entity == 'car':
-			self.cars[id_] = status
+			if entity == 'hub':
+				self.hubs[id_] = status
+			elif entity == 'drone':
+				self.drones[id_] = status
+			elif entity == 'car':
+				self.cars[id_] = status
+		except BaseException as e:
+			logging.warn(f'Could not update entity status ({repr(e)})!')
+			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 	def on_message_order_placed(self, client, userdata, msg):
 		try:
@@ -207,8 +198,11 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 
 	def on_message_add_dummy_entities(self, client, userdata, msg):
 		if not self.hubs:
-			self.hubs = { '27162bf8-810c-4e48-94f3-a8d3c8c7331a': { 'id': '27162bf8-810c-4e48-94f3-a8d3c8c7331a' } }
+			hub_id = uuid4()
+			self.hubs = { hub_id: { 'id': hub_id } }
 		if not self.drones:
-			self.drones = { 'd00': { 'id': 'd00' } }
+			drone_id = uuid4()
+			self.drones = { drone_id: { 'id': drone_id } }
 		if not self.cars:
-			self.cars = {'c00': {'id': 'c00'} }
+			car_id = uuid4()
+			self.cars = { car_id: {'id': car_id } }
