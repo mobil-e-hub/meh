@@ -64,6 +64,7 @@ export default {
                 listening = false;
             },
             startListening: () => {
+                alert(1);
                 listening = true;
             },
             isListening: () => {
