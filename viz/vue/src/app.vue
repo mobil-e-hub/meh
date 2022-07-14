@@ -30,8 +30,8 @@
                 <b-nav-form>
                     <b-button-toolbar>
                         <!--Start/stop listening to messages-->
-                        <b-button variant="link" :title="listening ? 'Stop listening' : 'Start listening'" @click="listening = !listening">
-                            <b-icon icon="record-circle-fill" :variant="listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
+                        <b-button variant="link" :title="$mqtt.listening ? 'Stop listening' : 'Start listening'" @click="toggleListening">
+                            <b-icon icon="record-circle-fill" :variant="$mqtt.listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
 
@@ -195,7 +195,6 @@ export default {
     data: function () {
         return {
             lodash: _,
-            listening: true,
             view: 'simulation',
             messages: {
                 messages: [],
@@ -237,7 +236,7 @@ export default {
     created: function() {
         // Subscribe to all relevant topics
         console.log("Subscribing to topics - VUE_CREATED ")
-        this.$mqtt.subscribe('#', (topic, message, metadata) => { if (this.listening) { this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }); } })
+        this.$mqtt.subscribe('#', (topic, message, metadata) => this.messages.messages.unshift({ topic, message, timestamp: metadata.timestamp }));
         this.$mqtt.subscribe('+/+/state', (topic, message) => this.$store.commit('updateEntityState', { type: topic.entity, id: topic.id, payload: message }));
         this.$mqtt.subscribe('+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
         this.$mqtt.subscribe('+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
@@ -304,6 +303,14 @@ export default {
         toggleSidebar: function() {
           this.$store.commit('toggleSideMenu');
         },
+        toggleListening: function() {
+          if (this.$mqtt.listening) {
+            this.$mqtt.stopListening()
+          }
+          else {
+            this.$mqtt.startListening()
+          }
+        }
     },
     computed: {
         incomingMessageCounter: function() {
