@@ -235,21 +235,10 @@ Since parcels do not have their own MQTT client, the entity which currently carr
 
 
 
-### TODOs
-
-ce276a8e-8e0d-4286-95b5-1b7ff37414f4
-
-39dd362a-cff1-4105-b961-4ad187fc1656
-
-5f9581f1-49d5-4479-b9d3-e179d1663d32
-
-a43791e0-121c-4dbb-9d17-19ce8c9e902f
-
-
-## Example: Complete MQTT Communication For A Simple Delivery (WIP)
+## Showcase: Complete MQTT Communication (WIP)
 ### Task Description
 #### Task
-The Parcel is manually placed on the Hub, then picked up by the Drone and dropped off to the car. The car carries the parcel to another point, where it is picked up again by the drone, and dropped off back to the Hub.
+The Parcel is manually placed on the Car, then picked up by the Drone and dropped off to the Hub.
 
 #### Involved Entities
 - Hub `aef6d0fd-d150-4435-9c73-3b3339b77582`, placed at node `n00`
