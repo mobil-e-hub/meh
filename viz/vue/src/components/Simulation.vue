@@ -44,8 +44,8 @@
                   </div>
                   <div class="card-body">
                     <b-form @submit.prevent="clickPlaceParcelButton">
-                      <b-form-group label="Hub" label-for="input-hub">
-                        <b-form-input id="input-hub" v-model="showcase0.placed.hub"></b-form-input>
+                      <b-form-group label="Car" label-for="input-hub">
+                        <b-form-input id="input-hub" v-model="showcase0.placed.car"></b-form-input>
                       </b-form-group>
                       <b-form-group label="Parcel" label-for="input-parcel">
                         <b-form-input id="input-parcel" v-model="showcase0.placed.parcel"></b-form-input>
