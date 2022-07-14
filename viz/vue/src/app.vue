@@ -241,7 +241,7 @@ export default {
         this.$mqtt.subscribe('+/+/reset', (topic, message) => this.$store.commit('resetEntityState'));
         this.$mqtt.subscribe('+/+/stop', (topic, message) => this.$store.commit('stopEntityState'));
         this.$mqtt.subscribe('order/+/placed', (topic, message) => this.showToastStatus('Order placed', `Order ${topic.id} for parcel ${message.id} has been placed with destination ${message.destination.id}.`));
-        this.$mqtt.subscribe('+/+/parcel/+/placed', (topic, message) => this.showToastStatus('Parcel placed', `Parcel ${topic.id} has been placed at hub ${message.carrier.id} with destination ${message.destination.id}.`));
+        this.$mqtt.subscribe('+/+/parcel/+/placed', (topic, message) => this.showToastStatus('Parcel placed', `Parcel ${topic.args[1]} has been placed at hub ${topic.id}.`));
         this.$mqtt.subscribe('+/+/mission/+/complete', (topic, message) => this.showToastStatus('Mission complete', `${topic.entity} ${topic.id} has completed mission ${topic.args[1]}.`));
         this.$mqtt.subscribe('+/+/transaction/+/complete', (topic, message) => this.showToastStatus('Transaction complete', `${topic.entity} ${topic.id} has completed transaction ${topic.args[1]}.`));
         this.$mqtt.subscribe('parcel/+/delivered', (topic, message) => this.showToastStatus('Parcel delivered', `Parcel ${topic.id} has reached its destination ${message.destination.id}.`));
