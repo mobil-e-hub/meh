@@ -37,7 +37,7 @@ export default {
             console.log(`Vue-app: RECEIVED MSG: short -> ${topic.string.short} .`);
             for (const [pattern, handler] of Object.entries(subscriptions)) {
                 if (mqttMatch(pattern, topic.string.short)) {
-                    handler(topic, message, {timestamp: Date.now()});
+                    handler(topic, message, {timestamp: new Date()});
                 }
             }
 
@@ -65,6 +65,9 @@ export default {
             },
             startListening: () => {
                 listening = true;
+            },
+            isListening: () => {
+                return listening;
             }
         };
     }

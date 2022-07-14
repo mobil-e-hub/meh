@@ -30,8 +30,8 @@
                 <b-nav-form>
                     <b-button-toolbar>
                         <!--Start/stop listening to messages-->
-                        <b-button variant="link" :title="$mqtt.listening ? 'Stop listening' : 'Start listening'" @click="toggleListening">
-                            <b-icon icon="record-circle-fill" :variant="$mqtt.listening ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
+                        <b-button variant="link" :title="$mqtt.isListening() ? 'Stop listening' : 'Start listening'" @click="toggleListening">
+                            <b-icon icon="record-circle-fill" :variant="$mqtt.isListening() ? 'danger' : 'secondary'" aria-hidden="true"></b-icon>
                         </b-button>
 
 
