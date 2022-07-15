@@ -149,7 +149,7 @@ app.get('/ping', (req, res) => {
 
 // Receive events from Orchestrator and forward them to MQTT broker
 app.post('/', async (req, res, next) => {
-    for (const [key, [inputSchema, outputSchema, handler]] of Object.entries(forwardings.httpToMqtt)) {
+    for (const [key, { inputSchema, outputSchema, handler }] of Object.entries(forwardings.httpToMqtt)) {
         if (true) { // TODO: Check if handler is appropriate for message
             try {
                 if (!inputSchema || schemaValidator.validate(req.body, inputSchema).valid) {
@@ -188,7 +188,7 @@ mqttClient.on('message', async (topic, message) => {
         console.log(`  (connector) Could not parse ${topic}: ${JSON.stringify(message)}: ${err}!`);
     }
 
-    for (const [key, [inputSchema, outputSchema, handler]] of Object.entries(forwardings.mqttToHttp)) {
+    for (const [key, { inputSchema, outputSchema, handler }] of Object.entries(forwardings.mqttToHttp)) {
         if (mqttMatch(key, topic)) {
             try {
                 if (!inputSchema || schemaValidator.validate(message, inputSchema).valid) {
