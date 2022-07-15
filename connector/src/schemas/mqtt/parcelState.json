@@ -21,7 +21,7 @@
       "description": "Unique identifier of the order."
     },
     "carrier": {
-      "type": "object",
+      "type": ["object", "null"],
       "description": "The entity currently carrying the parcel.",
       "properties": {
         "id": {

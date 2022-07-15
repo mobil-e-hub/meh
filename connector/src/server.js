@@ -153,7 +153,7 @@ app.post('/', async (req, res, next) => {
         if (true) { // TODO: Check if handler is appropriate for message
             try {
                 if (!inputSchema || schemaValidator.validate(req.body, inputSchema).valid) {
-                    const [topic, message] = handler(req, res);
+                    const { topic, message } = handler(req, res);
                     if (!outputSchema || schemaValidator.validate(message, outputSchema).valid) {
                         mqttClient.publish(topic, JSON.stringify(message));
                         console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from Orchestrator to MQTT.`);
