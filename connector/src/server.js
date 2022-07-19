@@ -78,7 +78,7 @@ const forwardings = {
         }
     },
     httpToMqtt: {
-        'orderPlaced': {
+        'order-placed': {
             inputSchema: schemas.orchestrator.orderPlacedSchema,
             outputSchema: schemas.mqtt.parcelSchema,
             handler: (req, res) => {
@@ -92,6 +92,16 @@ const forwardings = {
                     }
                 };
             }
+        },
+        'order-cancelled': {
+            inputSchema: schemas.orchestrator.statusUpdateSchema,
+            outputSchema: null,
+            handler: (req, res) => {
+                return {
+                    topic: `${root}/${version}/order/${req.body.transportId}/canceled`,
+                    message: { }
+                };
+            }
         }
     }
 }
@@ -100,23 +110,6 @@ const forwardings = {
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-/**
- * Error handler middleware for validation errors.
- */
-// app.use((error, req, res, next) => {
-//     // Check the error is a validation error
-//     console.log(`< (connector) Error caught: ${error}.`);
-//     if (error instanceof ValidationError) {
-//         // Handle the error
-//         console.log(`< (connector) Validation Error against JSON schema caught: ${error}.`);
-//         res.status(400).send(error.validationErrors);
-//         next();
-//     } else {
-//         // Pass error on if not a validation error
-//         next(error);
-//     }
-// });
 
 const server = app.listen(port, () => {
     console.log(`< (connector) Server listening at http://localhost:${port}.`);
@@ -150,7 +143,7 @@ app.get('/ping', (req, res) => {
 // Receive events from Orchestrator and forward them to MQTT broker
 app.post('/', async (req, res, next) => {
     for (const [key, { inputSchema, outputSchema, handler }] of Object.entries(forwardings.httpToMqtt)) {
-        if (true) { // TODO: Check if handler is appropriate for message
+        if (key === req.query.topic) {
             try {
                 if (!inputSchema || schemaValidator.validate(req.body, inputSchema).valid) {
                     const { topic, message } = handler(req, res);
@@ -163,10 +156,12 @@ app.post('/', async (req, res, next) => {
                     }
                     else {
                         console.log(`> (connector) Output schema validation failed: ${schemaValidator.validate(message, outputSchema)}`);
+                        res.status(400).end();
                     }
                 }
                 else {
                     console.log(`> (connector) Input schema validation failed: ${schemaValidator.validate(req.body, inputSchema)}`);
+                    res.status(400).end();
                 }
             }
             catch (e) {
@@ -175,6 +170,7 @@ app.post('/', async (req, res, next) => {
             }
         }
     }
+    res.status(400).end();
 });
 
 // Receive messages from MQTT broker and forward them to Orchestrator
