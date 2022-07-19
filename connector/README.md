@@ -1,13 +1,13 @@
 # Connector: Message forwarder (node.js server) for mobil-e-Hub
 Authors:
-- Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
+- Michael Oesterle (michael.oesterle@uni-mannheim.de)
 - Alexander Becker
 - Tim Grams
 
 ## Description
-This module simply connects Azure EventGrid and MQTT broker by forwarding messages to the other component. 
+This module connects Orchstrator and MQTT broker by forwarding messages to the other component. 
 
-**Note that topics received from EventGrid must not be subscribed to (otherwise, there will be an infinite forwarding loop)!**
+**Note that topics received from the Orchestrator must not be subscribed to (otherwise, there will be an infinite forwarding loop)!**
 
 ## Communication with MQTT
 Communication between entities exclusively uses the private mosquitto MQTT broker `wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt`.
@@ -17,34 +17,30 @@ For example each entity publishes `{ topic: mobil-e-hub/[version]/[entity]/[id]/
 
 The following table lists all currently used topics in this project with short explanations on their usage
 
-Entities comprise: *Hub, Drone, Car, Bus, Parcel, (Order)* - messages are sent by the corresponding simulators.
-Other registered clients are the Vue.app `'visualization'` and the Optimization engine `'opt'`.
+Entities comprise: Hub, Drone, Car, Parcel, and Order.
+Other registered clients are the Vue app `viz` and the Optimization engine `opt`.
 
 
-| Topic | Usage | Sender | Receiver | Payload (json) | Notes |
+| Topic | Usage | Sender | Intended Receiver | Payload (JSON) | Notes |
 |---	|---	|--- |--- |--- |--- |
-| `/[entity]/[id]/connected` | upon connection | Entity | all | | <!-- TODO double check: really used? or only state send? -->
+| `/[entity]/[id]/connected` | upon connection | Entity | all | - | 
 | `/[entity]/[id]/state` | on state change | Entity | all | Entity Object |
 | **Control:** | | | | |
-| `/visualization/[id]/start` | when Start button is pressed in Viz | viz | all | - |
-| `/visualization/[id]/pause` | when Pause button is pressed in Viz	| viz | all | - | 
-| `/visualization/[id]/resume`  	| when Resume button is pressed in Viz 	| viz | all | - | 
-| `/visualization/[id]/stop`	| when Stop button is pressed in Viz 	| viz | all | - |
-| `/visualization/[id]/reset`	| when Reset button is pressed in Viz 	| viz | all | - |
-| `/visualization/[id]/test`*	| used during DEV (Test Btn in Viz) | viz | all | - |
+| `/viz/[id]/start` | when Start button is pressed in Viz | viz | all | - |
+| `/viz/[id]/pause` | when Pause button is pressed in Viz	| viz | all | - | 
+| `/viz/[id]/resume`  	| when Resume button is pressed in Viz 	| viz | all | - | 
+| `/viz/[id]/stop`	| when Stop button is pressed in Viz 	| viz | all | - |
+| `/viz/[id]/reset`	| when Reset button is pressed in Viz 	| viz | all | - |
+| `/viz/[id]/test`*	| used during DEV (Test Btn in Viz) | viz | all | - |
 | **Orders / Parcels:**| | | | |
-| `/visualization/[id]/place-order`  | WIP	| viz | ParcelSimulator | - | 
-| `/order/[id]/placed`  | WIP	| ParcelSimulator | Entity, opt | - |
-| `/visualization/[id]/place-parcel` | create new parcel  | viz | ParcelSimulator | Parcel Object | 
-| `/parcel/[id]/placed` | parcel added to carrier (hub)  | ParcelSimulator | Entity, opt | Parcel Object |
-| `/parcel/[id]/transfer` | when entities agreed on transaction | Entity | Parcel | Entity (Receiver) | success triggers `from/parcel/[id]/delivered` | 
-| `/parcel/[id]/delivered` | parcel transfer success | Parcel | (Entity), opt | Parcel Object |  | <!-- TODO currently: only used by opt_engine--> 
-| `/[parcel]/[id]/pickup` | DEPRECATED?	| Entity | Parcel | Entity Object (Carrier) |
-| `/[parcel]/[id]/dropoff` | DEPRECATED? | Entity | Parcel | Entity Object (Carrier)  |
+| `/order/[id]/placed`  | when order is placed in the shop system | Orchestrator | Entity, opt | - |
+| `/hub/[id]/parcel/[id]/placed` | parcel physically placed in hub | Hub | opt | Parcel Object |
+| `/parcel/[id]/transfer` | when entities completed a transaction | Entity | opt, Orchestrator | Parcel object |
+| `/parcel/[id]/delivered` | when parcel has reached its destination hub | Entity | opt, Orchestrator | Parcel Object |
 | **Transactions:** | | | | |
-| `/[Entity]/[id]/transaction/[id]/ready`  	| Receiving Entity ready for transaction	| Entity (Receiver) | Entity (Giver)| - |
-| `/[Entity]/[id]/transaction/[id]/unready`  	| Receiving Entity no longer ready for transaction | Entity (Receiver) | Entity (Giver), (Opt) | - |
-| `/[Entity]/[id]/transaction/[id]/execute`  | Both ready, also sends `transfer` to parcel | Entity (Giver) | Entity (Receiver) | - | only send if `.../ready` was received |
+| `/[Entity]/[id]/transaction/[id]/ready` | Receiving Entity ready for transaction	| Entity (Receiver) | Entity (Giver)| - |
+| `/[Entity]/[id]/transaction/[id]/unready` | Receiving Entity no longer ready for transaction | Entity (Receiver) | Entity (Giver), (Opt) | - |
+| `/[Entity]/[id]/transaction/[id]/execute` | Both ready, also sends `transfer` to parcel | Entity (Giver) | Entity (Receiver) | - | only send if `.../ready` was received |
 | `/[Entity]/[id]/transaction/[id]/complete` | Transaction success | Entity (Receiver) | Entity (Giver) | - | |
 | **Missions:** | | | | |
 | `/[Entity]/[id]/mission` | assign new mission | opt | Entity | Mission Object | |
@@ -70,26 +66,15 @@ The format of the topic is `[root]/[version]/[entity]/[id]/[...args]`, where the
 The message can be arbitrary JSON data, serialized as a string. It is parsed back to JSON before forwarding, which means that an invalid format will cause an error in `JSON.parse()` and therefore prevent forwarding.
 
 
-### EventGrid message
-An EventGrid message is the body of a POST request and therefore in JSON format. Its schema is:
-
-```json
-[
-  {
-    "eventType": "[root]",
-    "dataVersion": "[version]",
-    "subject": "[entity]/[id]/[...args]",
-    "data": "[arbitrary JSON data]"
-  }
-]
-```
+### Orchestrator messages
+An Orchestrator message is the body of a POST request and therefore in JSON format. There are currently two types of messages:
+- Order placed: sent as `POST .../connector?topic=order-placed` with a payload which satisfies the `orderPlacedSchema`
+- Order cancelled: sent as `POST .../connector?topic=order-cancelled` with a payload which satisfies the `statusUpdateSchema`
 
 ## Testing
 
 This module can be manually tested with any mqtt client (e.g. [this one](http://www.hivemq.com/demos/websocket-client/)), and the api testing tool [Postman](https://www.postman.com).
-The MQTT to EventGrid direction can be tested in [this](../README.md#Testing) way. 
+The MQTT to Orchestrator direction can be tested in [this](../README.md#Testing) way. 
 
-For the other direction send an HTTP Post Request via Postman to the EventGrid Endpoint as described [here](https://social.technet.microsoft.com/wiki/contents/articles/53692.azure-eventgrid-submitting-from-postman-to-custom-topic.aspx). 
-If the EventGrid cannot be accessed the messages can also be send directly to the connector at ``https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector``. 
+For the other direction send an HTTP Post Request via Postman to the connector at ``https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector``. 
 For the body format select the *raw* checkbox and pick JSON.
-Then the body content needs to follow the schema described in the paragraph [above](#eventGrid-message), with at least the four keys that can be seen there.
