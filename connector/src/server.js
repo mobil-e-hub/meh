@@ -158,16 +158,16 @@ app.post('/', async (req, res, next) => {
                         console.log(`  (connector) Forwarding ${topic}: ${JSON.stringify(message)} from Orchestrator to MQTT.`);
 
                         // There's no need to return anything except status 200. Return json just for human readability (e.g., from Postman))
-                        res.status(200).json({ success: true, message: `Message forwarded to MQTT with topic ${topic}.` });
+                        return res.status(200).json({ success: true, message: `Message forwarded to MQTT with topic ${topic}.` });
                     }
                     else {
                         console.log(`> (connector) Output schema validation failed: ${schemaValidator.validate(message, outputSchema)}`);
-                        res.status(400).end();
+                        return res.status(400).end();
                     }
                 }
                 else {
                     console.log(`> (connector) Input schema validation failed: ${schemaValidator.validate(req.body, inputSchema)}`);
-                    res.status(400).end();
+                    return res.status(400).end();
                 }
             }
             catch (e) {
@@ -176,7 +176,7 @@ app.post('/', async (req, res, next) => {
             }
         }
     }
-    res.status(400).end();
+    return res.status(400).end();
 });
 
 // Receive messages from MQTT broker and forward them to Orchestrator
