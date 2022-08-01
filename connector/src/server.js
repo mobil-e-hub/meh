@@ -176,7 +176,7 @@ app.post('/', async (req, res, next) => {
             }
         }
     }
-    res.status(400).json({ success: false, message: 'Could not find any matching topic!' });
+    res.status(400).end();
 });
 
 // Receive messages from MQTT broker and forward them to Orchestrator
