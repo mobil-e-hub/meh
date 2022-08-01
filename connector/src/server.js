@@ -135,10 +135,16 @@ app.get('/', (req, res) => {
     res.status(200).json('This is the base url of the meh/connector module.');
 });
 
+
 //Ping
 app.get('/ping', (req, res) => {
-    res.status(200).json({ connector: 'pong' });
+    res.status(200).json({ connector: 'pong', method: 'get' });
 });
+
+app.post('/ping', (req, res) => {
+    res.status(200).json({ connector: 'pong', method: 'post' });
+});
+
 
 // Receive events from Orchestrator and forward them to MQTT broker
 app.post('/', async (req, res, next) => {
@@ -170,7 +176,7 @@ app.post('/', async (req, res, next) => {
             }
         }
     }
-    res.status(400).end();
+    res.status(400).json({ success: false, message: 'Could not find any matching topic!' });
 });
 
 // Receive messages from MQTT broker and forward them to Orchestrator

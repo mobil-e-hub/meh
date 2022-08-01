@@ -1,6 +1,6 @@
 # mobil-e-Hub: Intelligent Drone Logistics Network
 Authors: 
-- Michael Pernpeintner (pernpeintner@es.uni-mannheim.de)
+- Michael Oesterle (michael.oesterle@uni-mannheim.de)
 - Alexander Becker
 - Tim Grams
 
