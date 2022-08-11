@@ -1,0 +1,37 @@
+.service {
+  margin: 20px;
+}
+
+mat-toolbar {
+  background-color: #fafafa;
+}
+
+mat-toolbar span {
+  color: rgba(0,0,0,.5);
+  font-size: 70%;
+  margin-left: 20px;
+}
+
+mat-card {
+  margin: 50px 20%;
+  cursor: pointer;
+  display: inline-block;
+  width: 600px;
+  background-color: #fafafa;
+}
+
+mat-card mat-icon {
+  font-size: 250%;
+}
+
+mat-card .not_running {
+  color: red;
+}
+
+mat-card .running {
+  color: green;
+}
+
+mat-card p {
+  color: gray;
+}
