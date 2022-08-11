@@ -1,0 +1,29 @@
+{
+  "services": [
+    {
+      "name": "Visualization",
+      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/viz",
+      "running": false
+    },
+    {
+      "name": "Simulator",
+      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/sim",
+      "running": false
+    },
+    {
+      "name": "Optimization Engine",
+      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/opt",
+      "running": false
+    },
+    {
+      "name": "Connector",
+      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector",
+      "running": false
+    },
+    {
+      "name": "Mosquitto",
+      "path": "wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt",
+      "running": false
+    }
+  ]
+}

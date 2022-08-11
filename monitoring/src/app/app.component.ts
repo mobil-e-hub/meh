@@ -3,7 +3,7 @@ import {Service} from './Service';
 import {EndpointsService} from './endpoints.service';
 import {DOCUMENT} from '@angular/common';
 import { webSocket } from "rxjs/webSocket";
-import {retry, timeout} from 'rxjs/operators';
+import {AppConfigService} from "./AppConfigService";
 
 
 @Component({
@@ -14,39 +14,16 @@ import {retry, timeout} from 'rxjs/operators';
 export class AppComponent implements OnInit{
   title = 'Monitoring';
 
-  services: Service[] = [
-      {
-        name: 'Visualization',
-        path: 'https://ines-gpu-01.informatik.uni-mannheim.de/meh/viz',
-        running: false
-      },
-      {
-        name: 'Simulator',
-        path: 'https://ines-gpu-01.informatik.uni-mannheim.de/meh/sim',
-        running: false
-      },
-      {
-        name: 'Optimization Engine',
-        path: 'https://ines-gpu-01.informatik.uni-mannheim.de/meh/opt',
-        running: false
-      },
-      {
-        name: 'Connector',
-        path: 'https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector',
-        running: false
-      },
-      {
-        name: 'Mosquitto',
-        path: 'wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt',
-        running: false
-      }
-    ];
+  services: Service[];
 
   constructor(
     private endpointsService: EndpointsService,
     @Inject(DOCUMENT) private document: Document,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private appConfigService: AppConfigService
+  ) {
+    this.services =  appConfigService.services;
+  }
 
   ngOnInit(): void {
     this.checkServices();
