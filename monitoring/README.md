@@ -9,7 +9,7 @@ The monitoring application allows to check if mobil-e-Hub components are reachab
 
 ## Installation and usage
 ```shell script
-meh % cd sim
+meh % cd monitoring
 monitoring % npm install
 monitoring % npm run start:mac
 ```
