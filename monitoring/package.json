@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --live-reload=false",
+    "setup:mac": "npm install",
+    "setup:windows": "npm install",
+    "start:mac": "ng serve --live-reload=false",
+    "start:windows": "ng serve --live-reload=false",
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
