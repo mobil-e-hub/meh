@@ -1,0 +1,12 @@
+<mat-toolbar>
+  Mobil-e-hub <span>Monitoring Dashboard</span>
+</mat-toolbar>
+
+<mat-card class="service" *ngFor="let service of services" (click)="goToUrl(service.path)">
+  <div>
+    <mat-icon class="not_running" *ngIf="!service.running">error</mat-icon>
+    <mat-icon class="running" *ngIf="service.running">check_circle</mat-icon>
+  </div>
+  <h3>{{service.name}}</h3>
+  <p>{{service.path}}</p>
+</mat-card>
