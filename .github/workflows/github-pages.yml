@@ -26,13 +26,13 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - run: cd viz/vue && npm ci
+      - run: cd viz && npm ci
       - run: npm install -g @vue/cli
       - run: npm install -g @vue/cli-service-global
-      - run: cd viz/vue && npm run build:mac
+      - run: cd viz && npm run build:mac
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./viz/vue/dist
+          publish_dir: ./viz/dist
