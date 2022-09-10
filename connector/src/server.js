@@ -132,7 +132,7 @@ mqttClient.on('connect', () => {
 // Endpoints
 // Base
 app.get('/', (req, res) => {
-    return res.status(200).json('This is the base url of the meh/connector module.');
+    return res.status(200).json('This is the base URL of the meh/connector module.');
 });
 
 
