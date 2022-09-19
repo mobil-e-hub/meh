@@ -3,7 +3,6 @@ Authors:
 - Michael Oesterle (michael.oesterle@uni-mannheim.de)
 - Alexander Becker
 - Tim Grams
-- Johannes Pernpeintner
 
 ## Description
 This module connects Orchstrator and MQTT broker by forwarding messages to the other component. 
