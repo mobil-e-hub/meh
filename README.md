@@ -3,6 +3,7 @@ Authors:
 - Michael Oesterle (michael.oesterle@uni-mannheim.de)
 - Alexander Becker
 - Tim Grams
+- Johannes Pernpeintner
 
 [![github pages](https://github.com/mobil-e-hub/meh/actions/workflows/github-pages.yml/badge.svg)](https://github.com/mobil-e-hub/meh/actions/workflows/github-pages.yml)
 
