@@ -31,21 +31,17 @@ const version = process.env.VERSION || 'v1';
 // JSON schema validation
 const { validate } = new Validator();
 const schemas = {
-    mqtt: {
-        parcelSchema: require('./schemas/mqtt/parcelState.json')
-    },
-    orchestrator: {
-        orderPlacedSchema: require("./schemas/orchestrator/orderPlacedSchema"),
-        statusUpdateSchema: require("./schemas/orchestrator/statusUpdateSchema")
-    }
+    parcelSchema: require('./schemas/parcelState.json'),
+    orderPlacedSchema: require("./schemas/orderPlacedSchema"),
+    statusUpdateSchema: require("./schemas/statusUpdateSchema")
 }
 
 const forwardings = {
     mqttToHttp: {
         // Topics to listen to from MQTT broker (make sure that they are disjoint from topics received from Orchestrator!)
         'parcel/+/transfer': {
-            inputSchema: schemas.mqtt.parcelSchema,
-            outputSchema: schemas.orchestrator.statusUpdateSchema,
+            inputSchema: schemas.parcelSchema,
+            outputSchema: schemas.statusUpdateSchema,
             handler: (topic, message) => {
                 return {
                     boxId: message.id,
@@ -56,22 +52,22 @@ const forwardings = {
             }
         },
         'parcel/+/delivered': {
-            inputSchema: schemas.mqtt.parcelSchema,
-            outputSchema: schemas.orchestrator.statusUpdateSchema,
+            inputSchema: schemas.parcelSchema,
+            outputSchema: schemas.statusUpdateSchema,
             handler: (topic, message) => {
                 return { boxId: message.id, transportId: message.orderId, location: {platformId: message.carrier.id}, state: 'Delivered' };
             }
         },
         'parcel/+/collected': {
-            inputSchema: schemas.mqtt.parcelSchema,
-            outputSchema: schemas.orchestrator.statusUpdateSchema,
+            inputSchema: schemas.parcelSchema,
+            outputSchema: schemas.statusUpdateSchema,
             handler: (topic, message) => {
                 return { boxId: message.id, transportId: message.orderId, location: {platformId: message.carrier.id}, state: 'Completed' };
             }
         },
         'parcel/+/removed': {
-            inputSchema: schemas.mqtt.parcelSchema,
-            outputSchema: schemas.orchestrator.statusUpdateSchema,
+            inputSchema: schemas.parcelSchema,
+            outputSchema: schemas.statusUpdateSchema,
             handler: (topic, message) => {
                 return { boxId: message.id, transportId: message.orderId, location: {platformId: message.carrier.id}, state: 'Failed' };
             }
@@ -79,8 +75,8 @@ const forwardings = {
     },
     httpToMqtt: {
         'order-placed': {
-            inputSchema: schemas.orchestrator.orderPlacedSchema,
-            outputSchema: schemas.mqtt.parcelSchema,
+            inputSchema: schemas.orderPlacedSchema,
+            outputSchema: schemas.parcelSchema,
             handler: (req, res) => {
                 return {
                     topic: `${root}/${version}/order/${req.body.transportId}/placed`,
@@ -94,7 +90,7 @@ const forwardings = {
             }
         },
         'order-cancelled': {
-            inputSchema: schemas.orchestrator.statusUpdateSchema,
+            inputSchema: schemas.statusUpdateSchema,
             outputSchema: null,
             handler: (req, res) => {
                 return {
