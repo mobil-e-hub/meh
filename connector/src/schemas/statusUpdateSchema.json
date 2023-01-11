@@ -1,4 +1,4 @@
-module.exports = {
+{
     "type": "object",
     "properties": {
         "boxId": {"type": "string", "format": "uuid"},
@@ -15,4 +15,4 @@ module.exports = {
     },
     "required": ["boxId", "transportId", "location", "state"],
     "additionalProperties": false
-};
+}

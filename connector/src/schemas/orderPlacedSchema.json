@@ -1,4 +1,4 @@
-module.exports = {
+{
     "title": "OrderPlaced",
     "description": "JSON Schema for order placed messages. ",
     "type": "object",
@@ -26,4 +26,4 @@ module.exports = {
     },
     "required": ["boxId", "transportId", "partnerId", "timestamp", "startLocation", "destinationLocation"],
     "additionalProperties": false
-};
+}
