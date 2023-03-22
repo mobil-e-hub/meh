@@ -28,11 +28,13 @@ module.exports = class MQTTClient {
         this.mqtt.client.on('connect', () => {
             this.mqtt.client.subscribe(subscriptionTopics.map(topic => `${this.mqtt.root}/${topic}`));
             this.publish(this.type, 'connected');
-        });
+            if (this.type == 'bus-simulator') {
+                this.start();
+            }
+            });
 
         this.mqtt.client.on('message', (topic, message) => {
             let [project, version, entity, id, ...args] = topic.split('/');
-
             try {
                 this.receive({
                     version,
@@ -54,15 +56,15 @@ module.exports = class MQTTClient {
     }
 
     publish(sender, topic, message = '') {
-        // if(topic == undefined){
-        //     //e.g. for connect message
-        //     this.mqtt.client.publish(`${this.mqtt.root}/${sender}`, JSON.stringify(message));
-        //     console.log(`< [${this.type}] ${sender}/${topic}: ${JSON.stringify(message)}`);
-        // }
-        // else {
+        if(topic == undefined){
+            //e.g. for connect message
+            this.mqtt.client.publish(`${this.mqtt.root}/${sender}`, JSON.stringify(message));
+            console.log(`< [${this.type}] ${sender}/${topic}: ${JSON.stringify(message)}`);
+        }
+        else {
         this.mqtt.client.publish(`${this.mqtt.root}/${sender}/${topic}`, JSON.stringify(message));
         console.log(`< [${this.type}] ${sender}/${topic}: ${JSON.stringify(message)}`);
-        // }
+        }
     }
 
     receive(topic, message) {

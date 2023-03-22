@@ -18,7 +18,7 @@ module.exports = class BusSimulator extends MQTTClient {
         this.buses = {};
 
         this.timer = null;
-        this.interval = 100;
+        this.interval = 1000;
     }
 
     start() {

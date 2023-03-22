@@ -7,7 +7,6 @@ const MQTTClient = require('../mqtt-client');
 module.exports = class ControlSystem extends MQTTClient {
     constructor() {
         super('control-system', ['control-system/#', 'parcel/+/placed', 'parcel/+/delivered', 'visualization/#', 'order/+/placed']);
-
     }
 
     async receive(topic, message) {

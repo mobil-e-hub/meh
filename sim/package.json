@@ -4,6 +4,7 @@
   "description": "Simulator (node.js server) for mobil-e-Hub",
   "main": "src/server.js",
   "scripts": {
+    "testrun": "title simulator && nodemon src/server.js && assets/testrun.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup:mac": "npm install",
     "start:mac": "nodemon src/server.js",
@@ -20,6 +21,7 @@
     "morgan": "^1.10.0",
     "mqtt": "^4.2.8",
     "mqtt-match": "^2.0.3",
+    "nodemon": "^2.0.20",
     "random": "^2.2.0",
     "uuid": "^8.3.2",
     "ws": "^7.4.6"

@@ -78,6 +78,7 @@ module.exports = class CarSimulator extends MQTTClient {
     };
 
     receive(topic, message) {
+        console.log('received message');
         super.receive(topic, message);
 
         if (topic.entity === 'visualization') {

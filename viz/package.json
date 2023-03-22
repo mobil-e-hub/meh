@@ -4,9 +4,19 @@
   "private": true,
   "description": "Visualization (Vue web app) for mobil-e-Hub",
   "author": "",
+  "node": {
+    "fs": false
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
+  },
   "scripts": {
     "build:mac": "vue build src/app.js",
     "build:windows": "vue build src/app.js",
+    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve",
     "setup:mac": "npm install",
     "setup:windows": "npm install",
     "start:mac": "vue serve src/app.js",
@@ -19,24 +29,33 @@
     "bootstrap": "^4.6.0",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.8.3",
-    "dotenv": "^8.2.0",
+    "dotenv": "^8.6.0",
+    "fs": "^0.0.1-security",
     "lodash": "^4.17.20",
+    "mime": "^3.0.0",
     "mqtt": "^4.2.8",
     "mqtt-match": "^2.0.3",
+    "node-polyfill-webpack-plugin": "^2.0.1",
+    "nodemon": "^2.0.20",
+    "path": "^0.12.7",
     "random": "^2.2.0",
     "socket.io-client": "^4.0.1",
     "uuid": "^8.3.2",
-    "vue": "^2.6.14",
-    "vuex": "^3.6.2"
+    "vue": "^2.7.14",
+    "vuex": "^3.6.2",
+    "webpack": "^5.75.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "dotenv-webpack": "^8.0.1",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "jquery": "^3.5.1",
+    "postcss-import": "^15.0.1",
+    "url-loader": "^4.1.1",
     "vue-material-icon": "^1.0.1",
     "vue-template-compiler": "^2.6.14"
   },

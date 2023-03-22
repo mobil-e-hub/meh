@@ -37,7 +37,7 @@ const server = app.listen(port, () => {
 });
 
 // Map and initial entities
-const scenario = require('../assets/testrun.js');
+const scenario = require('../assets/original_scenario.js');
 
 
 // Simulators
@@ -46,7 +46,6 @@ const droneSimulator = new DroneSimulator(scenario);
 const carSimulator = new CarSimulator(scenario);
 const busSimulator = new BusSimulator(scenario);
 const parcelSimulator = new ParcelSimulator(scenario);
-
 
 // Control system for dummy simulation
 const controlSystem = new ControlSystem();
@@ -97,37 +96,41 @@ function matchTopic(pattern, topic) {
 }
 
 
-// app.post('/meh/viz/hubs/find', (req, res) => {
-//     res.json(controlSystem.getHubs(req.body.position, req.body.radius));
-// });
-//
-// app.post('/meh/viz/orders/request', (req, res) => {
-//     res.json({
-//         sourceHubs: controlSystem.getHubs(req.body.source.position, req.body.source.radius).map(h => ({ id: h.id, position: topology.nodes[h.position].position })),
-//         destinationHubs: controlSystem.getHubs(req.body.destination.position, req.body.destination.radius).map(h => ({ id: h.id, position: topology.nodes[h.position].position }))
-//     });
-// });
-//
-// app.post('/meh/viz/orders/place', (req, res) => {
-//     const sourceHub = hubSimulator.hubs[req.body.destinationHubs];
-//     const destinationHubs = _.pick(hubSimulator.hubs, req.body.destinationHubs);
-//
-//     parcelSimulator.
-//     controlSystem.
-//
-//     res.status(200).json('ok');
-// });
+/*
+ app.post('/meh/viz/hubs/find', (req, res) => {
+     res.json(controlSystem.getHubs(req.body.position, req.body.radius));
+});
 
-// Receive and distribute incoming event
-// async function receive(topic, message) {
-//     console.log(`> ${topic.string}: ${JSON.stringify(message)}`);
-//     for (const [pattern, handlers] of Object.entries(eventGridSubscriptions)) {
-//         if (matchTopic(pattern, topic)) {
-//             for (const handler of handlers) {
-//                 await handler(topic, message);
-//             }
-//         }
-//     }
-// }
+ app.post('/meh/viz/orders/request', (req, res) => {
+     res.json({
+         sourceHubs: controlSystem.getHubs(req.body.source.position, req.body.source.radius).map(h => ({ id: h.id, position: topology.nodes[h.position].position })),
+         destinationHubs: controlSystem.getHubs(req.body.destination.position, req.body.destination.radius).map(h => ({ id: h.id, position: topology.nodes[h.position].position }))
+     });
+ });
+
+ app.post('/meh/viz/orders/place', (req, res) => {
+     const sourceHub = hubSimulator.hubs[req.body.destinationHubs];
+     const destinationHubs = _.pick(hubSimulator.hubs, req.body.destinationHubs);
+
+     parcelSimulator.
+     controlSystem.
+
+     res.status(200).json('ok');
+ });
+
+ */
+
+ //Receive and distribute incoming event
+ async function receive(topic, message) {
+     console.log(`> ${topic.string}: ${JSON.stringify(message)}`);
+     for (const [pattern, handlers] of Object.entries(eventGridSubscriptions)) {
+         if (matchTopic(pattern, topic)) {
+             for (const handler of handlers) {
+                 await handler(topic, message);
+             }
+         }
+     }
+ }
+
 
 
