@@ -1,11 +1,6 @@
 {
   "services": [
     {
-      "name": "Visualization",
-      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/viz",
-      "running": false
-    },
-    {
       "name": "Simulator",
       "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/sim",
       "running": false
@@ -16,8 +11,8 @@
       "running": false
     },
     {
-      "name": "Connector",
-      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/connector",
+      "name": "Visualization",
+      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/viz",
       "running": false
     },
     {
