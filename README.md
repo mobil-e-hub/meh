@@ -135,7 +135,7 @@ TODO: different messages for deliberate/ accidental disconnect ???
 
 
 ### Updates of entity state
-Each entity is expected to send a message with topic `[project]/[version]/[entity]/[id]/state` and entity-specific payload whenever its state changes. During the execution of a mission, this should be a steady stream of messages for position updates, e.g., every 100 ms.
+Each entity is expected to send a message with topic `[project]/[version]/[entity]/[id]/status` and entity-specific payload whenever its state changes. During the execution of a mission, this should be a steady stream of messages for position updates, e.g., every 100 ms.
 In the following the expected payload contents for the different entities are explained:
 
 #### Drone state
