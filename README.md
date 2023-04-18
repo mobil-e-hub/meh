@@ -290,7 +290,7 @@ As soon as a customer completes an order in the shop system, the shop notifies t
 
 This message is converted into an MQTT message and sent to the broker:
 ##### MQTT message from MQTT Connector 
-`meh/v1/order/1922193319441955/placed`
+`mobil-e-hub/v1/order/1922193319441955/placed`
 ```json
 {
     "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
@@ -303,7 +303,7 @@ This means that the order is in the system, and we're now waiting for the corres
 
 As soon as the hub detects a box, it sends a message:
 #### Parcel Placement (sent from Hub)
-`meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed` (no content)
+`mobil-e-hub/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed` (no content)
 
 This message is converted by the connector into an HTTP message for the orchestrator
 
@@ -320,7 +320,7 @@ This message is converted by the connector into an HTTP message for the orchestr
 The optimization engine receives the parcelPlaced message, looks up the box ID in the list of orders and creates missions:
 #### Missions (sent from Optimization Engine)
 ##### Hub mission
-`meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission`
+`mobil-e-hub/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/mission`
 ```json
 {
   "id": "209ce34a-8187-4cf6-b22c-5f0a8cff9c0f",
@@ -350,7 +350,7 @@ The optimization engine receives the parcelPlaced message, looks up the box ID i
 ```
 
 ##### Drone mission
-`meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/mission`
+`mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/mission`
 ```json
 {
   "id": "2dc1eda2-2c81-4ea3-b187-a19a3d6d0aa1",
@@ -430,7 +430,7 @@ The optimization engine receives the parcelPlaced message, looks up the box ID i
 ```
 
 ##### Car mission
-`meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/mission`
+`mobil-e-hub/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/mission`
 ```json
 {
   "id": "fc0adcef-a123-417b-b61c-0a99f4789aee",
@@ -491,7 +491,7 @@ The optimization engine receives the parcelPlaced message, looks up the box ID i
 
 #### Entity State Updates (sent from respective entities)
 ##### Drone state update
-`meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/status`
+`mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/status`
 ```json
 {
   "id": "52715405-c8a0-4f53-8fb5-ffd54696200c",
@@ -508,7 +508,7 @@ The optimization engine receives the parcelPlaced message, looks up the box ID i
 These messages are sent continuously while the drone moves.
 
 ##### Car state update 
-`meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/status`
+`mobil-e-hub/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/status`
 ```json
 {
   "id": "3406a877-6f20-4d27-bac5-08b62a44326a",
@@ -526,12 +526,12 @@ These messages are sent continuously while the drone moves.
 These messages are sent continuously while the car moves.
 
 #### First Transaction (from hub to drone)
-- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/ready` (no content)
-- `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/646068b9-7814-4e08-a05e-752581b374a6/execute` (no content)
-- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/complete` (no content)
+- `mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/ready` (no content)
+- `mobil-e-hub/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/646068b9-7814-4e08-a05e-752581b374a6/execute` (no content)
+- `mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/646068b9-7814-4e08-a05e-752581b374a6/complete` (no content)
 
 After the transaction is complete, the receiving entity (drone) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
+`mobil-e-hub/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
   "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
@@ -556,12 +556,12 @@ This message is converted by the connector into an HTTP message for the orchestr
 Moreover, the drone checks if the current carrier of the parcel is the same as its destination. If so, it sends a parcelDelivered message (see below).
 
 #### Second Transaction (from drone to car)
-- `meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/ready` (no content)
-- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/execute` (no content)
-- `meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/complete` (no content)
+- `mobil-e-hub/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/ready` (no content)
+- `mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/execute` (no content)
+- `mobil-e-hub/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e786533c-9b72-4dfe-81ed-f1a80f2ed42e/complete` (no content)
 
 After the transaction is complete, the receiving entity (car) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
+`mobil-e-hub/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
   "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
@@ -584,12 +584,12 @@ This message is converted by the connector into an HTTP message for the orchestr
 ```
 
 #### Third Transaction (from car to drone)
-- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/ready` (no content)
-- `meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/execute` (no content)
-- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/complete` (no content)
+- `mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/ready` (no content)
+- `mobil-e-hub/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/execute` (no content)
+- `mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/e474e964-d5f1-4e73-b256-6e59eb4bda78/complete` (no content)
 
 After the transaction is complete, the receiving entity (drone) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
+`mobil-e-hub/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
   "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
@@ -612,12 +612,12 @@ This message is converted by the connector into an HTTP message for the orchestr
 ```
 
 #### Fourth Transaction (from drone to hub)
-- `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/ready` (no content)
-- `meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/execute` (no content)
-- `meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/complete` (no content)
+- `mobil-e-hub/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/ready` (no content)
+- `mobil-e-hub/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/execute` (no content)
+- `mobil-e-hub/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/transaction/54e08383-2fff-485b-b7d8-f4b444383d89/complete` (no content)
 
 After the transaction is complete, the receiving entity (hub) updates the `carrier` property of the parcel and sends a parcelTransfer message:
-`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
+`mobil-e-hub/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/transfer`
 ```json
 {
   "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
@@ -628,7 +628,7 @@ After the transaction is complete, the receiving entity (hub) updates the `carri
 ```
 
 Afterwards, the hub checks if the current carrier of the parcel is the same as its destination. If so, it sends a parcelDelivered message:
-`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/delivered`
+`mobil-e-hub/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/delivered`
 ```json
 {
   "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
@@ -652,7 +652,7 @@ This message is converted by the connector into an HTTP message for the orchestr
 
 #### Pick-up from the hub
 When the customer picks the parcel up at the hub (i.e., physically removes the parcel from the hub), the hub sends a parcelCollected message:
-`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/collected`
+`mobil-e-hub/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/collected`
 ```json
 {
   "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
