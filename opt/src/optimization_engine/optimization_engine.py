@@ -5,34 +5,12 @@ import logging
 
 class OptimizationEngine:
 	def __init__(self, mqtt_client):
-		self.callbacks = {}
 		self.client = mqtt_client
-
-	def publish(self, topic, message):
-		self.client.publish(topic, message)
-
-
-class OptimizationEngineTest0(OptimizationEngine):
-	def __init__(self, mqtt_client):
-		super().__init__(mqtt_client)
-		self.callbacks = {
-			'+/+/status': self.on_message_status
-		}
-
-	def on_message_status(self, client, userdata, msg):
-		print(f'OptimizationEngineTest0 received status message {msg}!')
-
-
-class OptimizationEngineShowcase0(OptimizationEngine):
-	def __init__(self, mqtt_client):
-		super().__init__(mqtt_client)
 		self.callbacks = {
 			'+/+/status': self.on_message_status,
 			'order/+/placed': self.on_message_order_placed,
 			'hub/+/parcel/+/placed': self.on_message_parcel_placed,
-			'parcel/+/delivered': self.on_message_parcel_delivered,
-			'+/+/opt-control/clear-entities': self.on_message_clear_entities,
-			'+/+/opt-control/add-dummy-entities': self.on_message_add_dummy_entities
+			'parcel/+/delivered': self.on_message_parcel_delivered
 		}
 
 		self.hubs = {}
@@ -85,6 +63,43 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		except BaseException as e:
 			logging.warn(f'Could not send missions ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
+
+	def on_message_parcel_delivered(self, client, userdata, msg):
+		try:
+			project, version, entity, id_, *args = str(msg.topic).split('/')
+			parcel = json.loads(msg.payload)
+
+			logging.debug(parcel)
+
+			del self.orders[parcel['orderId']]
+			logging.debug(f'Parcel delivered ({id_})!')
+		except BaseException as e:
+			logging.warn(f'Error: {e}!')
+			self.publish(f'opt/{self.client.id}/error', repr(e))
+
+
+#	def on_message_clear_entities(self, client, userdata, msg):
+#		self.hubs = {}
+#		self.drones = {}
+#		self.cars = {}
+
+
+	def publish(self, topic, message):
+		self.client.publish(topic, message)
+
+
+class OptimizationEngineTest0(OptimizationEngine):
+	def __init__(self, mqtt_client):
+		super().__init__(mqtt_client)
+		self.callbacks = {
+			'+/+/status': self.on_message_status
+		}
+
+	def on_message_status(self, client, userdata, msg):
+		print(f'OptimizationEngineTest0 received status message {msg}!')
+
+
+class OptimizationEngineShowcase0(OptimizationEngine):
 
 	def send_missions(self, parcel):
 		assert len(self.hubs) == 1, 'There has to be exactly one hub.'
@@ -172,31 +187,14 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		self.publish(f'car/{car["id"]}/mission', car_mission)
 		self.publish(f'drone/{drone["id"]}/mission', drone_mission)
 
-	def on_message_parcel_delivered(self, client, userdata, msg):
-		try:
-			project, version, entity, id_, *args = str(msg.topic).split('/')
-			parcel = json.loads(msg.payload)
-
-			logging.debug(parcel)
-
-			del self.orders[parcel['orderId']]
-			logging.debug(f'Parcel delivered ({id_})!')
-		except BaseException as e:
-			logging.warn(f'Error: {e}!')
-			self.publish(f'opt/{self.client.id}/error', repr(e))
-
-	def on_message_clear_entities(self, client, userdata, msg):
-		self.hubs = {}
-		self.drones = {}
-		self.cars = {}
-
-	def on_message_add_dummy_entities(self, client, userdata, msg):
-		if not self.hubs:
-			hub_id = uuid4()
-			self.hubs = { hub_id: { 'id': hub_id } }
-		if not self.drones:
-			drone_id = uuid4()
-			self.drones = { drone_id: { 'id': drone_id } }
-		if not self.cars:
-			car_id = uuid4()
-			self.cars = { car_id: {'id': car_id } }
+#	def on_message_add_dummy_entities(self, client, userdata, msg):
+#		if not self.hubs:
+#			hub_id = uuid4()
+#			self.hubs = { hub_id: { 'id': hub_id } }
+#		if not self.drones:
+#			drone_id = uuid4()
+#			self.drones = { drone_id: { 'id': drone_id } }
+#		if not self.cars:
+#			car_id = uuid4()
+#			self.cars = { car_id: {'id': car_id } }
+#
