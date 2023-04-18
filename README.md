@@ -197,7 +197,7 @@ Since parcels do not have their own MQTT client, the entity which currently carr
 ### Topics to send
 #### Permanently
 - `[project]/[version]/[entity]/[id]/connected`
-- `[project]/[version]/[entity]/[id]/state`
+- `[project]/[version]/[entity]/[id]/status`
 - `[project]/[version]/[entity]/[id]/mission/complete`
 - `[project]/[version]/[entity]/[id]/mission/failed`
 - `[project]/[version]/[entity]/[id]/error`
@@ -303,7 +303,7 @@ This means that the order is in the system, and we're now waiting for the corres
 
 As soon as the hub detects a box, it sends a message:
 #### Parcel Placement (sent from Hub)
-`meh/v1/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed` (no content)
+`meh/v1/hub/aef6d0fd-d150-4435-9c73-3b3339b77582/parcel/a64bcadb-6967-4407-ba06-8abf2182a1d0/placed` (no content)
 
 This message is converted by the connector into an HTTP message for the orchestrator
 
@@ -491,7 +491,7 @@ The optimization engine receives the parcelPlaced message, looks up the box ID i
 
 #### Entity State Updates (sent from respective entities)
 ##### Drone state update
-`meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/state`
+`meh/v1/drone/52715405-c8a0-4f53-8fb5-ffd54696200c/status`
 ```json
 {
   "id": "52715405-c8a0-4f53-8fb5-ffd54696200c",
@@ -508,7 +508,7 @@ The optimization engine receives the parcelPlaced message, looks up the box ID i
 These messages are sent continuously while the drone moves.
 
 ##### Car state update 
-`meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/state`
+`meh/v1/car/3406a877-6f20-4d27-bac5-08b62a44326a/status`
 ```json
 {
   "id": "3406a877-6f20-4d27-bac5-08b62a44326a",
