@@ -25,15 +25,19 @@ class OptimizationEngine:
 
 			if entity == 'hub':
 				self.hubs[id_] = status
+				print('hub message')
 			elif entity == 'drone':
 				self.drones[id_] = status
+				print('drone message')
 			elif entity == 'car':
 				self.cars[id_] = status
+				print('car message')
 		except BaseException as e:
 			logging.warn(f'Could not update entity status ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 	def on_message_order_placed(self, client, userdata, msg):
+		print('order placed')
 		try:
 			project, version, entity, id_, *args = str(msg.topic).split('/')
 			order = json.loads(msg.payload)
@@ -47,6 +51,7 @@ class OptimizationEngine:
 			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 	def on_message_parcel_placed(self, client, userdata, msg):
+		print('parcel placed')
 		try:
 			project, version, _, car_id, entity, parcel_id, *args = str(msg.topic).split('/')
 			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
@@ -102,6 +107,7 @@ class OptimizationEngineTest0(OptimizationEngine):
 class OptimizationEngineShowcase0(OptimizationEngine):
 
 	def send_missions(self, parcel):
+		print('send missions')
 		assert len(self.hubs) == 1, 'There has to be exactly one hub.'
 		assert len(self.cars) == 1, 'There has to be exactly one car.'
 		assert len(self.drones) == 1, 'There has to be exactly one drone.'
@@ -198,3 +204,91 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 #			car_id = uuid4()
 #			self.cars = { car_id: {'id': car_id } }
 #
+
+class OptimizationEngineRealWorld0(OptimizationEngine):
+
+	def send_missions(self, parcel):
+		print('Drones:')
+		print(self.drones)
+		print('Cars:')
+		print(self.cars)
+		print('Hubs:')
+		print(self.hubs)
+
+
+class OptimizationEngineTestWorld0(OptimizationEngine):
+
+	def on_message_status(self, client, userdata, msg):
+		try:
+			project, version, entity, id_, *args = str(msg.topic).split('/')
+			status = json.loads(msg.payload)
+
+			if status == 'updated':
+				return
+			elif entity == 'hub':
+				self.hubs[id_] = status
+			elif entity == 'drone':
+				self.drones[id_] = status
+			elif entity == 'car':
+				self.cars[id_] = status
+		except BaseException as e:
+			logging.warn(f'Could not update entity status ({repr(e)})!')
+			self.publish(f'opt/{self.client.id}/error', repr(e))
+
+		self.publish(f'{entity}/{id_}/status', 'updated')
+
+	def on_message_order_placed(self, client, userdata, msg):
+		try:
+			project, version, entity, id_, *args = str(msg.topic).split('/')
+			order = json.loads(msg.payload)
+
+			if order == 'order_placed':
+				return
+
+			self.orders[id_] = order
+
+			logging.debug(f'Order placed!')
+			logging.debug(f'self.orders = {self.orders}')
+			self.publish(f'order/{id_}/placed', 'order_placed')
+		except BaseException as e:
+			logging.warn(f'Could not store order ({repr(e)})!')
+			self.publish(f'opt/{self.client.id}/error', repr(e))
+
+	def on_message_parcel_placed(self, client, userdata, msg):
+		try:
+			project, version, _, car_id, entity, parcel_id, *args = str(msg.topic).split('/')
+			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
+			parcel = next(filter(lambda order: order['id'] == parcel_id, self.orders.values()))
+			parcel['carrier'] = { 'type': 'car', 'id': car_id }
+
+			logging.debug(f'Parcel placed ({parcel})!')
+
+			self.send_missions(parcel)
+			self.publish(f'parcel/{parcel_id}/delivered', 'delivered')
+		except StopIteration as e:
+			logging.warn(f'Placed parcel not found in orders!')
+			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
+		except BaseException as e:
+			logging.warn(f'Could not send missions ({repr(e)})!')
+			self.publish(f'opt/{self.client.id}/error', repr(e))
+
+	def on_message_parcel_delivered(self, client, userdata, msg):
+		try:
+			project, version, entity, id_, *args = str(msg.topic).split('/')
+			parcel = json.loads(msg.payload)
+
+			if parcel == 'delivered':
+				return
+
+			logging.debug(parcel)
+
+			del self.orders[parcel['orderId']]
+			logging.debug(f'Parcel delivered ({id_})!')
+		except BaseException as e:
+			logging.warn(f'Error: {e}!')
+			self.publish(f'opt/{self.client.id}/error', repr(e))
+
+	def send_missions(self, parcel):
+		self.publish(f'opt/1234/mission', 'optimized mission content')
+
+
