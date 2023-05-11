@@ -55,4 +55,4 @@ def backtrack_shortest_path(predecessors, start, end, distance):
 
 def generate_transaction_id():
     """generates and returns an uuid v4 for usage as transaction identifier"""
-    return str(uuid4())[0:4]
+    return str(uuid4())[0:14]

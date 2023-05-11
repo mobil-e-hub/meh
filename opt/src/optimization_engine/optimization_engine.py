@@ -25,19 +25,15 @@ class OptimizationEngine:
 
 			if entity == 'hub':
 				self.hubs[id_] = status
-				print('hub message')
 			elif entity == 'drone':
 				self.drones[id_] = status
-				print('drone message')
 			elif entity == 'car':
 				self.cars[id_] = status
-				print('car message')
 		except BaseException as e:
 			logging.warn(f'Could not update entity status ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 	def on_message_order_placed(self, client, userdata, msg):
-		print('order placed')
 		try:
 			project, version, entity, id_, *args = str(msg.topic).split('/')
 			order = json.loads(msg.payload)
@@ -51,7 +47,6 @@ class OptimizationEngine:
 			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 	def on_message_parcel_placed(self, client, userdata, msg):
-		print('parcel placed')
 		try:
 			project, version, _, car_id, entity, parcel_id, *args = str(msg.topic).split('/')
 			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
@@ -223,9 +218,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			project, version, entity, id_, *args = str(msg.topic).split('/')
 			status = json.loads(msg.payload)
 
-			if status == 'updated':
-				return
-			elif entity == 'hub':
+			if entity == 'hub':
 				self.hubs[id_] = status
 			elif entity == 'drone':
 				self.drones[id_] = status
@@ -235,21 +228,15 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			logging.warn(f'Could not update entity status ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
 
-		self.publish(f'{entity}/{id_}/status', 'updated')
-
 	def on_message_order_placed(self, client, userdata, msg):
 		try:
 			project, version, entity, id_, *args = str(msg.topic).split('/')
 			order = json.loads(msg.payload)
 
-			if order == 'order_placed':
-				return
-
 			self.orders[id_] = order
-
 			logging.debug(f'Order placed!')
 			logging.debug(f'self.orders = {self.orders}')
-			self.publish(f'order/{id_}/placed', 'order_placed')
+			self.publish(f'opt/{self.client.id}/accomplished', '')
 		except BaseException as e:
 			logging.warn(f'Could not store order ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
@@ -264,7 +251,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			logging.debug(f'Parcel placed ({parcel})!')
 
 			self.send_missions(parcel)
-			self.publish(f'parcel/{parcel_id}/delivered', 'delivered')
+			self.publish(f'opt/{self.client.id}/accomplished', '')
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
@@ -277,13 +264,11 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			project, version, entity, id_, *args = str(msg.topic).split('/')
 			parcel = json.loads(msg.payload)
 
-			if parcel == 'delivered':
-				return
-
 			logging.debug(parcel)
 
 			del self.orders[parcel['orderId']]
 			logging.debug(f'Parcel delivered ({id_})!')
+			self.publish(f'opt/{self.client.id}/accomplished', '')
 		except BaseException as e:
 			logging.warn(f'Error: {e}!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))

@@ -6,7 +6,7 @@ import json
 
 from dotenv import load_dotenv
 import paho.mqtt.client as mqtt
-
+from optimization_engine.helpers import generate_transaction_id
 
 from optimization_engine.optimization_engine import OptimizationEngineTest0, OptimizationEngineShowcase0, OptimizationEngineRealWorld0, OptimizationEngineTestWorld0
 
@@ -40,7 +40,7 @@ class OptimizationEngineMQTTClient:
         self.project = os.environ.get("MQTT_ROOT")
         self.version = os.environ.get("MQTT_VERSION")
         self.root = f"{self.project}/{self.version}"
-        self.id = str(uuid4())[:4]
+        self.id = str(uuid4())[0:14]
         self.logging_name = f'opt'
 
         # Add callbacks
@@ -48,8 +48,10 @@ class OptimizationEngineMQTTClient:
             f'+/+/mode/+/+': self.on_message_mode
         }
 
-        self.client_name = os.environ.get("CLIENT_ID")  # used for Client creation and logging?
+        self.client_name = self.id  # used for Client creation and logging?
         self.client = mqtt.Client(self.client_name, transport='websockets')
+
+        print(self.client_name)
 
         if self.MQTT_BROKER.startswith('ines'):
             self.MQTT_PATH = os.environ.get("MQTT_BROKER_PATH_INES")
@@ -109,7 +111,7 @@ class OptimizationEngineMQTTClient:
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
             logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER} - Port: {self.MQTT_PORT}")
-            self.publish('connected', '')
+            self.publish(f'opt/{self.id}/connected', '')
             for topic, callback in self.callbacks.items():
                 self.client.subscribe(f'{self.root}/{topic}')
                 self.client.message_callback_add(f'{self.root}/{topic}', callback)
