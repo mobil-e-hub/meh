@@ -61,7 +61,8 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "Monitoring:build"
+            "browserTarget": "Monitoring:build",
+            "port": 3004
           },
           "configurations": {
             "production": {

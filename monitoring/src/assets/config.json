@@ -16,9 +16,19 @@
       "running": false
     },
     {
-      "name": "Mosquitto",
+      "name": "MQTT Broker",
       "path": "wss://ines-gpu-01.informatik.uni-mannheim.de/meh/mqtt",
       "running": false
-    }
+    },
+    {
+      "name": "Monitoring",
+      "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/monitoring",
+      "running": false
+    },
+    {
+        "name": "Github Updater",
+        "path": "https://ines-gpu-01.informatik.uni-mannheim.de/meh/git",
+        "running": false
+      }
   ]
 }
