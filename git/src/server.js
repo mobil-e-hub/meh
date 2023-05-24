@@ -48,6 +48,7 @@ app.post('/', async (req, res) => {
     // TODO: Verify secret
 
     for (command of commands) {
+        console.log(`Command: ${command}`);
         const { stdout, stderr } = await exec(command); 
         console.log('stdout:', stdout);
         console.error('stderr:', stderr);
