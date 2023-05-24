@@ -236,7 +236,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			self.orders[id_] = order
 			logging.debug(f'Order placed!')
 			logging.debug(f'self.orders = {self.orders}')
-			self.publish(f'opt/{self.client.id}/accomplished', '')
+			self.publish(f'opt/{self.client.id}/acknowledged', '')
 		except BaseException as e:
 			logging.warn(f'Could not store order ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
@@ -251,7 +251,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			logging.debug(f'Parcel placed ({parcel})!')
 
 			self.send_missions(parcel)
-			self.publish(f'opt/{self.client.id}/accomplished', '')
+			self.publish(f'opt/{self.client.id}/acknowledged', '')
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
@@ -268,7 +268,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 
 			del self.orders[parcel['orderId']]
 			logging.debug(f'Parcel delivered ({id_})!')
-			self.publish(f'opt/{self.client.id}/accomplished', '')
+			self.publish(f'opt/{self.client.id}/acknowledged', '')
 		except BaseException as e:
 			logging.warn(f'Error: {e}!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
