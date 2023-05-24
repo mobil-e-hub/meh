@@ -10,6 +10,7 @@ module.exports = {
         {
             name: "opt",
             script: "./opt/src/server.py",
+            interpreter: "python3",
             watch: true,
             restart_delay: 3000
 

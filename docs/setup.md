@@ -37,14 +37,11 @@ $ systemctl start service nginx
 ```
 
 #### pm2
-Copy the configuration file from the repository to the default location:
-```
-$ cp $MEH/config/pm2.config.js /etc/nginx/nginx.conf
-```
-
-Register _pm2_ as a system service:
+Start _pm2_ with your ecosystem file and register the configuration as a system service:
 
 ```
+$ pm2 start $MEH/config/pm2.config.js
+$ pm2 save
 $ pm2 startup
 ```
 and follow the instruction.
