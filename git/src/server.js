@@ -10,7 +10,7 @@ const exec = util.promisify(require('child_process').exec);
 
 
 // Environment variables
-dotenv.config();
+dotenv.config({path: `${__dirname}/../../.env`});
 const port = process.env.GIT_PORT || 3005;
 const secret = process.env.GIT_SECRET || '';
 const repo = process.env.GIT_REPO || '';
@@ -18,7 +18,10 @@ const repo = process.env.GIT_REPO || '';
 // Updater commands
 const commands = [
     `cd "${repo}" && git pull`,
-    // `cd sim && npm install`
+    `cd "${repo}/sim" && npm install`,
+    `cd "${repo}/opt" && pip install -r`,
+    `cd "${repo}/viz" && npm install`,
+    `cd "${repo}/monitoring" && npm install`
 ]
 
 // Server

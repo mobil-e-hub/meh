@@ -8,13 +8,13 @@ from dotenv import load_dotenv
 from mqtt_client import OptimizationEngineMQTTClient
 
 # Environment variables
-load_dotenv()
+load_dotenv('../.env')
 port = int(os.environ.get('OPT_PORT', 3001))
 
 # Setup
 app = Flask(__name__)
 
-if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
     opt = OptimizationEngineMQTTClient(mode=('testworld', '0'))  # inherits from MQTTClient
 
 # Endpoints
@@ -39,4 +39,4 @@ def ping_mqtt():
 
 # Startup
 app.run(port=port, use_reloader=True)
-logging.info(f"< Server listening at http://localhost:${port}.")
+logging.info(f'< Server listening at http://localhost:${port}.')

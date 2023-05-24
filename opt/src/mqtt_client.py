@@ -32,10 +32,11 @@ class OptimizationEngineMQTTClient:
         logging.basicConfig(level=os.environ.get("LOGGING_LVL", 'WARNING').upper())
         print(f"LOGGING_LEVEL SET TO: {logging.root.level}")
 
-        self.MQTT_BROKER = os.environ.get("MQTT_BROKER_INES")
-        self.MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT_INES"))
-        self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME_INES")
-        self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD_INES")
+        self.MQTT_BROKER_HOST = os.environ.get("OPT_MQTT_BROKER_HOST")
+        self.MQTT_BROKER_PATH = os.environ.get("OPT_MQTT_BROKER_PATH")
+        self.MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT"))
+        self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME")
+        self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD")
 
         self.project = os.environ.get("MQTT_ROOT")
         self.version = os.environ.get("MQTT_VERSION")
@@ -53,14 +54,13 @@ class OptimizationEngineMQTTClient:
 
         print(self.client_name)
 
-        if self.MQTT_BROKER.startswith('ines'):
-            self.MQTT_PATH = os.environ.get("MQTT_BROKER_PATH_INES")
-            logging.debug(f" > opt_engine: INES MQTT broker selected, use  TLS and path: {self.MQTT_PATH}")
-            self.client.ws_set_options(path=self.MQTT_PATH)  # only needed to specify path to INES broker
+        # self.MQTT_PATH = os.environ.get("MQTT_BROKER_PATH")
+        # logging.debug(f" > opt_engine: INES MQTT broker selected, use  TLS and path: {self.MQTT_PATH}")
+        self.client.ws_set_options(path=self.MQTT_BROKER_PATH)  # only needed to specify path to INES broker
 
-            # only use TLS if INES Broker is used!
-            self.client.tls_set()
-            self.client.username_pw_set(username=self.MQTT_USERNAME, password=self.MQTT_PASSWORD)
+        # only use TLS if INES Broker is used!
+        self.client.tls_set()
+        self.client.username_pw_set(username=self.MQTT_USERNAME, password=self.MQTT_PASSWORD)
 
         logger = logging.getLogger(__name__)
         # self.client.enable_logger(logger)
@@ -79,8 +79,8 @@ class OptimizationEngineMQTTClient:
             self.set_engine(mode)
 
     def begin_client(self):
-        logging.warn(f" > {self.logging_name}: Setting up connection - broker: {self.MQTT_BROKER} on port: {self.MQTT_PORT}.")
-        self.client.connect(self.MQTT_BROKER, self.MQTT_PORT)
+        logging.warn(f" > {self.logging_name}: Setting up connection - broker: {self.MQTT_BROKER_HOST} on port: {self.MQTT_PORT}.")
+        self.client.connect(self.MQTT_BROKER_HOST, self.MQTT_PORT)
 
         self.client.loop_start()  # starts new thread
 
@@ -110,7 +110,7 @@ class OptimizationEngineMQTTClient:
 
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
-            logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER} - Port: {self.MQTT_PORT}")
+            logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER_URL} - Port: {self.MQTT_PORT}")
             self.publish(f'opt/{self.id}/connected', '')
             for topic, callback in self.callbacks.items():
                 self.client.subscribe(f'{self.root}/{topic}')
@@ -180,10 +180,10 @@ class OldMQTTClient:
         logging.basicConfig(level=os.environ.get("LOGGING_LVL", 'WARNING').upper())
         print(f"LOGGING_LEVEL SET TO: {logging.root.level}")
 
-        self.MQTT_BROKER = os.environ.get("MQTT_BROKER_INES")
-        self.MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT_INES"))
-        self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME_INES")
-        self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD_INES")
+        self.MQTT_BROKER_URL = os.environ.get("MQTT_BROKER")
+        self.MQTT_PORT = int(os.environ.get("MQTT_BROKER_PORT"))
+        self.MQTT_USERNAME = os.environ.get("MQTT_BROKER_USERNAME")
+        self.MQTT_PASSWORD = os.environ.get("MQTT_BROKER_PASSWORD")
 
         self.project = os.environ.get("MQTT_ROOT")
         self.version = os.environ.get("MQTT_VERSION")
@@ -198,8 +198,8 @@ class OldMQTTClient:
 
         self.client = mqtt.Client(self.client_name, transport='websockets')
 
-        if self.MQTT_BROKER.startswith('ines'):
-            self.MQTT_PATH = os.environ.get("MQTT_BROKER_PATH_INES")
+        if self.MQTT_BROKER_URL.startswith('ines'):
+            self.MQTT_PATH = os.environ.get("MQTT_BROKER_PATH")
             logging.debug(f" > opt_engine: INES MQTT broker selected, use  TLS and path: {self.MQTT_PATH}")
             self.client.ws_set_options(path=self.MQTT_PATH)  # only needed to specify path to INES broker
 
@@ -215,8 +215,8 @@ class OldMQTTClient:
         self.client.on_message = self.on_message
 
     def begin_client(self):
-        logging.warn(f" > {self.logging_name}: Setting up connection - broker: {self.MQTT_BROKER} on port: {self.MQTT_PORT}.")
-        self.client.connect(self.MQTT_BROKER, self.MQTT_PORT)
+        logging.warn(f" > {self.logging_name}: Setting up connection - broker: {self.MQTT_BROKER_URL} on port: {self.MQTT_PORT}.")
+        self.client.connect(self.MQTT_BROKER_URL, self.MQTT_PORT)
 
         self.client.loop_start()  # starts new thread
 
@@ -257,7 +257,7 @@ class OldMQTTClient:
 
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
-            logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER} - Port: {self.MQTT_PORT}")
+            logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER_URL} - Port: {self.MQTT_PORT}")
             self.publish('connected', '')
             for topic in self.subscriptions:
                 self.subscribe(topic)
