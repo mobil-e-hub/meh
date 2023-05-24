@@ -19,7 +19,7 @@ const repo = process.env.GIT_REPO || '';
 const commands = [
     `cd "${repo}" && git pull`,
     // `cd "${repo}/sim" && npm install`,
-    `cd "${repo}/opt" && pip install -r`,
+    `cd "${repo}/opt" && pip install -r requirements.txt`,
     `cd "${repo}/viz" && npm install`,
     `cd "${repo}/monitoring" && npm install`
 ]
