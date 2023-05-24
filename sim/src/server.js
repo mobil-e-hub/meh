@@ -19,9 +19,8 @@ const ControlSystem = require('./control-system/control-system');
 
 
 // Environment variables
-dotenv.config();
+dotenv.config({path: `${__dirname}/../../.env`});
 const port = process.env.SIM_PORT || 3000;
-
 const brokerUrl = process.env.MQTT_BROKER_URL;
 const brokerUsername = process.env.MQTT_BROKER_USERNAME;
 const brokerPassword = process.env.MQTT_BROKER_PASSWORD;

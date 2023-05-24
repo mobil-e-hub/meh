@@ -49,6 +49,9 @@ $ pm2 startup
 ```
 and follow the instruction.
 
+#### `.env` file
+For obvious reasons, the `.env` file containing all environment variables is not part of the repository. You can either rename the file `<project_folder>/meh/sample.env` to `.env` and adjust the variables manually, or copy the `.env` file from another machine.
+
 ### Check
 Make sure that everything is up and running:
 ```
@@ -61,7 +64,7 @@ Name                | Port | Type
 --------------------|------|-----
 Simulator           | 3000 | node.js server
 Optimization Engine | 3001 | flask server
-Visualization       | 3002 | Vue app
+[Visualization       | 3002 | Vue app]
 MQTT Broker         | 3003 | Mosquitto
 Monitoring          | 3004 | Angular app
 Github Updater      | 3005 | node.js server
