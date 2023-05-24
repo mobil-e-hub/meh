@@ -18,7 +18,7 @@ const repo = process.env.GIT_REPO || '';
 // Updater commands
 const commands = [
     `cd "${repo}" && git pull`,
-    `cd "${repo}/sim" && npm install`,
+    // `cd "${repo}/sim" && npm install`,
     `cd "${repo}/opt" && pip install -r`,
     `cd "${repo}/viz" && npm install`,
     `cd "${repo}/monitoring" && npm install`
@@ -50,9 +50,9 @@ app.post('/', async (req, res) => {
     for (command of commands) {
         try {
             console.log(`Command: ${command}`);
-        const { stdout, stderr } = await exec(command); 
-        console.log('stdout:', stdout);
-        console.error('stderr:', stderr);
+            const { stdout, stderr } = await exec(command); 
+            console.log('stdout:', stdout);
+            console.error('stderr:', stderr);
         }
         catch (e) {
             console.error('error:', e);
