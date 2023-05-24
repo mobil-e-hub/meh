@@ -110,7 +110,7 @@ class OptimizationEngineMQTTClient:
 
     def on_connect(self, client, userdata, flags, rx):
         if rx == 0:
-            logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER_URL} - Port: {self.MQTT_PORT}")
+            logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER_HOST} - Port: {self.MQTT_PORT}")
             self.publish(f'opt/{self.id}/connected', '')
             for topic, callback in self.callbacks.items():
                 self.client.subscribe(f'{self.root}/{topic}')
