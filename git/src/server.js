@@ -34,12 +34,18 @@ app.get('/ping', (req, res) => {
 });
 
 app.post('/', async (req, res) => {
-    console.log('Running git updater...')
-    // TODO: Verify secret from Webhook
+    try {
+        console.log('Running git updater...')
+        // TODO: Verify secret from Webhook
 
-    const { stdout, stderr } = await exec('./git.sh'); 
-    if (stdout != '') { console.log('stdout:', stdout) };
-    if (stderr != '') { console.error('stderr:', stderr) };
+        const { stdout, stderr } = await exec('./git.sh'); 
+        if (stdout != '') { console.log('stdout:', stdout) };
+        if (stderr != '') { console.error('stderr:', stderr) };
 
-    res.json({ success: true });    
+        res.json({ success: true });
+    }
+    catch (e) {
+        console.log(e);
+        res.json({ success: false, error: e });
+    }
 });
