@@ -36,6 +36,15 @@ def ping_mqtt():
     opt.publish('pong', 'optimization-engine')
     return {'mqtt': 'pong'}
 
+# Get status of optimization engine for debugging
+@app.route('/status')
+def get_status():
+    try:
+        return opt.__dict__.items()
+    except BaseException as e:
+        logging.warn(f'Could not get status ({repr(e)})!')
+        return {'error': e}
+
 
 # Startup
 app.run(port=port, use_reloader=True)
