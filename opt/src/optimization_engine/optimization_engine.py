@@ -93,6 +93,13 @@ class OptimizationEngineTest0(OptimizationEngine):
 
 
 class OptimizationEngineShowcase0(OptimizationEngine):
+	def __init__(self, mqtt_client):
+		super().__init__(mqtt_client)
+
+		self.drones = {'d01': {"id": "d01", "pos": {"x": 40, "y": 20, "z": 10}}}
+		self.cars = {'c01': {"id": "c01", "pos": {"x": 40, "y": 20, "z": 10}}}
+		self.hubs = {'h01': {'id': 'h01'}}
+
 	def send_missions(self, parcel):
 		try:
 			print('send missions')
