@@ -99,6 +99,8 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		self.drones = {'d01': {"id": "d01", "pos": {"x": 40, "y": 20, "z": 10}}}
 		self.cars = {'c01': {"id": "c01", "pos": {"x": 40, "y": 20, "z": 10}}}
 		self.hubs = {'h01': {'id': 'h01'}}
+		self.orders = { 'o01': {"id": "p01", "orderId": "o01", "carrier": None, "destination": { "type": "hub", "id": "h01" }
+} }
 
 	def on_message_order_placed(self, client, userdata, msg):
 		super().on_message_order_placed(client, userdata, msg)
