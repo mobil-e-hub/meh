@@ -28,9 +28,9 @@ module.exports = class MQTTClient {
         this.mqtt.client.on('connect', () => {
             this.mqtt.client.subscribe(subscriptionTopics.map(topic => `${this.mqtt.root}/${topic}`));
             this.publish(this.type, 'connected');
-            if (this.type == 'bus-simulator') {
-                this.start();
-            }
+            // if (this.type == 'bus-simulator') {
+            //     this.start();
+            // }
         });
 
         this.mqtt.client.on('message', (topic, message) => {
