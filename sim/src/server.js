@@ -69,10 +69,10 @@ function shutdown() {
 }
 
 // MQTT client
-const mqttClient = MQTT.connect(brokerUrl, {
-                username: brokerUsername,
-                password: brokerPassword
-});
+// const mqttClient = MQTT.connect(brokerUrl, {
+//                 username: brokerUsername,
+//                 password: brokerPassword
+// });
 
 // Endpoints
 app.get('/', (req, res) => {
@@ -120,16 +120,16 @@ function matchTopic(pattern, topic) {
  */
 
  //Receive and distribute incoming event
- async function receive(topic, message) {
-     console.log(`> ${topic.string}: ${JSON.stringify(message)}`);
-     for (const [pattern, handlers] of Object.entries(eventGridSubscriptions)) {
-         if (matchTopic(pattern, topic)) {
-             for (const handler of handlers) {
-                 await handler(topic, message);
-             }
-         }
-     }
- }
+//  async function receive(topic, message) {
+//      console.log(`> ${topic.string}: ${JSON.stringify(message)}`);
+//      for (const [pattern, handlers] of Object.entries(eventGridSubscriptions)) {
+//          if (matchTopic(pattern, topic)) {
+//              for (const handler of handlers) {
+//                  await handler(topic, message);
+//              }
+//          }
+//      }
+//  }
 
 
 

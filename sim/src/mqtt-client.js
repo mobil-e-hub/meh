@@ -6,12 +6,12 @@ const dotenv = require('dotenv');
 // Internal modules
 const {random, uuid} = require('./helpers');
 
-dotenv.config()
+dotenv.config({path: `${__dirname}/../../.env`});
 const mqttBrokerURL = process.env.MQTT_BROKER_URL;
 const mqttBrokerUsername = process.env.MQTT_BROKER_USERNAME;
 const mqttBrokerPassword = process.env.MQTT_BROKER_PASSWORD;
-const mqttPort = process.env.MQTT_BROKER_PORT;
 const mqttRoot = process.env.MQTT_ROOT;
+const mqttVersion = process.env.MQTT_VERSION;
 
 module.exports = class MQTTClient {
     constructor(type, subscriptionTopics) {
@@ -21,7 +21,7 @@ module.exports = class MQTTClient {
                 username: mqttBrokerUsername,
                 password: mqttBrokerPassword
             }),
-            root: mqttRoot,
+            root: `${mqttRoot}/${mqttVersion}`,
             id: uuid()
         };
 
@@ -31,7 +31,7 @@ module.exports = class MQTTClient {
             if (this.type == 'bus-simulator') {
                 this.start();
             }
-            });
+        });
 
         this.mqtt.client.on('message', (topic, message) => {
             let [project, version, entity, id, ...args] = topic.split('/');
@@ -47,7 +47,6 @@ module.exports = class MQTTClient {
             } catch (e) {
                  console.error(`> [${this.type}] MQTT message with topic ${topic} and message ${message} could not be parsed. ${e}.`);
             }
-
         });
     }
 
