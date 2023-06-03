@@ -38,7 +38,7 @@ app.post('/', async (req, res) => {
         console.log('Running git updater...')
         // TODO: Verify secret from Webhook
 
-        const { stdout, stderr } = await exec('./git.sh');
+        const { stdout, stderr } = await exec('pwd');
         if (stdout != '') { console.log('stdout:', stdout) };
         if (stderr != '') { console.error('stderr:', stderr) };
 
