@@ -100,6 +100,16 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 		self.cars = {'c01': {"id": "c01", "pos": {"x": 40, "y": 20, "z": 10}}}
 		self.hubs = {'h01': {'id': 'h01'}}
 
+	def on_message_order_placed(self, client, userdata, msg):
+		super().on_message_order_placed(client, userdata, msg)
+
+		self.publish(f'opt/{self.client.id}/acknowledged', '')
+
+	def on_message_parcel_placed(self, client, userdata, msg):
+		super().on_message_parcel_placed(client, userdata, msg)
+
+		self.publish(f'opt/{self.client.id}/acknowledged', '')
+
 	def send_missions(self, parcel):
 		try:
 			print('send missions')
