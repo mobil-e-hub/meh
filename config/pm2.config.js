@@ -23,7 +23,7 @@ module.exports = {
         // },
         {
             name: "mqtt",
-            script: "mosquitto",
+            script: "mosquitto -c $MEH/config/mosquitto.conf",
             // watch: true,
             // restart_delay: 3000
 
