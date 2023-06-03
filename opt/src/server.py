@@ -40,7 +40,7 @@ def ping_mqtt():
 @app.route('/status')
 def get_status():
     try:
-        return opt.__dict__.items()
+        return f'{opt.__dict__.items()}'
     except BaseException as e:
         logging.warn(f'Could not get status ({repr(e)})!')
         return {'error': e}
