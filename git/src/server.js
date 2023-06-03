@@ -42,6 +42,8 @@ app.post('/', async (req, res) => {
         if (stdout != '') { console.log('stdout:', stdout) };
         if (stderr != '') { console.error('stderr:', stderr) };
 
+        console.log('Done!')
+
         res.json({ success: true });
     }
     catch (e) {
