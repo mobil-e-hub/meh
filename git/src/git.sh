@@ -8,7 +8,12 @@ npm install
 
 echo "opt: Installing dependencies..."
 cd $MEH/opt
-[ -d $MEH/opt/.venv ] && python3 -m venv $MEH/opt/.venv
+if [ -d $MEH/opt/.venv ]
+then
+    echo "venv already exists."
+else
+    python3 -m venv $MEH/opt/.venv
+fi
 source .venv/bin/activate
 pip install -r requirements.txt
 
