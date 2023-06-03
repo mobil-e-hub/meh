@@ -1,12 +1,12 @@
 module.exports = {
     apps : [
-        {
-            name: "sim",
-            script: "./sim/src/server.js",
-            watch: true,
-            restart_delay: 3000
+        // {
+        //     name: "sim",
+        //     script: "./sim/src/server.js",
+        //     watch: true,
+        //     restart_delay: 3000
 
-        },
+        // },
         {
             name: "opt",
             script: "./opt/src/server.py",
