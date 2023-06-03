@@ -100,86 +100,86 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			assert len(self.cars) == 1, 'There has to be exactly one car.'
 			assert len(self.drones) == 1, 'There has to be exactly one drone.'
 			
-            hub, car, drone = list(self.hubs.values())[0], list(self.cars.values())[0], list(self.drones.values())[0]
-            
-            transaction_1 = {
-                "id": str(uuid4()),
-                "from": {"type": "car", "id": car['id']},
-                "to": {"type": "drone", "id": drone['id']},
-                "parcel": parcel
-            }
+			hub, car, drone = list(self.hubs.values())[0], list(self.cars.values())[0], list(self.drones.values())[0]
+			
+			transaction_1 = {
+				"id": str(uuid4()),
+				"from": {"type": "car", "id": car['id']},
+				"to": {"type": "drone", "id": drone['id']},
+				"parcel": parcel
+			}
 
-            transaction_2 = {
-                "id": str(uuid4()),
-                "from": {"type": "drone", "id": drone['id']},
-                "to": {"type": "hub", "id": hub['id']},
-                "parcel": parcel
-            }
+			transaction_2 = {
+				"id": str(uuid4()),
+				"from": {"type": "drone", "id": drone['id']},
+				"to": {"type": "hub", "id": hub['id']},
+				"parcel": parcel
+			}
 
-            position_1 = {"lat": 0.0, "long": 0.0, "alt": 0.0}
-            position_2 = {"lat": 1.0, "long": 0.0, "alt": 0.0}
-            position_3 = {"lat": 0.0, "long": 1.0, "alt": 0.0}
-            position_4 = {"lat": 1.0, "long": 1.0, "alt": 0.0}
+			position_1 = {"lat": 0.0, "long": 0.0, "alt": 0.0}
+			position_2 = {"lat": 1.0, "long": 0.0, "alt": 0.0}
+			position_3 = {"lat": 0.0, "long": 1.0, "alt": 0.0}
+			position_4 = {"lat": 1.0, "long": 1.0, "alt": 0.0}
 
-            hub_mission = {
-                "id": str(uuid4()),
-                "tasks": [
-                    {
-                        "type": "pickup",
-                        "state": "TaskState.notStarted",
-                        "transaction": transaction_2
-                    }
-                ]
-            }
+			hub_mission = {
+				"id": str(uuid4()),
+				"tasks": [
+					{
+						"type": "pickup",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_2
+					}
+				]
+			}
 
-            car_mission = {
-                "id": str(uuid4()),
-                "tasks": [
-                    {
-                        "type": "dropoff",
-                        "state": "TaskState.notStarted",
-                        "transaction": transaction_1
-                    }
-                ]
-            }
+			car_mission = {
+				"id": str(uuid4()),
+				"tasks": [
+					{
+						"type": "dropoff",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_1
+					}
+				]
+			}
 
-            drone_mission = {
-                "id": str(uuid4()),
-                "tasks": [
-                    {
-                        "type": "move",
-                        "state": "TaskState.notStarted",
-                        "destination": position_2,
-                        "minimumDuration": 10
-                    },
-                    {
-                        "type": "pickup",
-                        "state": "TaskState.notStarted",
-                        "transaction": transaction_1
-                    },
-                    {
-                        "type": "move",
-                        "state": "TaskState.notStarted",
-                        "destination": position_3,
-                        "minimumDuration": 10
-                    },
-                    {
-                        "type": "dropoff",
-                        "state": "TaskState.notStarted",
-                        "transaction": transaction_2
-                    },
-                    {
-                        "type": "move",
-                        "state": "TaskState.notStarted",
-                        "destination": position_4,
-                        "minimumDuration": 10
-                    }
-                ]
-            }
+			drone_mission = {
+				"id": str(uuid4()),
+				"tasks": [
+					{
+						"type": "move",
+						"state": "TaskState.notStarted",
+						"destination": position_2,
+						"minimumDuration": 10
+					},
+					{
+						"type": "pickup",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_1
+					},
+					{
+						"type": "move",
+						"state": "TaskState.notStarted",
+						"destination": position_3,
+						"minimumDuration": 10
+					},
+					{
+						"type": "dropoff",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_2
+					},
+					{
+						"type": "move",
+						"state": "TaskState.notStarted",
+						"destination": position_4,
+						"minimumDuration": 10
+					}
+				]
+			}
 
-            self.publish(f'hub/{hub["id"]}/mission', hub_mission)
-            self.publish(f'car/{car["id"]}/mission', car_mission)
-            self.publish(f'drone/{drone["id"]}/mission', drone_mission)
+			self.publish(f'hub/{hub["id"]}/mission', hub_mission)
+			self.publish(f'car/{car["id"]}/mission', car_mission)
+			self.publish(f'drone/{drone["id"]}/mission', drone_mission)
 	
 		except BaseException as e:
 			logging.warn(f'Could not send missions ({repr(e)})!')
