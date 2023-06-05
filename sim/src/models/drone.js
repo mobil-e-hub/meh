@@ -48,22 +48,22 @@ class Drone {
             switch (task.type) {
                 case 'move':
                     let direction = {
-                        x: task.destination.x - this.position.x,
-                        y: task.destination.y - this.position.y,
-                        z: task.destination.z - this.position.z,
+                        lat: task.destination.lat - this.position.lat,
+                        long: task.destination.long - this.position.long,
+                        alt: task.destination.alt - this.position.alt,
                     };
-                    let length = Math.sqrt(direction.x ** 2 + direction.y ** 2 + direction.z ** 2);
+                    let length = Math.sqrt(direction.lat ** 2 + direction.long ** 2 + direction.alt ** 2);
                     if (length > this.speed * interval) {
                         direction = {
-                            x: direction.x / length * this.speed * interval,
-                            y: direction.y / length * this.speed * interval,
-                            z: direction.z / length * this.speed * interval
+                            lat: direction.lat / length * this.speed * interval,
+                            long: direction.long / length * this.speed * interval,
+                            alt: direction.alt / length * this.speed * interval
                         }
                     }
 
-                    this.position.x += direction.x;
-                    this.position.y += direction.y;
-                    this.position.z += direction.z;
+                    this.position.lat += direction.lat;
+                    this.position.long += direction.long;
+                    this.position.alt += direction.alt;
 
                     if (_.isEqual(this.position, task.destination)) {
                         this.completeTask(simulator);
