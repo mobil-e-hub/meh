@@ -232,12 +232,6 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 	def __init__(self, mqtt_client):
 		super().__init__(mqtt_client)
 
-		self.drones = {'d00': {"id": "d00", "pos": {"x": 50, "y": -50, "z": 0}}}
-		self.cars = {'c00': {"id": "c00", "pos": {"x": -50, "y": -50, "z": 0}}}
-		self.hubs = {'h00': {'id': 'h00'},
-		             'h01': {'id': 'h01'},
-		             'h02': {'id': 'h02'}}
-
 	def on_message_order_placed(self, client, userdata, msg):
 		super().on_message_order_placed(client, userdata, msg)
 
@@ -251,82 +245,35 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 	def send_missions(self, parcel):
 		try:
 
-			car, drone = list(self.cars.values()[0]), list(self.drones.values()[0])
+			hub, car, drone = list(self.hubs.values())[0], list(self.cars.values())[0], list(self.drones.values())[0]
 
-			transaction_1 = {
-				"id": str(uuid4()),
-				"from": {"type": "hub", "id": 'h00'},
-				"to": {"type": "car", "id": car['id']},
-				"parcel": parcel
-			}
 
-			transaction_2 = {
+			transaction_0 = {
 				"id": str(uuid4()),
 				"from": {"type": "car", "id": car['id']},
-				"to": {"type": "hub", "id": 'h01'},
-				"parcel": parcel
-			}
-
-			transaction_3 = {
-				"id": str(uuid4()),
-				"from": {"type": "hub", "id": 'h01'},
 				"to": {"type": "drone", "id": drone['id']},
 				"parcel": parcel
 			}
 
-			transaction_3 = {
+			transaction_1 = {
 				"id": str(uuid4()),
 				"from": {"type": "drone", "id": drone['id']},
-				"to": {"type": "hub", "id": 'h02'},
+				"to": {"type": "hub", "id": hub['id']},
 				"parcel": parcel
 			}
 
-			position_1 = {"lat": -50.0, "long": 50.0, "alt": 0.0}
-			position_2 = {"lat": 0.0, "long": 50.0, "alt": 0.0}
-			position_3 = {"lat": 50.0, "long": 50.0, "alt": 0.0}
+			position_0 = {"lat": -50.0, "long": 50.0, "alt": 0.0}
+			position_1 = {"lat": 0.0, "long": 50.0, "alt": 0.0}
+			position_2 = {"lat": 50.0, "long": 50.0, "alt": 0.0}
 
-			hub_mission_h00 = {
+			hub_mission = {
 				{
 					"id": str(uuid4()),
 					"tasks": [
 						{
-							"type": "dropoff",
+							"type": "pickup",
 							"state": "TaskState.notStarted",
 							"transaction": transaction_1
-						}
-					]
-				}
-			}
-
-			hub_mission_h01 = {
-				{
-					"id": str(uuid4()),
-					"tasks": [
-						{
-							"type": "pickup",
-							"state": "TaskState.notStarted",
-							"transaction": transaction_2
-						},
-
-						{
-							"type": "dropoff",
-							"state": "TaskState.notStarted",
-							"transaction": transaction_3
-						}
-
-					]
-
-				}
-			}
-
-			hub_mission_h02 = {
-				{
-					"id": str(uuid4()),
-					"tasks": [
-						{
-							"type": "pickup",
-							"state": "TaskState.notStarted",
-							"transaction": transaction_4
 						}
 					]
 				}
@@ -336,22 +283,16 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 				"id": str(uuid4()),
 				"tasks": [
 					{
-						"type": "pickup",
-						"state": "TaskState.notStarted",
-						"transaction": transaction_1
-					},
-
-					{
                         "type": "move",
                         "state": "TaskState.notStarted",
-                        "destination": position_2,
+                        "destination": position_1,
                         "minimumDuration": 1
 					},
 
 					{
 						"type": "dropoff",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_2
+						"transaction": transaction_0
 					}
 				]
 			}
@@ -362,31 +303,29 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 					{
 						"type": "move",
 						"state": "TaskState.notStarted",
-						"destination": position_2,
+						"destination": position_1,
 						"minimumDuration": 10
 					},
 					{
 						"type": "pickup",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_3
+						"transaction": transaction_0
 					},
 					{
 						"type": "move",
 						"state": "TaskState.notStarted",
-						"destination": position_3,
+						"destination": position_2,
 						"minimumDuration": 10
 					},
 					{
 						"type": "dropoff",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_4
+						"transaction": transaction_1
 					},
 				]
 			}
 
-			self.publish(f'hub/h00/mission', hub_mission_h00)
-			self.publish(f'hub/h01/mission', hub_mission_h01)
-			self.publish(f'hub/h02/mission', hub_mission_h02)
+			self.publish(f'hub/{hub["id"]}/mission', hub_mission)
 			self.publish(f'car/{car["id"]}/mission', car_mission)
 			self.publish(f'drone/{drone["id"]}/mission', drone_mission)
 
