@@ -53,7 +53,7 @@ module.exports = class DroneSimulator extends MQTTClient {
     }
 
     init() {
-        this.drones = Object.assign({}, ...Object.values(this.scenario.entities.drones).map(drone => {
+        this.drones = Object.assign({}, ...Object.values(this.scenario['entities']['drones']).map(drone => {
             let id = drone.id || uuid();
             let position = drone.position || random.droneHub().position;
 
