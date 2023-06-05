@@ -4,27 +4,27 @@
 			"n00": {
 				"id": "n00",
 				"position": {
-					"x": -50,
-					"y": 50,
-					"z": 0
+					"lat": -50,
+					"long": 50,
+					"alt": 0
 				},
 				"type": "parking"
 			},
 			"n01": {
 				"id": "n01",
 				"position": {
-					"x": 0,
-					"y": 50,
-					"z": 0
+					"lat": 0,
+					"long": 50,
+					"alt": 0
 				},
 				"type": "parking"
 			},
 			"n02": {
 				"id": "n02",
 				"position": {
-					"x": 50,
-					"y": 50,
-					"z": 0
+					"lat": 50,
+					"long": 50,
+					"alt": 0
 				},
 				"type": "air"
 			}
@@ -56,24 +56,24 @@
 			"a00": {
 				"id": "a00",
 				"position": {
-					"x": -50,
-					"y": 55
+					"lat": -50,
+					"long": 55
 				},
 				"name": "5 Main St"
 			},
 			"a01": {
 				"id": "a01",
 				"position": {
-					"x": 0,
-					"y": 55
+					"lat": 0,
+					"long": 55
 				},
 				"name": "10 Main St"
 			},
 			"a02": {
 				"id": "a02",
 				"position": {
-					"x": 50,
-					"y": 55
+					"lat": 50,
+					"long": 55
 				},
 				"name": "15 Main St"
 			}
@@ -111,9 +111,9 @@
 			"d00": {
 				"id": "d00",
 				"position": {
-					"x": 50,
-					"y": 50,
-					"z": 0
+					"lat": 50,
+					"long": 50,
+					"alt": 0
 				}
 			}
 		},
@@ -121,9 +121,9 @@
 			"v00": {
 				"id": "v00",
 				"position": {
-					"x": -50,
-					"y": 50,
-					"z": 0
+					"lat": -50,
+					"long": 50,
+					"alt": 0
 				}
 			}
 		},
