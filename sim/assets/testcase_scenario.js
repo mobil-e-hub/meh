@@ -25,7 +25,8 @@ module.exports = {
         //idea: if value is none --> generate randomly during init
         hubs: {
             h00: {id: 'h00', position: 'n00'},
-            h01: {id: 'h01', position: 'n02'}
+            h01: {id: 'h01', position: 'n01'},
+            h02: {id: 'h02', position: 'n02'}
         },
         drones: {
             d00: {id: 'd00', position: { x: 50, y: -50, z: 0 }}
@@ -37,9 +38,6 @@ module.exports = {
                     {node: 'n00', position: {x: -50, y: 50, z: 0}, time: 12}
                 ],
             } //, speed:0, parcel:null, state:VehicleState.IDLE}
-        },
-        parcels: {
-            p00: {id:'p00', carrier: {type: 'hub', id: 'h00'}, destination: {type: 'hub', id: 'h01'}}
         },
         missions: {
             // TODO nötig? --> einfach für alle Pakete in der Init eine Mission erstellen?

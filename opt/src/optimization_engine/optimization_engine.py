@@ -235,10 +235,8 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		self.drones = {'d00': {"id": "d00", "pos": {"x": 50, "y": -50, "z": 0}}}
 		self.cars = {'c00': {"id": "c00", "pos": {"x": -50, "y": -50, "z": 0}}}
 		self.hubs = {'h00': {'id': 'h00'},
-		             'h01': {'id': 'h01'}}
-		self.orders = {
-			'o00': {"id": "p00", "orderId": "o00", "carrier": None, "destination": {"type": "hub", "id": "h00"}
-			        }}
+		             'h01': {'id': 'h01'},
+		             'h02': {'id': 'h02'}}
 
 	def on_message_order_placed(self, client, userdata, msg):
 		super().on_message_order_placed(client, userdata, msg)
