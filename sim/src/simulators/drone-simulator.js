@@ -1,5 +1,4 @@
 // External modules
-import json
 
 // Internal modules
  const { random, uuid } = require('../helpers');
@@ -54,6 +53,7 @@ module.exports = class DroneSimulator extends MQTTClient {
     }
 
     init() {
+        this.publish(this.scenario['entities']['drones']);
         this.drones = Object.assign({}, ...Object.values(this.scenario['entities']['drones']).map(drone => {
             let id = drone.id || uuid();
             let position = drone.position || random.droneHub().position;
