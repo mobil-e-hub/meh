@@ -1,7 +1,7 @@
 // External modules
 
 // Internal modules
-const { random, uuid } = require('../helpers');
+// const { random, uuid } = require('../helpers');
 const MQTTClient = require('../mqtt-client');
 const { Drone, DroneState, TaskState} = require('../models/drone');
 
@@ -54,8 +54,10 @@ module.exports = class DroneSimulator extends MQTTClient {
 
     init() {
         this.drones = Object.assign({}, ...Object.values(this.scenario.entities.drones).map(drone => {
-            let id = drone.id || uuid();
-            let position = drone.position || random.droneHub().position;
+            let id = drone.id;
+            //let id = drone.id || uuid();
+            let position = drone.position;
+            //let position = drone.position || random.droneHub().position;
 
             // return { [id]: new Drone(id, random.position())};
             // return { [id]: new Drone(id, random.position(), { id: uuid(), items: [{ type: 'fly', destination: random.position(), minimumDuration: 10 }] }) };
