@@ -86,6 +86,7 @@ module.exports = class HubSimulator extends MQTTClient {
         } else if (this.matchTopic(topic, 'hub/+/transaction/+/complete')) {
             // This message is only received if the hub is the transaction's "from" instance and has already sent the "execute" message
             let hub = this.hubs[topic.id];
+            console.log(hub);
             let transaction = hub.transactions[topic.args[1]];
 
             if(typeof transaction !== "undefined" && transaction.id in hub.transactions) {
