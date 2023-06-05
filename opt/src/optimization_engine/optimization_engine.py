@@ -257,8 +257,6 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			hub, car, drone = list(self.hubs.values())[0], list(self.cars.values())[0], list(self.drones.values())[0]
 			hub01 = list(self.hubs.values())[1]
 
-			self.publish(f'hub/{hub01["id"]}/mission', 'hub_mission')
-
 			transaction_0 = {
 				"id": str(uuid4()),
 				"from": {"type": "car", "id": car['id']},
