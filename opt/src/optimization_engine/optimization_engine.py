@@ -251,7 +251,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 	def send_missions(self, parcel):
 		try:
 
-			hub, car, drone = list(self.hubs.values()), list(self.cars.values()), list(self.drones.values())
+			car, drone = list(self.cars.values()[0]), list(self.drones.values()[0])
 
 			transaction_1 = {
 				"id": str(uuid4()),
