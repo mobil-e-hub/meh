@@ -2,7 +2,7 @@ const random = require('random');
 const { v4: uuid } = require('uuid');
 
 // Internal modules
-const scenario = require("../assets/testcase_scenario");
+//const scenario = require("../assets/testcase_scenario");
 
 module.exports = {
     random: {
@@ -57,14 +57,14 @@ module.exports = {
             };
         },
         // TODO refactor! --> doesnt belong here
-        droneHub: () => {
-            let d = Object.values(scenario.topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'air');
-            return d[Math.floor(Math.random() * (d.length-1))];
-        },
-        roadHub: () => {
-            let d = Object.values(scenario.topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'road');
-            return d[Math.floor(Math.random() * (d.length-1))];
-        },
+//        droneHub: () => {
+//           let d = Object.values(scenario.topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'air');
+//           return d[Math.floor(Math.random() * (d.length-1))];
+//       },
+//       roadHub: () => {
+//           let d = Object.values(scenario.topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'road');
+//           return d[Math.floor(Math.random() * (d.length-1))];
+//        },
         rand: random
     },
     uuid: () => {
