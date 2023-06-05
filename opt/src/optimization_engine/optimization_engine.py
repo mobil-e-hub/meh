@@ -229,67 +229,183 @@ class OptimizationEngineRealWorld0(OptimizationEngine):
 
 class OptimizationEngineTestWorld0(OptimizationEngine):
 
-	def on_message_status(self, client, userdata, msg):
-		try:
-			project, version, entity, id_, *args = str(msg.topic).split('/')
-			status = json.loads(msg.payload)
+	def __init__(self, mqtt_client):
+		super().__init__(mqtt_client)
 
-			if entity == 'hub':
-				self.hubs[id_] = status
-			elif entity == 'drone':
-				self.drones[id_] = status
-			elif entity == 'car':
-				self.cars[id_] = status
-		except BaseException as e:
-			logging.warn(f'Could not update entity status ({repr(e)})!')
-			self.publish(f'opt/{self.client.id}/error', repr(e))
+		self.drones = {'d00': {"id": "d00", "pos": {"x": 50, "y": -50, "z": 0}}}
+		self.cars = {'c00': {"id": "c00", "pos": {"x": -50, "y": -50, "z": 0}}}
+		self.hubs = {'h00': {'id': 'h00'},
+		             'h01': {'id': 'h01'}}
+		self.orders = {
+			'o00': {"id": "p00", "orderId": "o00", "carrier": None, "destination": {"type": "hub", "id": "h00"}
+			        }}
 
 	def on_message_order_placed(self, client, userdata, msg):
-		try:
-			project, version, entity, id_, *args = str(msg.topic).split('/')
-			order = json.loads(msg.payload)
+		super().on_message_order_placed(client, userdata, msg)
 
-			self.orders[id_] = order
-			logging.debug(f'Order placed!')
-			logging.debug(f'self.orders = {self.orders}')
-			self.publish(f'opt/{self.client.id}/acknowledged', '')
-		except BaseException as e:
-			logging.warn(f'Could not store order ({repr(e)})!')
-			self.publish(f'opt/{self.client.id}/error', repr(e))
+		self.publish(f'opt/{self.client.id}/acknowledged', '')
 
 	def on_message_parcel_placed(self, client, userdata, msg):
+		super().on_message_parcel_placed(client, userdata, msg)
+
+		self.publish(f'opt/{self.client.id}/acknowledged', '')
+
+	def send_missions(self, parcel):
 		try:
-			project, version, _, car_id, entity, parcel_id, *args = str(msg.topic).split('/')
-			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
-			parcel = next(filter(lambda order: order['id'] == parcel_id, self.orders.values()))
-			parcel['carrier'] = { 'type': 'car', 'id': car_id }
 
-			logging.debug(f'Parcel placed ({parcel})!')
+			hub, car, drone = list(self.hubs.values()), list(self.cars.values()), list(self.drones.values())
 
-			self.send_missions(parcel)
-			self.publish(f'opt/{self.client.id}/acknowledged', '')
-		except StopIteration as e:
-			logging.warn(f'Placed parcel not found in orders!')
-			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
+			transaction_1 = {
+				"id": str(uuid4()),
+				"from": {"type": "hub", "id": 'h00'},
+				"to": {"type": "car", "id": car['id']},
+				"parcel": parcel
+			}
+
+			transaction_2 = {
+				"id": str(uuid4()),
+				"from": {"type": "car", "id": car['id']},
+				"to": {"type": "hub", "id": 'h01'},
+				"parcel": parcel
+			}
+
+			transaction_3 = {
+				"id": str(uuid4()),
+				"from": {"type": "hub", "id": 'h01'},
+				"to": {"type": "drone", "id": drone['id']},
+				"parcel": parcel
+			}
+
+			transaction_3 = {
+				"id": str(uuid4()),
+				"from": {"type": "drone", "id": drone['id']},
+				"to": {"type": "hub", "id": 'h02'},
+				"parcel": parcel
+			}
+
+			position_1 = {"lat": -50.0, "long": 50.0, "alt": 0.0}
+			position_2 = {"lat": 0.0, "long": 50.0, "alt": 0.0}
+			position_3 = {"lat": 50.0, "long": 50.0, "alt": 0.0}
+
+			hub_mission_h00 = {
+				{
+					"id": str(uuid4()),
+					"tasks": [
+						{
+							"type": "dropoff",
+							"state": "TaskState.notStarted",
+							"transaction": transaction_1
+						}
+					]
+				}
+			}
+
+			hub_mission_h01 = {
+				{
+					"id": str(uuid4()),
+					"tasks": [
+						{
+							"type": "pickup",
+							"state": "TaskState.notStarted",
+							"transaction": transaction_2
+						},
+
+						{
+							"type": "dropoff",
+							"state": "TaskState.notStarted",
+							"transaction": transaction_3
+						}
+
+					]
+
+				}
+			}
+
+			hub_mission_h02 = {
+				{
+					"id": str(uuid4()),
+					"tasks": [
+						{
+							"type": "pickup",
+							"state": "TaskState.notStarted",
+							"transaction": transaction_4
+						}
+					]
+				}
+			}
+
+			car_mission = {
+				"id": str(uuid4()),
+				"tasks": [
+					{
+						"type": "pickup",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_1
+					},
+
+					{
+                        "type": "move",
+                        "state": "TaskState.notStarted",
+                        "destination": position_2,
+                        "minimumDuration": 1
+					},
+
+					{
+						"type": "dropoff",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_2
+					}
+				]
+			}
+
+			drone_mission = {
+				"id": str(uuid4()),
+				"tasks": [
+					{
+						"type": "move",
+						"state": "TaskState.notStarted",
+						"destination": position_2,
+						"minimumDuration": 10
+					},
+					{
+						"type": "pickup",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_3
+					},
+					{
+						"type": "move",
+						"state": "TaskState.notStarted",
+						"destination": position_3,
+						"minimumDuration": 10
+					},
+					{
+						"type": "dropoff",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_4
+					},
+				]
+			}
+
+			self.publish(f'hub/h00/mission', hub_mission_h00)
+			self.publish(f'hub/h01/mission', hub_mission_h01)
+			self.publish(f'hub/h02/mission', hub_mission_h02)
+			self.publish(f'car/{car["id"]}/mission', car_mission)
+			self.publish(f'drone/{drone["id"]}/mission', drone_mission)
+
 		except BaseException as e:
 			logging.warn(f'Could not send missions ({repr(e)})!')
 			self.publish(f'opt/{self.client.id}/error', repr(e))
 
-	def on_message_parcel_delivered(self, client, userdata, msg):
-		try:
-			project, version, entity, id_, *args = str(msg.topic).split('/')
-			parcel = json.loads(msg.payload)
-
-			logging.debug(parcel)
-
-			del self.orders[parcel['orderId']]
-			logging.debug(f'Parcel delivered ({id_})!')
-			self.publish(f'opt/{self.client.id}/acknowledged', '')
-		except BaseException as e:
-			logging.warn(f'Error: {e}!')
-			self.publish(f'opt/{self.client.id}/error', repr(e))
-
-	def send_missions(self, parcel):
-		self.publish(f'opt/1234/mission', 'optimized mission content')
+#	def on_message_add_dummy_entities(self, client, userdata, msg):
+#		if not self.hubs:
+#			hub_id = uuid4()
+#			self.hubs = { hub_id: { 'id': hub_id } }
+#		if not self.drones:
+#			drone_id = uuid4()
+#			self.drones = { drone_id: { 'id': drone_id } }
+#		if not self.cars:
+#			car_id = uuid4()
+#			self.cars = { car_id: {'id': car_id } }
+#
 
 

@@ -2,8 +2,8 @@ module.exports = {
     topology: {
         nodes: {
             n00: {id: 'n00', position: {x: -50, y: 50, z: 0}, type: 'parking'},
-            n01: {id: 'n01', position: {x: -50, y: -50, z: 0}, type: 'parking'},
-            n02: {id: 'n02', position: {x: 50, y: -50, z: 0}, type: 'air'},
+            n01: {id: 'n01', position: {x: 0, y: 50, z: 0}, type: 'parking'},
+            n02: {id: 'n02', position: {x: 50, y: 50, z: 0}, type: 'air'},
         },
         edges: {
             e00: {id: 'e00', from: 'n00', to: 'n01', type: 'road', distance: 100},
@@ -17,8 +17,8 @@ module.exports = {
         },
         customers: {
             c00: {id: 'c00', name: 'Outside', address: 'a00'},
-            c01: {id: 'c01', name: 'Lab Area', address: 'a02'},
-            c02: {id: 'c02', name: 'Roof Hub', address: 'a04'}
+            c01: {id: 'c01', name: 'Lab Area', address: 'a01'},
+            c02: {id: 'c02', name: 'Roof Hub', address: 'a02'}
         }
     },
     entities: {
@@ -39,7 +39,7 @@ module.exports = {
             } //, speed:0, parcel:null, state:VehicleState.IDLE}
         },
         parcels: {
-            p00: {id:'p00', carrier: {type: 'hub', id: 'h00'}, destination: {type: 'hub', id: 'h00'}}
+            p00: {id:'p00', carrier: {type: 'hub', id: 'h00'}, destination: {type: 'hub', id: 'h01'}}
         },
         missions: {
             // TODO nötig? --> einfach für alle Pakete in der Init eine Mission erstellen?
