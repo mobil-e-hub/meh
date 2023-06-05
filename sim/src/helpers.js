@@ -1,5 +1,6 @@
 const random = require('random');
 const { v4: uuid } = require('uuid');
+const { readFileSync } = require('fs');
 
 // Internal modules
 const scenario = JSON.parse(readFileSync('assets/showcase_0.json'));
