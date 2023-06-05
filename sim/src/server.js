@@ -38,7 +38,6 @@ const server = app.listen(port, () => {
 
 // Map and initial entities
 const scenario = JSON.parse(readFileSync('assets/showcase_0.json'));
-console.log(scenario);
 
 
 // Simulators
