@@ -2,7 +2,7 @@ const random = require('random');
 const { v4: uuid } = require('uuid');
 
 // Internal modules
-//const scenario = require("../assets/testcase_scenario");
+const scenario = JSON.parse(readFileSync('assets/showcase_0.json'));
 
 module.exports = {
     random: {
