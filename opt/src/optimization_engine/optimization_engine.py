@@ -257,6 +257,8 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			hub, car, drone = list(self.hubs.values())[0], list(self.cars.values())[0], list(self.drones.values())[0]
 			hub01 = list(self.hubs.values())[1]
 
+			self.publish(f'hub/{hub01["id"]}/mission', 'hub_mission')
+
 			transaction_0 = {
 				"id": str(uuid4()),
 				"from": {"type": "car", "id": car['id']},
@@ -283,29 +285,25 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			position_2 = {"lat": 50.0, "long": 50.0, "alt": 0.0}
 
 			hub01_mission = {
-				{
-					"id": str(uuid4()),
-					"tasks": [
-						{
-							"type": "dropoff",
-							"state": "TaskState.notStarted",
-							"transaction": transaction_2
-						}
-					]
-				}
+				"id": str(uuid4()),
+				"tasks": [
+					{
+						"type": "dropoff",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_2
+					}
+				]
 			}
 
 			hub_mission = {
-				{
-					"id": str(uuid4()),
-					"tasks": [
-						{
-							"type": "pickup",
-							"state": "TaskState.notStarted",
-							"transaction": transaction_1
-						}
-					]
-				}
+				"id": str(uuid4()),
+				"tasks": [
+					{
+						"type": "pickup",
+						"state": "TaskState.notStarted",
+						"transaction": transaction_1
+					}
+				]
 			}
 
 			car_mission = {
@@ -314,8 +312,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 					{
 						"type": "pickup",
 						"state": "TaskState.notStarted",
-						"destination": position_0,
-						"minimumDuration": 1
+						"transaction": transaction_2
 					},
 					{
                         "type": "move",
@@ -323,7 +320,6 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
                         "destination": position_1,
                         "minimumDuration": 1
 					},
-
 					{
 						"type": "dropoff",
 						"state": "TaskState.notStarted",
