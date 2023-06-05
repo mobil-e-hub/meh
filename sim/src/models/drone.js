@@ -110,6 +110,7 @@ class Drone {
     }
 
     setMission(mission, simulator) {
+        this.publish('drohne.js')
         this.mission = mission;
         if (mission === null) {
             this.state = DroneState.idle;
