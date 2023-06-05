@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const mqttMatch = require('mqtt-match');
 const dotenv = require('dotenv');
 const MQTT = require('mqtt');
+const { readFileSync } = require('fs');
 
 
 // Internal modules
@@ -36,7 +37,7 @@ const server = app.listen(port, () => {
 });
 
 // Map and initial entities
-const scenario = require('../assets/showcase_0.js');
+const scenario = JSON.parse(readFileSync('../../assets/showcase_0.json'));
 
 
 // Simulators

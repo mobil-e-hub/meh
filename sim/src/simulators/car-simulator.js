@@ -106,6 +106,9 @@ module.exports = class CarSimulator extends MQTTClient {
             // This message is only received if the car is the transaction's "from" instance and has already sent the "execute" message
             this.cars[topic.id].completeTask(this);
         }
+//        else if (this.matchTopic(topic, 'car/+/parcel/+/placed')) {
+//
+//      }
     }
 
     getIdleCars() {

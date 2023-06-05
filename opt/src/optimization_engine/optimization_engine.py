@@ -48,10 +48,10 @@ class OptimizationEngine:
 
 	def on_message_parcel_placed(self, client, userdata, msg):
 		try:
-			project, version, _, car_id, entity, parcel_id, *args = str(msg.topic).split('/')
+			project, version, entity, entity_id, _, parcel_id, *args = str(msg.topic).split('/')
 			logging.debug(f'Received parcel/placed message. Current orders: {self.orders}')
 			parcel = next(filter(lambda order: order['id'] == parcel_id, self.orders.values()))
-			parcel['carrier'] = { 'type': 'car', 'id': car_id }
+			parcel['carrier'] = { 'type': entity, 'id': entity_id }
 
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
@@ -231,6 +231,15 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 
 	def __init__(self, mqtt_client):
 		super().__init__(mqtt_client)
+
+		# Opening JSON file
+		with open('data.json') as f:
+			data = json.load(f)
+
+		self.drones = data['entities']['drones']
+		self.cars = data['entities']['cars']
+		self.hubs = data['entities']['hubs']
+
 
 	def on_message_order_placed(self, client, userdata, msg):
 		super().on_message_order_placed(client, userdata, msg)
