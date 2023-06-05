@@ -35,7 +35,7 @@ class Car {
         this.id = id;
         this.position = position;
 
-        this.speed = 10;
+        this.speed = 25;
         this.capacity = capacity;
         this.parcels = [];
         this.state = CarState.idle;
