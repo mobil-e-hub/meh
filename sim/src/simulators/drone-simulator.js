@@ -90,6 +90,7 @@ module.exports = class DroneSimulator extends MQTTClient {
             }
             else if (this.matchTopic(topic, 'drone/+/mission')) {
                 try {
+                    this.publish(`drone/${topic.id}`, this.drones[topic.id])
                     this.drones[topic.id].setMission(message, this);
                 } catch (err) {
                     console.log(`-- Could not assign missions to Drone ${topic.id}: err.message`)
