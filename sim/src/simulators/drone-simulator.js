@@ -53,15 +53,14 @@ module.exports = class DroneSimulator extends MQTTClient {
     }
 
     init() {
-        this.drones = scenario['entities']['drones']
-//        this.drones = Object.assign({}, ...Object.values(this.scenario.entities.drones).map(drone => {
-//            let id = drone.id || uuid();
-//            let position = drone.position || random.droneHub().position;
+        this.drones = Object.assign({}, ...Object.values(this.scenario.entities.drones).map(drone => {
+            let id = drone.id || uuid();
+            let position = drone.position || random.droneHub().position;
 
             // return { [id]: new Drone(id, random.position())};
             // return { [id]: new Drone(id, random.position(), { id: uuid(), items: [{ type: 'fly', destination: random.position(), minimumDuration: 10 }] }) };
-//            return { [id]: new Drone(id, position)};  //{ id: uuid(), items: [{ type: 'fly', destination: random.droneHub().position, minimumDuration: 10 }] }) };
-//        }));
+            return { [id]: new Drone(id, position)};  //{ id: uuid(), items: [{ type: 'fly', destination: random.droneHub().position, minimumDuration: 10 }] }) };
+        }));
         for (const [id, drone] of Object.entries(this.drones)) {
             this.publish(`drone/${id}`, 'state', drone);
         }
