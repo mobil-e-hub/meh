@@ -246,7 +246,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		try:
 
 			hub, car, drone = list(self.hubs.values())[0], list(self.cars.values())[0], list(self.drones.values())[0]
-
+			hub01 = list(self.hubs.values())[1]
 
 			transaction_0 = {
 				"id": str(uuid4()),
@@ -262,9 +262,29 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 				"parcel": parcel
 			}
 
+			transaction_2 = {
+				"id": str(uuid4()),
+				"from": {"type": "hub", "id": hub01['id']},
+				"to": {"type": "car", "id": car['id']},
+				"parcel": parcel
+			}
+
 			position_0 = {"lat": -50.0, "long": 50.0, "alt": 0.0}
 			position_1 = {"lat": 0.0, "long": 50.0, "alt": 0.0}
 			position_2 = {"lat": 50.0, "long": 50.0, "alt": 0.0}
+
+			hub01_mission = {
+				{
+					"id": str(uuid4()),
+					"tasks": [
+						{
+							"type": "dropoff",
+							"state": "TaskState.notStarted",
+							"transaction": transaction_2
+						}
+					]
+				}
+			}
 
 			hub_mission = {
 				{
@@ -282,6 +302,12 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			car_mission = {
 				"id": str(uuid4()),
 				"tasks": [
+					{
+						"type": "pickup",
+						"state": "TaskState.notStarted",
+						"destination": position_0,
+						"minimumDuration": 1
+					},
 					{
                         "type": "move",
                         "state": "TaskState.notStarted",

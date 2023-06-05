@@ -23,9 +23,9 @@ module.exports = {
         }
     },
     entities: {
-        //idea: if value is none --> generate randomly during init
         hubs: {
             h00: {id: 'h00', position: 'n02'},
+            h01: {id: 'h01', position: 'n00'} //remove later
         },
         drones: {
             d00: {id: 'd00', position: { x: 50, y: 50, z: 0 }}
