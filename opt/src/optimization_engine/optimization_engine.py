@@ -233,7 +233,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		super().__init__(mqtt_client)
 
 		# Opening JSON file
-		with open('../../../assets/showcase_0.json') as f:
+		with open('../assets/showcase_0.json') as f:
 			data = json.load(f)
 
 		self.drones = data['entities']['drones']
