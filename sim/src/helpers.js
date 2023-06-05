@@ -1,9 +1,8 @@
 const random = require('random');
 const { v4: uuid } = require('uuid');
-const { readFileSync } = require('fs');
 
 // Internal modules
-const scenario = JSON.parse(readFileSync('assets/showcase_0.json'));
+//const scenario = JSON.parse(readFileSync('assets/showcase_0.json'));
 
 module.exports = {
     random: {
@@ -58,14 +57,14 @@ module.exports = {
             };
         },
         // TODO refactor! --> doesnt belong here
-//        droneHub: () => {
-//           let d = Object.values(scenario.topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'air');
-//           return d[Math.floor(Math.random() * (d.length-1))];
-//       },
-//       roadHub: () => {
-//           let d = Object.values(scenario.topology.nodes).filter(n => n["type"] === 'parking' || n["type"] === 'road');
-//           return d[Math.floor(Math.random() * (d.length-1))];
-//        },
+        droneHub: () => {
+           let d = Object.values(scenario['topology']['nodes']).filter(n => n["type"] === 'parking' || n["type"] === 'air');
+           return d[Math.floor(Math.random() * (d.length-1))];
+       },
+       roadHub: () => {
+           let d = Object.values(scenario['topology']['nodes']).filter(n => n["type"] === 'parking' || n["type"] === 'road');
+           return d[Math.floor(Math.random() * (d.length-1))];
+        },
         rand: random
     },
     uuid: () => {
