@@ -68,7 +68,7 @@ module.exports = class HubSimulator extends MQTTClient {
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
             console.log('hub begin');
-            console.log(JSON.stringify(`${transaction.to.type}/${transaction.to.id}`, `transaction/${transaction.id}/execute`));
+            console.log(JSON.stringify(transaction));
             this.publish(`${transaction.to.type}/${transaction.to.id}`, `transaction/${transaction.id}/execute`);
             this.publish(`parcel/${transaction.parcel}`, 'transfer', transaction.to);
             console.log('hub ready');
