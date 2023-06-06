@@ -65,12 +65,12 @@ module.exports = class HubSimulator extends MQTTClient {
             }
         } else if (this.matchTopic(topic, 'hub/+/transaction/+/ready')) {
             // This message is only received if the hub is the transaction's "from" instance
-            console.log('hub-simular...ready!');
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
 
             this.publish(`${transaction.to.type}/${transaction.to.id}`, `transaction/${transaction.id}/execute`);
             this.publish(`parcel/${transaction.parcel}`, 'transfer', transaction.to);
+            console.log('hub ready');
         } else if (this.matchTopic(topic, 'hub/+/transaction/+/execute')) {
             // This message is only received if the hub is the transaction's "to" instance and has already sent the "ready" message
             let hub = this.hubs[topic.id];
