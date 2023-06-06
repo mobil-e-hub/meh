@@ -270,15 +270,15 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		}
 
 		transaction_2 = {
-            "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+            "id": "12341",
             "orderId": "1922193319441955",
-            "carrier": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
-            "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
+            "carrier": { "type": "hub", "id": "h00" },
+            "destination": { "type": "hub", "id": "h00" }
 }
 
-		self.publish(f'parcel'/{parcel.id}/'transfer', transaction_0)
-		self.publish(f'parcel' / {parcel.id} / 'transfer', transaction_1)
-		self.publish(f'parcel' / {parcel.id} / 'delivered', transaction_2)
+		self.publish(f'parcel'/'12345'/'transfer', transaction_0)
+		self.publish(f'parcel'/'12345'/'transfer', transaction_1)
+		self.publish(f'parcel'/'12345'/'delivered', transaction_2)
 
 	def send_missions(self, parcel):
 		try:
