@@ -314,7 +314,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			]
 		}
 
-		self.publish(f'parcel/transfer', JSON.stringify(transaction_0))
+		self.publish(f'parcel/12345/transfer', transaction_0)
 		self.publish(f'parcel/transfer', 'From Drone to Hub')
 		self.publish(f'parcel/delivered', 'Delivered to Hub')
 
