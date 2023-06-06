@@ -355,6 +355,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 			}
 
 			self.publish(f'hub/{hub["id"]}/mission', hub_mission)
+			self.publish((f'hub/{hub01["id"]}/mission', hub01_mission))
 			self.publish(f'car/{car["id"]}/mission', car_mission)
 			self.publish(f'drone/{drone["id"]}/mission', drone_mission)
 
