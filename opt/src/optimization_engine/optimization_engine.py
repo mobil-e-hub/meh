@@ -315,9 +315,10 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		}
 
 		self.publish(f'parcel/transfer', 'From Car to Drone')
+		await sleep(5000);
 		self.publish(f'parcel/transfer', 'From Drone to Hub')
+		await sleep(5000);
 		self.publish(f'parcel/delivered', 'Delivered to Hub')
-		self.publish(f'parcel/delivered', JSON_stringify(transaction_2))
 
 	def send_missions(self, parcel):
 		try:
