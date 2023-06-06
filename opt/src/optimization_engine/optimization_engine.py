@@ -313,10 +313,9 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 				}
 			]
 		}
-		self.publish(f'parcel', 'testnachricht')
-		self.publish(f'parcel'/'transfer', car_mission)
-		self.publish(f'parcel'/'transfer', drone_mission)
-		self.publish(f'parcel'/'delivered', hub_mission)
+		self.publish(f'parcel/transfer', 'From Car to Drone')
+		self.publish(f'parcel/transfer', 'From Drone to Hub')
+		self.publish(f'parcel/delivered', 'Delivered to Hub')
 
 	def send_missions(self, parcel):
 		try:
