@@ -250,7 +250,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 	def on_message_parcel_placed(self, client, userdata, msg):
 		super().on_message_parcel_placed(client, userdata, msg)
 
-		self.publish(f'opt/{self.client.id}/acknowledged', '')
+		#self.publish(f'opt/{self.client.id}/acknowledged', '')
 
 
 	def send_transaction(self, parcel):
@@ -313,9 +313,11 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 				}
 			]
 		}
+
 		self.publish(f'parcel/transfer', 'From Car to Drone')
 		self.publish(f'parcel/transfer', 'From Drone to Hub')
 		self.publish(f'parcel/delivered', 'Delivered to Hub')
+		self.publish(f'parcel/delivered', JSON_stringify(transaction_2))
 
 	def send_missions(self, parcel):
 		try:
