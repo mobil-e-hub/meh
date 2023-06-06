@@ -56,7 +56,8 @@ class OptimizationEngine:
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
 
-			//self.send_missions(parcel)
+			self.send_transaction(parcel)
+			#self.send_missions(parcel)
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
@@ -251,7 +252,8 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 
 		self.publish(f'opt/{self.client.id}/acknowledged', '')
 
-	def send_transaction(selfself, parcel):
+
+	def send_transaction(self, parcel):
 
 		transaction_0 = {
             "id": "12345",
