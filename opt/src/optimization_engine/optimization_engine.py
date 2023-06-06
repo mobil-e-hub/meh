@@ -258,14 +258,14 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		transaction_0 = {
             "id": "12345",
             "orderId": "1922193319441955",
-            "carrier": { "type": "car", "id": "c00" },
-            "destination": { "type": "drone", "id": "d00" }
+            "carrier": { "type": "drone", "id": "d00" },
+            "destination": { "type": "hub", "id": "h00" }
 		}
 
 		transaction_1 = {
 			"id": "1234",
 			"orderId": "1922193319441955",
-			"carrier": {"type": "drone", "id": "d00"},
+			"carrier": {"type": "hub", "id": "h00"},
 			"destination": {"type": "hub", "id": "h00"}
 		}
 
@@ -276,47 +276,9 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
             "destination": { "type": "hub", "id": "h00" }
 }
 
-		car_mission = {
-			"id": str(uuid4()),
-			"tasks": [
-				{
-					"type": "dropoff",
-					"state": "TaskState.notStarted",
-					"transaction": transaction_0
-				}
-			]
-		}
-
-		drone_mission = {
-			"id": str(uuid4()),
-			"tasks": [
-				{
-					"type": "pickup",
-					"state": "TaskState.notStarted",
-					"transaction": transaction_1
-				},
-				{
-					"type": "dropoff",
-					"state": "TaskState.notStarted",
-					"transaction": transaction_2
-				}
-			]
-		}
-
-		hub_mission = {
-			"id": str(uuid4()),
-			"tasks": [
-				{
-					"type": "pickup",
-					"state": "TaskState.notStarted",
-					"transaction": transaction_2
-				}
-			]
-		}
-
 		self.publish(f'parcel/12345/transfer', transaction_0)
-		self.publish(f'parcel/transfer', 'From Drone to Hub')
-		self.publish(f'parcel/delivered', 'Delivered to Hub')
+		self.publish(f'parcel/12345/transfer', transaction_1)
+		self.publish(f'parcel/12345/delivered', transaction_2)
 
 	def send_missions(self, parcel):
 		try:
