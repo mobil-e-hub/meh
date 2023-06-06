@@ -275,10 +275,48 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
             "carrier": { "type": "hub", "id": "h00" },
             "destination": { "type": "hub", "id": "h00" }
 }
+
+		car_mission = {
+			"id": str(uuid4()),
+			"tasks": [
+				{
+					"type": "dropoff",
+					"state": "TaskState.notStarted",
+					"transaction": transaction_0
+				}
+			]
+		}
+
+		drone_mission = {
+			"id": str(uuid4()),
+			"tasks": [
+				{
+					"type": "pickup",
+					"state": "TaskState.notStarted",
+					"transaction": transaction_1
+				},
+				{
+					"type": "dropoff",
+					"state": "TaskState.notStarted",
+					"transaction": transaction_2
+				}
+			]
+		}
+
+		hub_mission = {
+			"id": str(uuid4()),
+			"tasks": [
+				{
+					"type": "pickup",
+					"state": "TaskState.notStarted",
+					"transaction": transaction_2
+				}
+			]
+		}
 		self.publish(f'parcel', 'testnachricht')
-		self.publish(f'parcel'/'transfer', transaction_0)
-		self.publish(f'parcel'/'transfer', transaction_1)
-		self.publish(f'parcel'/'delivered', transaction_2)
+		self.publish(f'parcel'/'transfer', car_mission)
+		self.publish(f'parcel'/'transfer', drone_mission)
+		self.publish(f'parcel'/'delivered', hub_mission)
 
 	def send_missions(self, parcel):
 		try:
