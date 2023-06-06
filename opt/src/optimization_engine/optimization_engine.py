@@ -276,9 +276,9 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
             "destination": { "type": "hub", "id": "h00" }
 }
 
-		self.publish(f'parcel'/'12345'/'transfer', transaction_0)
-		self.publish(f'parcel'/'12345'/'transfer', transaction_1)
-		self.publish(f'parcel'/'12345'/'delivered', transaction_2)
+		self.publish(f'parcel'/{parcel["id"]}/'transfer', transaction_0)
+		self.publish(f'parcel'/{parcel["id"]}/'transfer', transaction_1)
+		self.publish(f'parcel'/{parcel["id"]}/'delivered', transaction_2)
 
 	def send_missions(self, parcel):
 		try:
