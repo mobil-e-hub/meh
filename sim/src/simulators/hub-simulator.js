@@ -67,7 +67,7 @@ module.exports = class HubSimulator extends MQTTClient {
             // This message is only received if the hub is the transaction's "from" instance
             let hub = this.hubs[topic.id];
             let transaction = hub.transactions[topic.args[1]];
-
+            console.log('hub begin');
             this.publish(`${transaction.to.type}/${transaction.to.id}`, `transaction/${transaction.id}/execute`);
             this.publish(`parcel/${transaction.parcel}`, 'transfer', transaction.to);
             console.log('hub ready');
