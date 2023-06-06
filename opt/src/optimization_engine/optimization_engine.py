@@ -275,7 +275,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
             "carrier": { "type": "hub", "id": "h00" },
             "destination": { "type": "hub", "id": "h00" }
 }
-
+		self.publish(f'parcel', 'testnachricht')
 		self.publish(f'parcel'/{parcel["id"]}/'transfer', transaction_0)
 		self.publish(f'parcel'/{parcel["id"]}/'transfer', transaction_1)
 		self.publish(f'parcel'/{parcel["id"]}/'delivered', transaction_2)
