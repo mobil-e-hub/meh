@@ -56,7 +56,7 @@ class OptimizationEngine:
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
 
-			self.send_missions(parcel)
+			//self.send_missions(parcel)
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
@@ -250,6 +250,33 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		super().on_message_parcel_placed(client, userdata, msg)
 
 		self.publish(f'opt/{self.client.id}/acknowledged', '')
+
+	def send_transaction(selfself, parcel):
+
+		transaction_0 = {
+            "id": "12345",
+            "orderId": "1922193319441955",
+            "carrier": { "type": "car", "id": "c00" },
+            "destination": { "type": "drone", "id": "d00" }
+		}
+
+		transaction_1 = {
+			"id": "1234",
+			"orderId": "1922193319441955",
+			"carrier": {"type": "drone", "id": "d00"},
+			"destination": {"type": "hub", "id": "h00"}
+		}
+
+		transaction_2 = {
+            "id": "a64bcadb-6967-4407-ba06-8abf2182a1d0",
+            "orderId": "1922193319441955",
+            "carrier": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" },
+            "destination": { "type": "hub", "id": "aef6d0fd-d150-4435-9c73-3b3339b77582" }
+}
+
+		self.publish(f'parcel'/{parcel.id}/'transfer', transaction_0)
+		self.publish(f'parcel' / {parcel.id} / 'transfer', transaction_1)
+		self.publish(f'parcel' / {parcel.id} / 'delivered', transaction_2)
 
 	def send_missions(self, parcel):
 		try:
