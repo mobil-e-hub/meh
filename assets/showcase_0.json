@@ -4,8 +4,8 @@
 			"n00": {
 				"id": "n00",
 				"position": {
-					"lat": -50,
-					"long": 50,
+					"lat": 49.36252,
+					"long": 86.8661,
 					"alt": 0
 				},
 				"type": "parking"
@@ -13,8 +13,8 @@
 			"n01": {
 				"id": "n01",
 				"position": {
-					"lat": 0,
-					"long": 50,
+					"lat": 49.36219,
+					"long": 86.8565,
 					"alt": 0
 				},
 				"type": "parking"
@@ -22,8 +22,8 @@
 			"n02": {
 				"id": "n02",
 				"position": {
-					"lat": 50,
-					"long": 50,
+					"lat": 49.36217,
+					"long": 86.8606,
 					"alt": 0
 				},
 				"type": "air"
@@ -56,63 +56,43 @@
 			"a00": {
 				"id": "a00",
 				"position": {
-					"lat": -50,
-					"long": 55
+					"lat": 49.36252,
+					"long": 86.8661
 				},
-				"name": "5 Main St"
+				"name": "1203-Labor Limbach Paket-HUB"
 			},
 			"a01": {
 				"id": "a01",
 				"position": {
-					"lat": 0,
-					"long": 55
+					"lat": 49.36219,
+					"long": 86.8565
 				},
-				"name": "10 Main St"
+				"name": "1203-Labor Limbach Mobile-e-- FZ HUB"
 			},
 			"a02": {
 				"id": "a02",
 				"position": {
-					"lat": 50,
-					"long": 55
+					"lat": 49.36217,
+					"long": 86.8606
 				},
-				"name": "15 Main St"
+				"name": "1203-Labor Limbach Drohnen-HUB"
 			}
 		},
-		"customers": {
-			"c00": {
-				"id": "c00",
-				"name": "Outside",
-				"address": "a00"
-			},
-			"c01": {
-				"id": "c01",
-				"name": "Lab Area",
-				"address": "a01"
-			},
-			"c02": {
-				"id": "c02",
-				"name": "Roof Hub",
-				"address": "a02"
-			}
-		}
+		"customers": {}
 	},
 	"entities": {
 		"hubs": {
 			"h00": {
 				"id": "h00",
 				"position": "n02"
-			},
-			"h01": {
-				"id": "h01",
-				"position": "n00"
 			}
 		},
 		"drones": {
 			"d00": {
 				"id": "d00",
 				"position": {
-					"lat": 50,
-					"long": 50,
+					"lat": 49.36217,
+					"long": 86.8606,
 					"alt": 0
 				}
 			}
@@ -121,8 +101,8 @@
 			"v00": {
 				"id": "v00",
 				"position": {
-					"lat": -50,
-					"long": 50,
+					"lat": 49.36252,
+					"long": 86.8661,
 					"alt": 0
 				}
 			}
