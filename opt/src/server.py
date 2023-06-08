@@ -15,7 +15,7 @@ port = int(os.environ.get('OPT_PORT', 3001))
 app = Flask(__name__)
 
 if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-    opt = OptimizationEngineMQTTClient(mode=('testworld', '0'))  # inherits from MQTTClient
+    opt = OptimizationEngineMQTTClient(mode=('testworld', '0'))  # inherits from MQTTClien
 
 # Endpoints
 @app.route('/')
