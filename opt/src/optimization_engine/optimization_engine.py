@@ -82,12 +82,12 @@ class OptimizationEngine:
 		self.client.publish(topic, message)
 
 
-class OptimizationEngineTest0(OptimizationEngine):
-	def __init__(self, mqtt_client):
-		super().__init__(mqtt_client)
-		self.callbacks = {
-			'+/+/status': self.on_message_status
-		}
+#class OptimizationEngineTest0(OptimizationEngine):
+#	def __init__(self, mqtt_client):
+#		super().__init__(mqtt_client)
+#		self.callbacks = {
+#			'+/+/status': self.on_message_status
+#		}
 
 	def on_message_status(self, client, userdata, msg):
 		print(f'OptimizationEngineTest0 received status message {msg}!')
