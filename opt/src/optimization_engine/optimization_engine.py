@@ -83,11 +83,11 @@ class OptimizationEngine:
 
 
 class OptimizationEngineTest0(OptimizationEngine):
-#	def __init__(self, mqtt_client):
-#		super().__init__(mqtt_client)
-#		self.callbacks = {
-#			'+/+/status': self.on_message_status
-#		}
+	def __init__(self, mqtt_client):
+		super().__init__(mqtt_client)
+		self.callbacks = {
+			'+/+/status': self.on_message_status
+		}
 
 	def on_message_status(self, client, userdata, msg):
 		print(f'OptimizationEngineTest0 received status message {msg}!')
@@ -239,14 +239,14 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 #
 
 class OptimizationEngineRealWorld0(OptimizationEngine):
-#
-#	def send_missions(self, parcel):
-#		print('Drones:')
-#		print(self.drones)
-#		print('Cars:')
-#		print(self.cars)
-#		print('Hubs:')
-#		print(self.hubs)
+
+	def send_missions(self, parcel):
+		print('Drones:')
+		print(self.drones)
+		print('Cars:')
+		print(self.cars)
+		print('Hubs:')
+		print(self.hubs)
 
 
 class OptimizationEngineTestWorld0(OptimizationEngine):
