@@ -139,6 +139,13 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 				"parcel": parcel
 			}
 
+			#with open('assets/showcase_0.json') as f:
+			#	data = json.load(f)
+
+			#position_0 = data['topology']['nodes']['n00']['position']
+			#position_1 = data['topology']['nodes']['n01']['position']
+			#position_2 = data['topology']['nodes']['n02']['position']
+
 			position_0 = {"lat": 49.36252, "long": 86.8661, "alt": 0}
 			position_1 = {"lat": 49.36219, "long": 86.8565, "alt": 0}
 			position_2 = {"lat": 49.36217, "long": 86.8606, "alt": 0}
