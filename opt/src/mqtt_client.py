@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import paho.mqtt.client as mqtt
 from optimization_engine.helpers import generate_transaction_id
 
-from optimization_engine.optimization_engine import OptimizationEngineTest0, OptimizationEngineShowcase0, OptimizationEngineRealWorld0, OptimizationEngineTestWorld0
+from optimization_engine.optimization_engine import OptimizationEngineShowcase0, OptimizationEngineTestWorld0
 
 
 engines = {
