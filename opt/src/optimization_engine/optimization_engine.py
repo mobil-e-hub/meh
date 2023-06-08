@@ -229,7 +229,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 
 		except BaseException as e:
 			logging.warn(f'Could not send missions ({repr(e)})!')
-			self.publish(f'opt/{self.client.id}/error', repr(e))
+			self.publish(f'opt/{self.client.id}/error', repr(e));
 
 #	def on_message_add_dummy_entities(self, client, userdata, msg):
 #		if not self.hubs:
@@ -306,7 +306,5 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		self.publish(f'parcel/12345/transfer', transaction_1)
 		self.publish(f'parcel/12345/delivered', transaction_2)
 
-	def send_missions(self, parcel):
-		#never called
 
 
