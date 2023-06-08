@@ -56,8 +56,8 @@ class OptimizationEngine:
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
 
-			self.send_transaction(parcel)
-			#self.send_missions(parcel)
+			#self.send_transaction(parcel)
+			self.send_missions(parcel)
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
@@ -127,39 +127,35 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 
 			transaction_0 = {
 				"id": str(uuid4()),
+				"orderId": "1922193319441955",
+				"carrier": {"type": "car", "id": "c00"},
+				"destination": {"type": "hub", "id": "h00"}
+			}
+
+			transaction_1 = {
+				"id": str(uuid4()),
 				"from": {"type": "car", "id": car['id']},
 				"to": {"type": "drone", "id": drone['id']},
 				"parcel": parcel
 			}
 
-			transaction_1 = {
+			transaction_2 = {
 				"id": str(uuid4()),
 				"from": {"type": "drone", "id": drone['id']},
 				"to": {"type": "hub", "id": hub['id']},
 				"parcel": parcel
 			}
 
-			#with open('assets/showcase_0.json') as f:
-			#	data = json.load(f)
+			with open('assets/showcase_0.json') as f:
+				data = json.load(f)
 
-			#position_0 = data['topology']['nodes']['n00']['position']
-			#position_1 = data['topology']['nodes']['n01']['position']
-			#position_2 = data['topology']['nodes']['n02']['position']
+			position_0 = data['topology']['nodes']['n00']['position']
+			position_1 = data['topology']['nodes']['n01']['position']
+			position_2 = data['topology']['nodes']['n02']['position']
 
-			position_0 = {"lat": 49.36252, "long": 86.8661, "alt": 0}
-			position_1 = {"lat": 49.36219, "long": 86.8565, "alt": 0}
-			position_2 = {"lat": 49.36217, "long": 86.8606, "alt": 0}
-
-			hub01_mission = {
-				"id": str(uuid4()),
-				"tasks": [
-					{
-						"type": "dropoff",
-						"state": "TaskState.notStarted",
-						"transaction": transaction_2
-					}
-				]
-			}
+			#position_0 = {"lat": 49.36252, "long": 86.8661, "alt": 0}
+			#position_1 = {"lat": 49.36219, "long": 86.8565, "alt": 0}
+			#position_2 = {"lat": 49.36217, "long": 86.8606, "alt": 0}
 
 			hub_mission = {
 				"id": str(uuid4()),
@@ -167,7 +163,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 					{
 						"type": "pickup",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_1
+						"transaction": transaction_2
 					}
 				]
 			}
@@ -176,9 +172,9 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 				"id": str(uuid4()),
 				"tasks": [
 					{
-						"type": "pickup",
+						"type": "place",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_2
+						"transaction": transaction_0
 					},
 					{
 						"type": "move",
@@ -189,7 +185,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 					{
 						"type": "dropoff",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_0
+						"transaction": transaction_1
 					}
 				]
 			}
@@ -206,7 +202,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 					{
 						"type": "pickup",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_0
+						"transaction": transaction_1
 					},
 					{
 						"type": "move",
@@ -217,13 +213,12 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 					{
 						"type": "dropoff",
 						"state": "TaskState.notStarted",
-						"transaction": transaction_1
+						"transaction": transaction_2
 					},
 				]
 			}
 
 			self.publish(f'hub/{hub["id"]}/mission', hub_mission)
-			self.publish(f'hub/{hub01["id"]}/mission', hub01_mission)
 			self.publish(f'car/{car["id"]}/mission', car_mission)
 			self.publish(f'drone/{drone["id"]}/mission', drone_mission)
 

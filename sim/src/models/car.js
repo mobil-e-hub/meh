@@ -85,6 +85,14 @@ class Car {
 
                         return true;
                     }
+                case 'place':
+                    let parcel = {
+                        id: task.transaction.id,
+                        orderId: task.transaction.orderId,
+                        carrier: task.transaction.carrier,
+                        destination: task.transaction.destination
+                    };
+                    this.parcels.push(parcel)
             }
         }
     }

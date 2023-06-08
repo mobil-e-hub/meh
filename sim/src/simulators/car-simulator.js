@@ -107,7 +107,7 @@ module.exports = class CarSimulator extends MQTTClient {
             this.cars[topic.id].completeTask(this);
         }
 //        else if (this.matchTopic(topic, 'car/+/parcel/+/placed')) {
-//
+//            this.cars[topic.id].parcels.append()
 //      }
     }
 
