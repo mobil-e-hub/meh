@@ -295,7 +295,7 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
             "orderId": "1922193319441955",
             "carrier": { "type": "hub", "id": "h00" },
             "destination": { "type": "hub", "id": "h00" }
-}
+		}
 
 		self.publish(f'parcel/12345/transfer', transaction_0)
 		self.publish(f'parcel/12345/transfer', transaction_1)
