@@ -82,7 +82,7 @@ class OptimizationEngine:
 		self.client.publish(topic, message)
 
 
-#class OptimizationEngineTest0(OptimizationEngine):
+class OptimizationEngineTest0(OptimizationEngine):
 #	def __init__(self, mqtt_client):
 #		super().__init__(mqtt_client)
 #		self.callbacks = {
@@ -238,7 +238,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 #			self.cars = { car_id: {'id': car_id } }
 #
 
-#class OptimizationEngineRealWorld0(OptimizationEngine):
+class OptimizationEngineRealWorld0(OptimizationEngine):
 #
 #	def send_missions(self, parcel):
 #		print('Drones:')
