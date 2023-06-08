@@ -56,7 +56,7 @@ class OptimizationEngine:
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
 
-			#self.send_transaction(parcel)
+		    #self.send_transaction(parcel)
 			self.send_missions(parcel)
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
@@ -88,10 +88,6 @@ class OptimizationEngineTest0(OptimizationEngine):
 		self.callbacks = {
 			'+/+/status': self.on_message_status
 		}
-
-	def on_message_status(self, client, userdata, msg):
-		print(f'OptimizationEngineTest0 received status message {msg}!')
-
 
 class OptimizationEngineShowcase0(OptimizationEngine):
 	def __init__(self, mqtt_client):
@@ -153,9 +149,9 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			position_1 = data['topology']['nodes']['n01']['position']
 			position_2 = data['topology']['nodes']['n02']['position']
 
-			#position_0 = {"lat": 49.36252, "long": 86.8661, "alt": 0}
-			#position_1 = {"lat": 49.36219, "long": 86.8565, "alt": 0}
-			#position_2 = {"lat": 49.36217, "long": 86.8606, "alt": 0}
+#           position_0 = {"lat": 49.36252, "long": 86.8661, "alt": 0}
+#           position_1 = {"lat": 49.36219, "long": 86.8565, "alt": 0}
+#           position_2 = {"lat": 49.36217, "long": 86.8606, "alt": 0}
 
 			hub_mission = {
 				"id": str(uuid4()),
@@ -224,7 +220,7 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 
 		except BaseException as e:
 			logging.warn(f'Could not send missions ({repr(e)})!')
-			self.publish(f'opt/{self.client.id}/error', repr(e));
+			self.publish(f'opt/{self.client.id}/error', repr(e))
 
 #	def on_message_add_dummy_entities(self, client, userdata, msg):
 #		if not self.hubs:
@@ -300,6 +296,3 @@ class OptimizationEngineTestWorld0(OptimizationEngine):
 		self.publish(f'parcel/12345/transfer', transaction_0)
 		self.publish(f'parcel/12345/transfer', transaction_1)
 		self.publish(f'parcel/12345/delivered', transaction_2)
-
-
-
