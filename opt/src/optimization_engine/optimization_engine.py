@@ -56,8 +56,9 @@ class OptimizationEngine:
 			logging.debug(f'Parcel placed ({parcel})!')
 			self.publish(f'parcel/{parcel_id}/transfer', parcel)
 
-            self.send_transaction(parcel)
+			self.send_transaction(parcel)
 			#self.send_missions(parcel)
+
 		except StopIteration as e:
 			logging.warn(f'Placed parcel not found in orders!')
 			self.publish(f'opt/{self.client.id}/error', f'Placed parcel not found in orders!')
