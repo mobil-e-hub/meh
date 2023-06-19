@@ -151,6 +151,11 @@ class Car {
             if (task.transaction.ready) {
                 this.state = CarState.executingTransaction;
                 task.state = TaskState.executingTransaction;
+            } else if (task.type === 'place') {
+            let transaction = task.transaction;
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+            this.state = CarState.waitingForTransaction;
+            task.state = TaskState.waitingForTransaction;
             } else {
                 this.state = CarState.waitingForTransaction;
                 task.state = TaskState.waitingForTransaction;
