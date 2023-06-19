@@ -94,7 +94,7 @@ class Car {
                     };
                     this.parcels.push(new_parcel)
 
-
+                    return false;
 
             }
         }
