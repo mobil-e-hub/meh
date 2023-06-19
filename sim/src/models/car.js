@@ -93,7 +93,7 @@ class Car {
                         destination: task.transaction.destination
                     };
                     this.parcels.push(parcel)
-                    simulator.publish(`car/${this.id}/car_placed`, parcel)
+
             }
         }
     }
