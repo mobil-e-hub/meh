@@ -86,14 +86,14 @@ class Car {
                         return true;
                     }
                 case 'place':
-                    console.log('test:' task.transaction.id)
-                    let parcel = {
+                    simulator.publish('test:' task.transaction.id)
+                    let new_parcel = {
                         id: task.transaction.id,
                         orderId: task.transaction.orderId,
                         carrier: task.transaction.carrier,
                         destination: task.transaction.destination
                     };
-                    this.parcels.push(parcel)
+                    this.parcels.push(new_parcel)
 
             }
         }
