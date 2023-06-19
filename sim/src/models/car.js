@@ -86,6 +86,7 @@ class Car {
                         return true;
                     }
                 case 'place':
+                    console.log('test:' task.transaction.id)
                     let parcel = {
                         id: task.transaction.id,
                         orderId: task.transaction.orderId,
