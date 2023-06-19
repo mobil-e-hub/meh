@@ -35,7 +35,7 @@ class Car {
         this.id = id;
         this.position = position;
 
-        this.speed = 25;
+        this.speed = 5;
         this.capacity = capacity;
         this.parcels = [];
         this.state = CarState.idle;
@@ -93,6 +93,7 @@ class Car {
                         destination: task.transaction.destination
                     };
                     this.parcels.push(parcel)
+                    simulator.publish(`car/${this.id}/car_placed`, parcel)
             }
         }
     }
