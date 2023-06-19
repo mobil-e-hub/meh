@@ -86,7 +86,6 @@ class Car {
                         return true;
                     }
                 case 'place':
-                    simulator.publish('car.js', task.transaction);
                     let new_parcel = {
                         id: task.transaction.id,
                         orderId: task.transaction.orderId,
