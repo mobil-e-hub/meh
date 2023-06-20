@@ -156,7 +156,6 @@ class Car {
             simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
-            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, "car_placed");
         } else {
                 this.state = CarState.waitingForTransaction;
                 task.state = TaskState.waitingForTransaction;
