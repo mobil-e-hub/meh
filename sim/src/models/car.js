@@ -86,6 +86,7 @@ class Car {
                         return true;
                     }
                 case 'place':
+                    simulator.publish(`car_placed1`, `car_placed1`);
                     let new_parcel = {
                         id: task.transaction.id,
                         orderId: task.transaction.orderId,
@@ -93,7 +94,6 @@ class Car {
                         destination: task.transaction.destination
                     };
                     this.parcels.push(new_parcel)
-                    simulator.publish(`car_placed1`, `car_placed1`);
                     if (this.state === CarState.waitingForTransaction) {
                         return false;
                     } else {
