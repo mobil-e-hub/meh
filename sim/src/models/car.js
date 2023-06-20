@@ -94,7 +94,15 @@ class Car {
                     };
                     this.parcels.push(new_parcel)
 
-                    return false;
+                    if (this.state === CarState.waitingForTransaction) {
+                        return false;
+                    } else {
+                        // this.state === CarState.executingTransaction
+                        simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
+                        simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
+
+                        return true;
+                    }
 
             }
         }
