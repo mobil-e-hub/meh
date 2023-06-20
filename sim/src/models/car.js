@@ -93,11 +93,10 @@ class Car {
                         destination: task.transaction.destination
                     };
                     this.parcels.push(new_parcel)
-
+                    simulator.publish(`car_placed1`, `car_placed1`);
                     if (this.state === CarState.waitingForTransaction) {
                         return false;
                     } else {
-                        // this.state === CarState.executingTransaction
                         simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
                         simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
 
@@ -160,6 +159,7 @@ class Car {
                 this.state = CarState.executingTransaction;
                 task.state = TaskState.executingTransaction;
         } else if (task.type === 'place') {
+            simulator.publish(`car_placed2`, `car_placed2`);
             let transaction = task.transaction;
             simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
