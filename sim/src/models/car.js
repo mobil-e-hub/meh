@@ -94,7 +94,7 @@ class Car {
                     };
                     this.parcels.push(new_parcel)
 
-                    return true;
+                    return false;
 
             }
         }
@@ -154,7 +154,7 @@ class Car {
         } else if (task.type === 'place') {
 
             let transaction = task.transaction;
-            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+//            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
         } else {
