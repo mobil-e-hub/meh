@@ -49,7 +49,7 @@ const parcelSimulator = new ParcelSimulator(scenario);
 
 // Control system for dummy simulation
 const controlSystem = new ControlSystem();
-
+console.log("init server");
 
 // Graceful shutdown
 process.on('SIGTERM', shutdown);
