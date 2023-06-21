@@ -86,7 +86,6 @@ class Car {
                         return true;
                     }
                 case 'place':
-                    simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `car_placed1`);
                     let new_parcel = {
                         id: task.transaction.id,
                         orderId: task.transaction.orderId,
@@ -159,7 +158,6 @@ class Car {
                 this.state = CarState.executingTransaction;
                 task.state = TaskState.executingTransaction;
         } else if (task.type === 'place') {
-            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `car_placed2`);
             let transaction = task.transaction;
             simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;

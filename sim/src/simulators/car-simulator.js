@@ -78,8 +78,6 @@ module.exports = class CarSimulator extends MQTTClient {
     };
 
     receive(topic, message) {
-        this.publish(`car/${id}`, 'received message' , message);
-        console.log('received message');
         super.receive(topic, message);
 
         if (topic.entity === 'visualization') {
@@ -87,7 +85,6 @@ module.exports = class CarSimulator extends MQTTClient {
                 this[topic.rest]();
             }
         } else if (this.matchTopic(topic, 'car/+/mission')) {
-            this.publish(`car/${id}`, message);
             this.cars[topic.id].setMission(message, this);
         }
         else if (this.matchTopic(topic, 'car/+/transaction/+/ready')) {
