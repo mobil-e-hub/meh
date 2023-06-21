@@ -79,6 +79,7 @@ module.exports = class CarSimulator extends MQTTClient {
 
     receive(topic, message) {
         super.receive(topic, message);
+        this.publish(`car/${id}`, 'init');
 
         if (topic.entity === 'visualization') {
             if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
