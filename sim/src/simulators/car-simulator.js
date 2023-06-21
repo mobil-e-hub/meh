@@ -78,6 +78,7 @@ module.exports = class CarSimulator extends MQTTClient {
     };
 
     receive(topic, message) {
+        this.publish(`car/${id}`, 'received message' , message);
         console.log('received message');
         super.receive(topic, message);
 
@@ -86,8 +87,8 @@ module.exports = class CarSimulator extends MQTTClient {
                 this[topic.rest]();
             }
         } else if (this.matchTopic(topic, 'car/+/mission')) {
+            this.publish(`car/${id}`, message);
             this.cars[topic.id].setMission(message, this);
-             this.publish(`car/${id}`, message);
         }
         else if (this.matchTopic(topic, 'car/+/transaction/+/ready')) {
             // This message is only received if the car is the transaction's "from" instance
