@@ -19,7 +19,7 @@ module.exports = class DroneSimulator extends MQTTClient {
     }
 
     start() {
-        console.log("start drone");
+        console.log('< Drone start.');
         if (this.timer) {
             clearInterval(this.timer);
         }
@@ -54,7 +54,6 @@ module.exports = class DroneSimulator extends MQTTClient {
     }
 
     init() {
-        console.log("init drone");
         this.drones = Object.assign({}, ...Object.values(this.scenario.entities.drones).map(drone => {
             let id = drone.id || uuid();
             let position = drone.position || random.droneHub().position;
