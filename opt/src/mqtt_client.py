@@ -109,6 +109,7 @@ class OptimizationEngineMQTTClient:
             logging.info(f"> [opt_engine] default msg_callback {topic}:  {msg.payload}")
 
     def on_connect(self, client, userdata, flags, rx):
+        self.publish(f'opt', 'connect', self.id)
         if rx == 0:
             logging.debug(f"[{self.logging_name}] - Connected to broker: {self.MQTT_BROKER_HOST} - Port: {self.MQTT_PORT}")
             self.publish(f'opt/{self.id}/connected', '')
