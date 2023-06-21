@@ -10,7 +10,7 @@ module.exports = class CarSimulator extends MQTTClient {
 
     constructor(scenario) {
         super('car-simulator', ['car/#', 'visualization/#']);
-
+        this.publish('hello', 'hello');
         this.scenario = scenario;
         this.cars = { };
 
