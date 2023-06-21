@@ -125,14 +125,14 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			transaction_0 = {
 				"id": str(uuid4()),
 				"orderId": "1922193319441955",
-				"carrier": {"type": "car", "id": "c00"},
+				"carrier": {"type": "car", "id": car['id']},
 				"destination": {"type": "hub", "id": "h00"}
 			}
 
 			transaction_1 = {
 				"id": str(uuid4()),
 				"from": {"type": "car", "id": car['id']},
-				"to": {"type": "drone", "id": drone['id']},
+				"to": {"type": "drone", "id": hub['id']},
 				"parcel": parcel
 			}
 
