@@ -144,7 +144,6 @@ class Car {
 
     startTask(simulator) {
         let task = this.mission.tasks[0];
-        simulator.publish(`${transaction.from.type}/${transaction.from.id}`, task);
         if (task.type === 'move') {
             this.state = CarState.moving;
             task.state = TaskState.ongoing;
