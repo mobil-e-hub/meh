@@ -52,6 +52,7 @@ module.exports = class CarSimulator extends MQTTClient {
     }
 
     init() {
+        console.log(`init car`);
         this.cars = Object.assign({}, ...Object.values(this.scenario.entities.cars).map(car => {
             let id = car.id || uuid();
             let position = car.position || random.roadHub().position;
