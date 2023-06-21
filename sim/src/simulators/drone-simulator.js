@@ -19,6 +19,7 @@ module.exports = class DroneSimulator extends MQTTClient {
     }
 
     start() {
+        console.log(`-- Could start Drone ${this.id}`)
         if (this.timer) {
             clearInterval(this.timer);
         }
