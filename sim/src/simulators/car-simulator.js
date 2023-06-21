@@ -53,7 +53,6 @@ module.exports = class CarSimulator extends MQTTClient {
     }
 
     init() {
-        this.publish(`car/${id}`, 'init');
         this.cars = Object.assign({}, ...Object.values(this.scenario.entities.cars).map(car => {
             let id = car.id || uuid();
             let position = car.position || random.roadHub().position;
@@ -84,6 +83,7 @@ module.exports = class CarSimulator extends MQTTClient {
         if (topic.entity === 'visualization') {
             if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                 this[topic.rest]();
+                this.publish(`car/${id}`, 'init');
             }
         } else if (this.matchTopic(topic, 'car/+/mission')) {
             this.cars[topic.id].setMission(message, this);
