@@ -132,6 +132,7 @@ class Car {
     }
 
     setMission(mission, simulator) {
+        console.log('car entered setMission');
         this.mission = mission;
         if (mission === null) {
             this.state = CarState.idle;
