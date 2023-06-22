@@ -93,15 +93,8 @@ class Car {
                         destination: task.transaction.destination
                     };
                     this.parcels.push(new_parcel)
-                    console.log(`parcels: ${JSON.stringify(this.parcels[0])}`);
-                    if (this.state === CarState.waitingForTransaction) {
-                        return false;
-                    } else {
-                        simulator.publish(`${task.transaction.to.type}/${task.transaction.to.id}`, `transaction/${task.transaction.id}/execute`);
-                        simulator.publish(`parcel/${task.transaction.parcel}`, 'transfer', task.transaction.to);
 
-                        return true;
-                    }
+                    return true;
 
             }
         }
