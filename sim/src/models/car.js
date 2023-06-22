@@ -99,7 +99,6 @@ class Car {
                     } else {
                         simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`); // TODO include in table
                     }
-                    this.completeTask(simulator);
 
                     return true;
             }
