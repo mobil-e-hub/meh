@@ -120,8 +120,6 @@ class OptimizationEngineShowcase0(OptimizationEngine):
 			assert len(self.cars) == 1, 'There has to be exactly one car.'
 			assert len(self.drones) == 1, 'There has to be exactly one drone.'
 
-			self.publish(f'opt/{self.client.id}/cars', self.cars)
-
 			hub, car, drone = list(self.hubs.values())[0], list(self.cars.values())[0], list(self.drones.values())[0]
 
 			transaction_0 = {

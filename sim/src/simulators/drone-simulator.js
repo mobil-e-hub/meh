@@ -84,8 +84,6 @@ module.exports = class DroneSimulator extends MQTTClient {
 
         try {
             if (this.matchTopic(topic, 'visualization/#')) {
-                console.log(`-- drone init ${topic.id}`);
-                this.publish(`drone/${topic.id}`, 'init');
                 if (['start', 'pause', 'resume', 'stop', 'reset'].includes(topic.rest)) {
                     this[topic.rest]();
                 }
