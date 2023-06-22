@@ -95,9 +95,9 @@ class Car {
 
                     if(this.parcels.length < this.capacity) {
                         this.parcels.push(new_parcel)
-                        simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/complete`);
+                        simulator.publish(`car/${task.transaction.carrier.id}/transaction/${task.transaction.id}/complete`);
                     } else {
-                        simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel/${transaction.parcel}`); // TODO include in table
+                        simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel`); // TODO include in table
                     }
 
                     return true;
