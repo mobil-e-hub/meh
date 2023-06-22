@@ -92,7 +92,7 @@ class Car {
                         carrier: task.transaction.carrier,
                         destination: task.transaction.destination
                     };
-                    console.log(`car placed: ${new_parcel}`);
+                    console.log(`car placed: ${task.transaction.id} and ${task.transaction.destination}`);
                     this.parcels.push(new_parcel)
                     if (this.state === CarState.waitingForTransaction) {
                         return false;
