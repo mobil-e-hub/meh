@@ -100,7 +100,7 @@ class Car {
                         simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel`); // TODO include in table
                     }
 
-                    return true;
+                    return false;
             }
         }
     }
