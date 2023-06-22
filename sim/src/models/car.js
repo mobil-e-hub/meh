@@ -86,15 +86,14 @@ class Car {
                         return true;
                     }
                 case 'place':
-                    console.log(`car placed: ${JSON.stringify(task.transaction)}`);
                     let new_parcel = {
                         id: task.transaction.id,
                         orderId: task.transaction.orderId,
                         carrier: task.transaction.carrier,
                         destination: task.transaction.destination
                     };
-                    console.log(`car dest: ${JSON.stringify(new_parcel)}`);
                     this.parcels.push(new_parcel)
+                    console.log(`parcels: ${JSON.stringify(this.parcels[0])}`);
                     if (this.state === CarState.waitingForTransaction) {
                         return false;
                     } else {
