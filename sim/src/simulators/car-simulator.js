@@ -59,6 +59,7 @@ module.exports = class CarSimulator extends MQTTClient {
             return { [id]: new Car (id, position)};
         }));
         for (const [id, car] of Object.entries(this.cars)) {
+            console.log('init car');
             this.publish(`car/${id}`, 'state', car);
         }
     }
