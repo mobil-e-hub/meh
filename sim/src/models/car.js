@@ -95,7 +95,7 @@ class Car {
 
                     if(this.parcels.length < this.capacity) {
                         this.parcels.push(new_parcel)
-                        simulator.publish(`car/${task.transaction.carrier.id}/transaction/${task.transaction.id}/complete`);
+                        //simulator.publish(`car/${task.transaction.carrier.id}/transaction/${task.transaction.id}/complete`);
                     } else {
                         simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel`); // TODO include in table
                     }
@@ -159,7 +159,7 @@ class Car {
         } else if (task.type === 'place') {
             let transaction = task.transaction;
             console.log(`car: ${JSON.stringify(task.transaction)}`);
-            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+//            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
         } else {
