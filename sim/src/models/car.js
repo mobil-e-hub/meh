@@ -86,20 +86,6 @@ class Car {
                         return true;
                     }
                 case 'place':
-                    let new_parcel = {
-                        id: task.transaction.id,
-                        orderId: task.transaction.orderId,
-                        carrier: task.transaction.carrier,
-                        destination: task.transaction.destination
-                    };
-
-                    if(this.parcels.length < this.capacity) {
-                        this.parcels.push(new_parcel)
-                        //simulator.publish(`car/${task.transaction.carrier.id}/transaction/${task.transaction.id}/complete`);
-                    } else {
-                        simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel`); // TODO include in table
-                    }
-
                     return false;
             }
         }
@@ -111,6 +97,23 @@ class Car {
         if (task.type === undefined) {
             console.error(`Transaction failed! - Could not find transaction in tasks of Car.`)
             return;
+        }
+
+        if (task.type == 'place') {
+            let new_parcel = {
+                        id: task.transaction.id,
+                        orderId: task.transaction.orderId,
+                        carrier: task.transaction.carrier,
+                        destination: task.transaction.destination
+            };
+
+            if(this.parcels.length < this.capacity) {
+                this.parcels.push(new_parcel)
+                simulator.publish(`car/${task.transaction.carrier.id}/transaction/${task.transaction.id}/complete`);
+            } else {
+                simulator.publish(`car/${this.id}`, `error/capacity/exceeded/parcel`); // TODO include in table
+                }
+            this.completeTask(simulator);
         }
 
         if (task.type !== 'pickup') {
@@ -158,8 +161,7 @@ class Car {
                 task.state = TaskState.executingTransaction;
         } else if (task.type === 'place') {
             let transaction = task.transaction;
-            console.log(`car: ${JSON.stringify(task.transaction)}`);
-//            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
+            simulator.publish(`${transaction.from.type}/${transaction.from.id}`, `transaction/${transaction.id}/ready`);
             this.state = CarState.waitingForTransaction;
             task.state = TaskState.waitingForTransaction;
         } else {
